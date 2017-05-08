@@ -80,9 +80,10 @@ D_SER_BAUD = 115000
 
 # < stylesheet >-----------------------------------------------------------------------------------
 
-D_GBX_STYLE = """QGroupBox { background-color: rgb(210, 210, 210);
+D_GBX_STYLE = """QGroupBox { color: white;
+                             background-color: black;
                              border-style: solid;
-                             border: 2px solid gray;
+                             border: 2px solid white;
                              border-radius: 5px;
                              margin-top: 4ex; }
 
@@ -94,8 +95,29 @@ D_GBX_STYLE = """QGroupBox { background-color: rgb(210, 210, 210);
                                     font-weight: bold; }
 
                  QGroupBox:focus { border: 2px solid 
-                                   QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffa02f, stop: 1 #d7801a); }"""
+                                   QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffa02f, stop: 1 #d7801a); }
+"""
 
+D_PTE_STYLE = """QPlainTextEdit { color: white;
+                                  background-color: black;
+                                  border: 1px solid rgb(200, 200, 200);
+                                  border-style: solid;
+                                  border-radius: 5px;}
+"""
+
+"""
+                                  margin-top: 4ex; }
+
+                 QPlainTextEdit::title { background-color: transparent;
+                                         subcontrol-origin: margin;
+                                         subcontrol-position: top left;
+                                         padding: 3 13px;
+                                         font-size: 18px;
+                                         font-weight: bold; }
+
+                 QPlainTextEdit:focus { border: 2px solid 
+                                        QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffa02f, stop: 1 #d7801a); }
+"""
 # < tables >---------------------------------------------------------------------------------------
 
 # tabela de aeródromos

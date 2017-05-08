@@ -41,8 +41,6 @@ import view.wid_calibra as cwid
 import view.wid_sensors as swid
 import view.wid_net_monitor as nwid
 
-import view.pc_wnd_main_ui as wmui
-
 # control
 import control.events.events_basic as events
 import control.events_tty as evttty
@@ -69,7 +67,7 @@ M_CURVES = [M_GYRO_X, M_GYRO_Y, M_GYRO_Z, \
 '''
 # < CPAPICalWndMainCli >---------------------------------------------------------------------------
 
-class CPAPICalWndMainCli(QtGui.QMainWindow, wmui.Ui_wndMain):
+class CPAPICalWndMainCli(QtGui.QMainWindow):
     """
     a serial port packet monitor that plots live data using PyQwt
 
@@ -110,17 +108,25 @@ class CPAPICalWndMainCli(QtGui.QMainWindow, wmui.Ui_wndMain):
         self.__live_feed = self.__model.live_feed
         assert self.__live_feed
 
+        # load settings
+        self.__settings = QtCore.QSettings("sophosoft", "papi_calibra")
+        assert self.__settings
+
         # create main Ui
         self.__setup_ui()
-
-        # config main window
-        self.setWindowTitle("PAPI Calibra [Client] v0.1")
-        self.resize(1255, 755)
-
-        # config UI
         #self.__create_menu()
         self.__create_status_bar()
 
+        # config main window
+        self.setWindowTitle("PAPI Calibra [Client] v0.1")
+
+        # set position
+        self.move(self.__settings.value("pos", QtCore.QPoint(200, 200)).toPoint())
+
+        # set size 
+        self.resize(self.__settings.value("size", QtCore.QSize(1255, 800)).toSize())
+
+        # config UI
         # activate start-stop button connections
         #self.btn_start.clicked.connect(self.__on_start)
         #self.btn_stop.clicked.connect(self.__on_stop)
@@ -767,7 +773,7 @@ class CPAPICalWndMainCli(QtGui.QMainWindow, wmui.Ui_wndMain):
         assert lwid_mon
         
         # create widget monitor (network)
-        self.wid_mon = nwid.CWidgetNetMonitor(lwid_mon)
+        self.wid_mon = nwid.CWidgetNetMonitor(self.__settings, lwid_mon)
         assert self.wid_mon
 
         ### 
@@ -787,6 +793,9 @@ class CPAPICalWndMainCli(QtGui.QMainWindow, wmui.Ui_wndMain):
         # create tabWidget
         self.qtw_sensors = QtGui.QTabWidget(self)
         assert self.qtw_sensors is not None
+        
+        # setup
+        self.qtw_sensors.setStyleSheet("background-color: rgb(0, 0, 0);")
         
         # put on tabWidget
         self.qtw_sensors.addTab(lwid_sns, "Sensores")
