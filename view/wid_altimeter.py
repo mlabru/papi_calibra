@@ -98,7 +98,6 @@ class CWidgetAltimeter(wplt.CWidgetPlotModel):
         llay_wid.addWidget(lbtn_clear, 3, 8)
 
         self.setLayout(llay_wid)
-        self.setFixedHeight(350)
 
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(list)

@@ -75,18 +75,18 @@ class CPAPICalControl(object):
         self.create_app("papi_calibra")
 
         # interface e endereço de rede
-        ls_ifc = self.__config.dct_config["net.ifc"]
+        lt_ifc = self.__config.dct_config["net.ifc"]
         ls_adr = self.__config.dct_config["net.adr"]
 
         # portas
-        ls_ccc = self.__config.dct_config["net.ccc"]
-        ls_img = self.__config.dct_config["net.img"]
-        ls_sns = self.__config.dct_config["net.sns"]
+        li_ccc = int(self.__config.dct_config["net.ccc"])
+        li_img = int(self.__config.dct_config["net.img"])
+        li_sns = int(self.__config.dct_config["net.sns"])
 
         # server mode ?
         if self.__config.dct_config["glb.server"]:
             # create connections
-            self.create_connections_server(ls_ifc, ls_adr, ls_ccc, ls_img, ls_sns)
+            self.create_connections_server(lt_ifc, ls_adr, li_ccc, li_img, li_sns)
 
             # instancia o modelo
             self.__model = mdsrv.CPAPICalModelSrv(self)
@@ -99,7 +99,7 @@ class CPAPICalControl(object):
         # senão, client mode
         else:
             # create connections
-            self.create_connections_client(ls_ifc, ls_adr, ls_ccc, ls_img, ls_sns)        
+            self.create_connections_client(lt_ifc, ls_adr, li_ccc, li_img, li_sns)        
         
             # instancia o modelo
             self.__model = mdcli.CPAPICalModelCli(self)
@@ -170,7 +170,7 @@ class CPAPICalControl(object):
         self.__app.processEvents()
 
     # ---------------------------------------------------------------------------------------------
-    def create_connections_client(self, ls_ifc, ls_adr, ls_ccc, ls_img, ls_sns):
+    def create_connections_client(self, ft_ifc, fs_adr, fi_ccc, fi_img, fi_sns):
         """
         create connections
         """
@@ -179,7 +179,7 @@ class CPAPICalControl(object):
         assert self.__q_snd_ccc
 
         # cria o socket de envio de comando/controle/configuração
-        self.__sck_snd_ccc = sender.CNetSender(ls_ifc, ls_adr, ls_ccc, self.__q_snd_ccc)
+        self.__sck_snd_ccc = sender.CNetSender(ft_ifc, fs_adr, fi_ccc, self.__q_snd_ccc)
         assert self.__sck_snd_ccc
 
         # cria a queue de recebimento de comando/controle/configuração
@@ -187,19 +187,19 @@ class CPAPICalControl(object):
         assert self.__q_rcv_ccc
 
         # cria o socket de recebimento de comando/controle/configuração
-        self.__sck_rcv_ccc = listener.CNetListener(ls_ifc, ls_adr, ls_ccc, self.__q_rcv_ccc)
+        self.__sck_rcv_ccc = listener.CNetListener(ft_ifc, fs_adr, fi_ccc, self.__q_rcv_ccc)
         assert self.__sck_rcv_ccc
 
         # cria o socket de recebimento de imagens
-        self.__sck_rcv_img = sockin.CNetSockIn(ls_ifc, ls_adr, ls_img)
+        self.__sck_rcv_img = sockin.CNetSockIn(ft_ifc, fs_adr, fi_img)
         assert self.__sck_rcv_img
 
         # cria o socket de recebimento de dados de sensores
-        self.__sck_rcv_sns = sockin.CNetSockIn(ls_ifc, ls_adr, ls_sns)
+        self.__sck_rcv_sns = sockin.CNetSockIn(ft_ifc, fs_adr, fi_sns)
         assert self.__sck_rcv_sns
 
     # ---------------------------------------------------------------------------------------------
-    def create_connections_server(self, ls_ifc, ls_adr, ls_ccc, ls_img, ls_sns):
+    def create_connections_server(self, ft_ifc, fs_adr, fi_ccc, fi_img, fi_sns):
         """
         create connections
         """

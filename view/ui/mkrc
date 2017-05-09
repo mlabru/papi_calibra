@@ -2,8 +2,6 @@
 #  papi calibra
 #
 pyuic4 ./wid_calibra.ui > ../wid_calibra_ui.py
-pyuic4 ./wid_sensors.ui > ../wid_sensors_ui.py
-pyuic4 ./wid_net_monitor.ui > ../wid_net_monitor_ui.py
 pyuic4 ./wid_tty_monitor.ui > ../wid_tty_monitor_ui.py
 pyuic4 ./pc_wnd_main.ui > ../pc_wnd_main_ui.py
 

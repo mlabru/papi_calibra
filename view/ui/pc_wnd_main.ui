@@ -14,30 +14,7 @@
    <string>PAPI Calibra v.0.1</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_4">
-    <item>
-     <widget class="QTabWidget" name="qtw_sensors">
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <widget class="QWidget" name="tab_sns">
-       <attribute name="title">
-        <string>Sensores</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="tab_mon">
-       <attribute name="title">
-        <string>Monitor</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="tab_cal">
-       <attribute name="title">
-        <string>Calibração</string>
-       </attribute>
-      </widget>
-     </widget>
-    </item>
-   </layout>
+   <layout class="QVBoxLayout" name="verticalLayout_4"/>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

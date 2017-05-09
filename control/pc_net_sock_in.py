@@ -92,7 +92,7 @@ class CNetSockIn(socket.socket):
             # logger
             l_log = logging.getLogger("CNetSockIn::__init__")
             l_log.setLevel(logging.WARNING)
-            l_log.warning("<E02: bind failed: {}-{}".format(l_err[0], l_err[1]))
+            l_log.warning("<E02: bind failed: {} - {}".format(l_err[0], l_err[1]))
 
             # termina
             sys.exit()
@@ -138,7 +138,7 @@ class CNetSockIn(socket.socket):
                     # coloca a mensagem na queue
                     self.__q_queue.put(llst_data[1:])
 
-                # mensagem não reconhecida ou inválida
+                # senão, mensagem não reconhecida ou inválida
                 else:
                     # logger
                     l_log = logging.getLogger("CNetSockIn::run")

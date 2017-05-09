@@ -4,7 +4,7 @@
 ---------------------------------------------------------------------------------------------------
 pc_net_listener
 
-DOCUMENT ME!
+communication socket to receive messages
 
 revision 0.1  2017/may  mlabru
 initial version (Linux/Python)
@@ -90,7 +90,7 @@ class CNetListener(multiprocessing.Process):
         # especificou uma interface ?
         if ft_ifce[0] is not None:
             # seleciona a interface (from socket.h, SO_BINDTODEVICE 25)
-            self.__fd_recv.setsockopt(socket.SOL_SOCKET, 25, ft_ifce[0]+'\0')
+            self.__fd_recv.setsockopt(socket.SOL_SOCKET, 25, ft_ifce[0] + '\0')
 
         # set some options to make it multicast-friendly
         self.__fd_recv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -119,7 +119,7 @@ class CNetListener(multiprocessing.Process):
             # logger
             l_log = logging.getLogger("CNetListener::__init__")
             l_log.setLevel(logging.WARNING)
-            l_log.warning("<E03: bind failed: {}-{}".format(l_err[0], l_err[1]))
+            l_log.warning("<E03: bind failed: {} - {}".format(l_err[0], l_err[1]))
 
             # termina
             sys.exit()
@@ -181,12 +181,12 @@ class CNetListener(multiprocessing.Process):
                     # coloca a mensagem na queue
                     self.__q_queue.put(llst_data[1:])
 
-                # mensagem não reconhecida ou inválida
+                # senão, mensagem não reconhecida ou inválida
                 else:
                     # logger
                     l_log = logging.getLogger("CNetListener::run")
                     l_log.setLevel(logging.WARNING)
-                    l_log.warning("<E01: unknow:[{}].".format(llst_data[2:]))
+                    l_log.warning("<E01: unknow: {}.".format(llst_data[2:]))
 
             # em caso de erro...
             except socket.timeout, l_err:
