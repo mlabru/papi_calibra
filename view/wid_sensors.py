@@ -108,6 +108,9 @@ class CWidgetSensors(QtGui.QWidget):
         lwid_altimeter = walt.CWidgetAltimeter(self.__sf, self)
         assert lwid_altimeter
 
+        # setup
+        lwid_altimeter.setFixedHeight(280)
+
         # create horizontal layout
         llay_gbx = QtGui.QHBoxLayout()
         assert llay_gbx is not None
@@ -162,6 +165,9 @@ class CWidgetSensors(QtGui.QWidget):
         # create GPS widget
         lwid_gps = wgps.CWidgetGPS(self.__sf, self)
         assert lwid_gps
+
+        # setup
+        lwid_gps.setFixedHeight(280)
 
         # create horizontal layout
         llay_gbx = QtGui.QHBoxLayout()

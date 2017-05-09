@@ -795,7 +795,7 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
         assert self.qtw_sensors is not None
         
         # setup
-        self.qtw_sensors.setStyleSheet("background-color: rgb(0, 0, 0);")
+        self.qtw_sensors.setStyleSheet("background-color: rgb(180, 180, 180);")
         
         # put on tabWidget
         self.qtw_sensors.addTab(lwid_sns, "Sensores")

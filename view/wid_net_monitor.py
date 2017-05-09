@@ -26,6 +26,9 @@ from PyQt4 import QtGui
 # control
 import control.pc_defs as gdefs
 
+# view
+import view.pc_syntax as syntax
+
 # < module data >----------------------------------------------------------------------------------
 
 # logger
@@ -290,23 +293,29 @@ class CWidgetNetMonitor(QtGui.QWidget):
         l_font.setPointSize(10)
 
         # create QPlainTextEdit configuração
-        self.__pte_config = QtGui.QPlainTextEdit()
-        assert self.__pte_config
+        self.__pte_editor = QtGui.QPlainTextEdit()
+        assert self.__pte_editor
 
-        self.__pte_config.setFont(l_font)
-        self.__pte_config.setReadOnly(False)
-        self.__pte_config.setStyleSheet(gdefs.D_PTE_STYLE)
-        self.__pte_config.setMinimumSize(QtCore.QSize(660, 270))
+        self.__pte_editor.setFont(l_font)
+        self.__pte_editor.setReadOnly(False)
+        self.__pte_editor.setStyleSheet(gdefs.D_PTE_STYLE)
+        self.__pte_editor.setMinimumSize(QtCore.QSize(660, 270))
+
+        # syntax highlight
+        self.highlight = syntax.CConfigHighlighter(self.__pte_editor.document())
+        assert self.highlight 
+
+        self.__pte_editor.show()
 
         # connections
-        self.__pte_config.textChanged.connect(self.on_pte_config_textChanged)
+        self.__pte_editor.textChanged.connect(self.on_pte_editor_textChanged)
 
         # create horizontal layout
         llay_gbx = QtGui.QHBoxLayout()
         assert llay_gbx is not None
 
         # put altimeter on layout
-        llay_gbx.addWidget(self.__pte_config)
+        llay_gbx.addWidget(self.__pte_editor)
 
         # create groupBox configuração
         self.__gbx_cnf = QtGui.QGroupBox(u"Configuração", self)
@@ -346,7 +355,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
             textStream = QtCore.QTextStream(file)
 
             # put text on widget
-            self.__pte_config.setPlainText(textStream.readAll())
+            self.__pte_editor.setPlainText(textStream.readAll())
 
             # update settings
             self.__updateDocumentFilePath(fs_file_path)
@@ -394,7 +403,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
         if file.open(QIODevice.WriteOnly):
 
             textStream = QTextStream(file)
-            textStream << self.__pte_config.toPlainText()
+            textStream << self.__pte_editor.toPlainText()
             textStream.flush()
 
             self.__v_document_is_dirty  = False
@@ -458,7 +467,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
 
         if __check_document():
 
-            self.__pte_config.clear()
+            self.__pte_editor.clear()
             documentFilePath = ""
             self.statusBar.showMessage(documentFilePath)
             self.__v_document_is_dirty  = False
@@ -478,7 +487,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
     # ---------------------------------------------------------------------------------------------
     def on_actionRun_triggered(self):
 
-        self.__config.parse( self.__pte_config.toPlainText())
+        self.__config.parse( self.__pte_editor.toPlainText())
         self.dataText.setMaximumBlockCount(MAX(1, self.__config.get("_setup_", "width").toInt()))
 
         self.chart.init(self.__config)
@@ -542,7 +551,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
     '''
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot()
-    def on_pte_config_textChanged(self):
+    def on_pte_editor_textChanged(self):
         """
         change in config file
         """

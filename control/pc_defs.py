@@ -81,7 +81,7 @@ D_SER_BAUD = 115000
 # < stylesheet >-----------------------------------------------------------------------------------
 
 D_GBX_STYLE = """QGroupBox { color: white;
-                             background-color: black;
+                             background-color: rgb(150, 150, 150);
                              border-style: solid;
                              border: 2px solid white;
                              border-radius: 5px;
@@ -97,15 +97,17 @@ D_GBX_STYLE = """QGroupBox { color: white;
                  QGroupBox:focus { border: 2px solid 
                                    QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffa02f, stop: 1 #d7801a); }
 """
+# D_GBX_STYLE = ""
 
 D_PTE_STYLE = """QPlainTextEdit { color: white;
-                                  background-color: rgb(100, 100, 100);
+                                  background-color: rgb(0, 0, 0);
                                   border: 1px solid rgb(200, 200, 200);
                                   border-style: solid;
                                   border-radius: 5px;}
 """
+# D_PTE_STYLE = ""
 
-"""
+D_XXX_STYLE = """
                                   margin-top: 4ex; }
 
                  QPlainTextEdit::title { background-color: transparent;
