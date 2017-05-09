@@ -99,7 +99,7 @@ D_GBX_STYLE = """QGroupBox { color: white;
 """
 
 D_PTE_STYLE = """QPlainTextEdit { color: white;
-                                  background-color: black;
+                                  background-color: rgb(100, 100, 100);
                                   border: 1px solid rgb(200, 200, 200);
                                   border-style: solid;
                                   border-radius: 5px;}

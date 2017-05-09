@@ -100,7 +100,7 @@ class CWidgetGPS(wplt.CWidgetPlotModel):
 
         # set layout
         self.setLayout(llay_wid)
-        self.setFixedHeight(350)
+        self.setFixedHeight(330)
 
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(list)
