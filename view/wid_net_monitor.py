@@ -84,10 +84,10 @@ class CWidgetNetMonitor(QtGui.QWidget):
         assert llo_grid is not None
 
         # put all groupBoxes on a grid
-        llo_grid.addWidget(self.__gbx_ccc, 1, 0, 1, 1)
         llo_grid.addWidget(self.__gbx_cnf, 0, 0, 1, 1)
-        llo_grid.addWidget(self.__gbx_sns, 1, 1, 1, 1)
         llo_grid.addWidget(self.__gbx_cam, 0, 1, 1, 1)
+        llo_grid.addWidget(self.__gbx_ccc, 1, 0, 1, 1)
+        llo_grid.addWidget(self.__gbx_sns, 1, 1, 1, 1)
 
         # make connections
         self.C_SIG_MSG_CAM.connect(self.__on_msg_camera)
@@ -160,10 +160,10 @@ class CWidgetNetMonitor(QtGui.QWidget):
         llay_gbx = QtGui.QHBoxLayout()
         assert llay_gbx is not None
 
-        # put altimeter on layout
+        # put camera on layout
         llay_gbx.addWidget(self.__pte_camera)
 
-        # create groupBox altimeter
+        # create groupBox camera
         self.__gbx_cam = QtGui.QGroupBox(u"Camera", self)
         assert self.__gbx_cam
         

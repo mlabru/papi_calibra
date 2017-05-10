@@ -39,8 +39,8 @@ M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
 # altimeter plot widget
-M_ALT_YMAX = 30
-M_ALT_YMIN = -5
+M_ALT_YMAX = 600
+M_ALT_YMIN = 520
 
 # < CWidgetAltimeter >-----------------------------------------------------------------------------
 
