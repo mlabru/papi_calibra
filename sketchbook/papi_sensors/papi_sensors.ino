@@ -74,14 +74,14 @@ void loop()
     // obtém tempo inicial
     lf_ini = millis();    
 
-    // send temperature
-    Serial.print("!@TMP#");
+    // send altitude
+    Serial.print("!@ALT#");
 #ifdef D_BMP280
-    Serial.print(g_bmp280.readTemperature());
+    Serial.print(g_bmp280.readAltitude(g_QNH));
     Serial.print("#");
 #endif
 #ifdef D_MPL3115
-    Serial.print(g_mpl3115.readTemp());
+    Serial.print(g_mpl3115.readAltitude());
     Serial.print("#");
 #endif
     Serial.print(millis() / 1000.);
@@ -100,14 +100,14 @@ void loop()
     Serial.print(millis() / 1000.);
     Serial.println();
 
-    // send altitude
-    Serial.print("!@ALT#");
+    // send temperature
+    Serial.print("!@TMP#");
 #ifdef D_BMP280
-    Serial.print(g_bmp280.readAltitude(g_QNH));
+    Serial.print(g_bmp280.readTemperature());
     Serial.print("#");
 #endif
 #ifdef D_MPL3115
-    Serial.print(g_mpl3115.readAltitude());
+    Serial.print(g_mpl3115.readTemp());
     Serial.print("#");
 #endif
     Serial.print(millis() / 1000.);
