@@ -79,32 +79,53 @@ void setup()
 // ------------------------------------------------------------------------------------------------
 void loop() 
 {
+    // tempo inicial
+    unsigned long lul_ini;
+
+    // get initial time (ms)
+    lul_ini = millis();
+
+    // send altitude
+    Serial.print("!@ALT#");
 #ifdef D_BMP280
-    Serial.print("BMP280#");
-    Serial.print(g_bmp280.readTemperature());
-    Serial.print("#");
-    Serial.print(g_bmp280.readPressure());
-    Serial.print("#");
     Serial.print(g_bmp280.readAltitude(g_QNH));
     Serial.print("#");
-    Serial.print(millis() / 1000.);
-    Serial.println();
-#endif // D_BMP280
-
+#endif
 #ifdef D_MPL3115
-    Serial.print("MPL3115#");
-    Serial.print(g_mpl3115.readTemp());
-    Serial.print("#");
-    Serial.print(g_mpl3115.readPressure());
-    Serial.print("#");
     Serial.print(g_mpl3115.readAltitude());
     Serial.print("#");
+#endif
     Serial.print(millis() / 1000.);
     Serial.println();
-#endif // D_MPL3115
 
-    // aguarda 1s
-    delay(1000);
+    // send pressure
+    Serial.print("!@PRS#");
+#ifdef D_BMP280
+    Serial.print(g_bmp280.readPressure());
+    Serial.print("#");
+#endif
+#ifdef D_MPL3115
+    Serial.print(g_mpl3115.readPressure());
+    Serial.print("#");
+#endif
+    Serial.print(millis() / 1000.);
+    Serial.println();
+
+    // send temperature
+    Serial.print("!@TMP#");
+#ifdef D_BMP280
+    Serial.print(g_bmp280.readTemperature());
+    Serial.print("#");
+#endif
+#ifdef D_MPL3115
+    Serial.print(g_mpl3115.readTemp());
+    Serial.print("#");
+#endif
+    Serial.print(millis() / 1000.);
+    Serial.println();
+
+    // 1Hz
+    delay(1000 - (millis() - lul_ini));
 
 } // loop
 
