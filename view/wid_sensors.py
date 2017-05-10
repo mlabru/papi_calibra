@@ -22,18 +22,20 @@ import logging
 # openCV
 import cv2.cv as cv
 
-# PyQt
+# PyQt4
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 
-# view
-import view.camera_feed as cf
-import view.sensor_feed as sf
+# model
+import model.pc_altimeter_feed as altfd
+import model.pc_camera_feed as camfd
+import model.pc_gps_feed as gpsfd
 
+# view
 import view.wid_altimeter as walt
 import view.wid_camera as wcam
 import view.wid_gps as wgps
-import view.wid_papi_plot as wppt
+import view.wid_plot_papi as wplp
 
 # control
 import control.pc_defs as gdefs
@@ -68,15 +70,10 @@ class CWidgetSensors(QtGui.QWidget):
 
         # control
         self.__control = f_control
+
+        # monitor
+        self.__monitor = f_monitor
         
-        # create camera feed
-        self.__cf = cf.CCameraFeed(self.__control.sck_rcv_img, f_monitor)
-        assert self.__cf
-
-        # create sensor feed
-        self.__sf = sf.CSensorFeed(self.__control.sck_rcv_sns, f_monitor)
-        assert self.__sf
-
         # create camera groupBox
         self.__create_gbx_cam()
 
@@ -104,8 +101,12 @@ class CWidgetSensors(QtGui.QWidget):
         """
         create altimeter groupBox
         """
+        # create altimeter feed
+        self.__alt_feed = altfd.CAltimeterFeed(self.__control.sck_rcv_sns, self.__monitor)
+        assert self.__alt_feed
+
         # create altimeter widget
-        lwid_altimeter = walt.CWidgetAltimeter(self.__sf, self)
+        lwid_altimeter = walt.CWidgetAltimeter(self.__alt_feed, self)
         assert lwid_altimeter
 
         # setup
@@ -136,8 +137,12 @@ class CWidgetSensors(QtGui.QWidget):
         # clear to go
         assert self.__control.sck_rcv_img
 
+        # create camera feed
+        self.__cam_feed = camfd.CCameraFeed(self.__control.sck_rcv_img)
+        assert self.__cam_feed
+
         # create camera widget
-        lwid_camera = wcam.CWidgetCamera(self.__cf, self)
+        lwid_camera = wcam.CWidgetCamera(self.__cam_feed, self)
         assert lwid_camera
 
         # create horizontal layout
@@ -162,8 +167,12 @@ class CWidgetSensors(QtGui.QWidget):
         """
         create GPS groupBox
         """
+        # create GPS feed
+        self.__gps_feed = gpsfd.CGPSFeed(self.__control.sck_rcv_sns)
+        assert self.__gps_feed
+
         # create GPS widget
-        lwid_gps = wgps.CWidgetGPS(self.__sf, self)
+        lwid_gps = wgps.CWidgetGPS(self.__gps_feed, self)
         assert lwid_gps
 
         # setup
@@ -192,15 +201,15 @@ class CWidgetSensors(QtGui.QWidget):
         create plot groupBox
         """
         # create the plot and curves
-        lwid_ppt = wppt.CWidgetPAPIPlot(None, self) 
-        assert lwid_ppt 
+        lwid_plp = wplp.CWidgetPlotPAPI(self) 
+        assert lwid_plp 
 
         # place the horizontal panel widget
         llay_gbx = QtGui.QHBoxLayout()
         assert llay_gbx is not None
         
         # put plot on layout
-        llay_gbx.addWidget(lwid_ppt)
+        llay_gbx.addWidget(lwid_plp)
 
         # create groupBox plot
         self.__gbx_plot = QtGui.QGroupBox("Plot", self)

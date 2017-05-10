@@ -49,7 +49,7 @@ class CWidgetAltimeter(wplt.CWidgetPlotModel):
     widget for altimeter
     """
     # signals
-    C_SIG_NEW_ALTM = QtCore.pyqtSignal(list)
+    C_SGN_DATA_ALT = QtCore.pyqtSignal(list)
 
     # ---------------------------------------------------------------------------------------------
     def __init__(self, f_sensor_feed, f_parent=None):
@@ -70,7 +70,7 @@ class CWidgetAltimeter(wplt.CWidgetPlotModel):
 
         # image source
         self.__sensor_feed = f_sensor_feed
-        self.__sensor_feed.C_SIG_NEW_ALTM.connect(self.on_new_data)
+        self.__sensor_feed.C_SGN_DATA_ALT.connect(self.on_new_data)
 
         # create the plot and curves
         self._create_plot("Altitude", M_ALT_YMIN, M_ALT_YMAX)
@@ -110,7 +110,7 @@ class CWidgetAltimeter(wplt.CWidgetPlotModel):
 
         # it emits a signal with the data
         # (to process the frame is not responsibility of the widget)
-        self.C_SIG_NEW_ALTM.emit(flst_data)
+        self.C_SGN_DATA_ALT.emit(flst_data)
 
 # < the end >--------------------------------------------------------------------------------------
         

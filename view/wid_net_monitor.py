@@ -25,6 +25,8 @@ from PyQt4 import QtGui
 
 # model
 import model.pc_syntax as sntx
+import model.pc_altimeter_feed as altf
+import model.pc_camera_feed as camf
 
 # control
 import control.pc_defs as gdefs
@@ -41,10 +43,9 @@ class CWidgetNetMonitor(QtGui.QWidget):
     """
     network packet monitor that plots live data using PyQwt
     """
-    # signals
-    C_SIG_MSG_CAM = QtCore.pyqtSignal(str)
-    C_SIG_MSG_CCC = QtCore.pyqtSignal(str)
-    C_SIG_MSG_SNS = QtCore.pyqtSignal(str)
+    # signal
+    C_SGN_NEW_MSG_SNS = QtCore.pyqtSignal(str)
+    C_SGN_NEW_MSG_CAM = QtCore.pyqtSignal(str)
 
     # ---------------------------------------------------------------------------------------------
     def __init__(self, f_settings, f_parent=None):
@@ -90,9 +91,8 @@ class CWidgetNetMonitor(QtGui.QWidget):
         llo_grid.addWidget(self.__gbx_sns, 1, 1, 1, 1)
 
         # make connections
-        self.C_SIG_MSG_CAM.connect(self.__on_msg_camera)
-        self.C_SIG_MSG_CCC.connect(self.__on_msg_ccc)
-        self.C_SIG_MSG_SNS.connect(self.__on_msg_sensor)
+        self.C_SGN_NEW_MSG_SNS.connect(self.__on_msg_sensor)
+        self.C_SGN_NEW_MSG_CAM.connect(self.__on_msg_camera)
 
         # load configuration file
         self.__load_document()

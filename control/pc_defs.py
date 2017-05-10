@@ -45,6 +45,7 @@ D_MSG_SIZ = 111    # mensagens de imagens
 D_MSG_IMG = 112    # mensagens de imagens
 D_MSG_SNS = 113    # mensagens de sensores
 D_MSG_ALT = 114    # mensagens de altímetro
+D_MSG_GPS = 115    # mensagens de altímetro
 
 # separador de campos na mensagem
 D_MSG_SEP = '#'
