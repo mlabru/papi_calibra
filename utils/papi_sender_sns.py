@@ -13,7 +13,7 @@ initial release (Linux/Python)
 __version__ = "$revision: 0.1$"
 __author__ = "Milton Abrunhosa"
 __date__ = "2017/04"
-    
+
 # < imports >--------------------------------------------------------------------------------------
 
 # python library
@@ -60,16 +60,13 @@ def main():
     assert l_queue
 
     # create and start serial read thread
-    lthr_ser = threading.Thread(target=ser_read, args=(l_queue,)).start()
-    assert lthr_ser 
+    threading.Thread(target=ser_read, args=(l_queue,)).start()
 
     # create and start net sender thread
     lthr_net = threading.Thread(target=net_sender, args=(l_queue,)).start()
-    assert lthr_net
 
     # aguarda as threads
-    lthr_ser.join()
-    lthr_net.join()    
+    lthr_net.join()
 
 # -------------------------------------------------------------------------------------------------
 def net_sender(f_queue):
@@ -88,24 +85,25 @@ def net_sender(f_queue):
     while G_KEEP_RUN:
         # block until get message
         ls_msg = f_queue.get()
-
+ 
         # split message
         llst_msg = ls_msg.split('#')
+        M_LOG.debug("llst_msg: {}".format(llst_msg))
 
         # mensagem de altímetro ?
         if "!@ALT" == llst_msg[0]:
             # send altimeter message
-            l_altimeter.send_data(llst_msg[1], llst_msg[2], llst_msg[3], llst_msg[4])        
+            l_altimeter.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
 
         # mensagem de barômetro ?
         #elif "!@PRS" == llst_msg[0]:
             # send barometer message
-            #l_barometer.send_data(llst_msg[1], llst_msg[2], llst_msg[3], llst_msg[4])        
+            #l_barometer.send_data(llst_msg[1], llst_msg[2], llst_msg[3])
 
         # mensagem de termômetro ?
         #elif "!@TMP" == llst_msg[0]:
             # send termometer message
-            #l_termometer.send_data(llst_msg[1], llst_msg[2], llst_msg[3], llst_msg[4])        
+            #l_termometer.send_data(llst_msg[1], llst_msg[2], llst_msg[3])
 
     # fecha o socket
     l_sock.close()
@@ -116,13 +114,19 @@ def ser_read(f_queue):
     serial reader thread
     """
     # open serial port
-    l_ser = serial.Serial(M_PORT, M_BAUD)
+    l_ser = serial.Serial(M_SER_PORT, M_SER_BAUD)
     assert l_ser
+
+    M_LOG.debug("l_ser: {}".format(l_ser))
 
     # while keep running...
     while G_KEEP_RUN:
+        # read serial line        
+        ls_line = l_ser.readline()
+        M_LOG.debug("ls_line: {}".format(ls_line))
+
         # read serial line and queue message
-        f_queue.put(l_ser.readline())
+        f_queue.put(ls_line[:-2])
 
 # -------------------------------------------------------------------------------------------------
 # this is the bootstrap process

@@ -71,8 +71,11 @@ void setup()
 // ------------------------------------------------------------------------------------------------
 void loop() 
 {
-    // obtém tempo inicial
-    lf_ini = millis();    
+    // tempo inicial
+    unsigned long lul_ini;
+
+    // get initial time (ms)
+    lul_ini = millis();
 
     // send altitude
     Serial.print("!@ALT#");
@@ -114,7 +117,7 @@ void loop()
     Serial.println();
 
     // 1Hz
-    delay(1000 - (millis() - lf_ini));
+    delay(1000 - (millis() - lul_ini));
 
 } // loop
 
