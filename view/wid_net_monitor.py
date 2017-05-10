@@ -23,11 +23,11 @@ import logging
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 
+# model
+import model.pc_syntax as sntx
+
 # control
 import control.pc_defs as gdefs
-
-# view
-import view.pc_syntax as syntax
 
 # < module data >----------------------------------------------------------------------------------
 
@@ -302,7 +302,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
         self.__pte_editor.setMinimumSize(QtCore.QSize(660, 270))
 
         # syntax highlight
-        self.highlight = syntax.CConfigHighlighter(self.__pte_editor.document())
+        self.highlight = sntx.CConfigHighlighter(self.__pte_editor.document())
         assert self.highlight 
 
         self.__pte_editor.show()

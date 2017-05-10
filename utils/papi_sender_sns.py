@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------------------------------------
-kalman
+papi_sender_sns
 
-implements a multi-variable linear Kalman filter
+PAPI sender sensors
 
 revision 0.1  2017/abr  mlabru
 initial release (Linux/Python)
@@ -18,126 +18,111 @@ __date__ = "2017/04"
 
 # python library
 import logging
-import math
-import random
+import Queue
+import serial
 import socket
-import time
+import threading
 
-# numPy
-import numpy as np
-
-# kalman
-import kalman_filter_linear as kfl
+# papi_calibra
+import sns_altimeter as salt
 
 # < module data >----------------------------------------------------------------------------------
 
+# logger
+M_LOG = logging.getLogger(__name__)
+M_LOG.setLevel(logging.DEBUG)
+
 # symbolic name meaning all available interfaces
-UDP_HOST = "192.168.12.1"
+M_UDP_HOST = "192.168.12.1"
 
 # arbitrary non-privileged port
-UDP_PORT = 1961
+M_UDP_PORT = 1961
 
 # tupla
-UDP_ADDR = (UDP_HOST, UDP_PORT)
+M_UDP_ADDR = (M_UDP_HOST, M_UDP_PORT)
 
-# biases
-BIAS1 = +1.
-BIAS2 = -1.
+# serial port
+M_SER_PORT = "/dev/ttyUSB0"
+
+# serial baudrate
+M_SER_BAUD = 9600
+
+# keep running
+G_KEEP_RUN = True
 
 # -------------------------------------------------------------------------------------------------
 def main():
     """
-    REAL PROGRAM START
+    REAL PROGRAM MAIN
     """
-    # how many sensors ?
-    li_sensors = 2
-    
-    # how many iterations should the simulation run for ?
-    # (notice that the full journey takes 14.416 seconds, so 145 iterations will
-    # cover the whole thing when timeslice = 0.10)
-    # li_iterations = 1000
+    # create read queue
+    l_queue = Queue.Queue()
+    assert l_queue
 
-    # these are arrays to store the data points we want to plot at the end
+    # create and start serial read thread
+    lthr_ser = threading.Thread(target=ser_read, args=(l_queue,)).start()
+    assert lthr_ser 
 
-    # sensors
-    llst_ns1 = []
-    llst_ns2 = []
+    # create and start net sender thread
+    lthr_net = threading.Thread(target=net_sender, args=(l_queue,)).start()
+    assert lthr_net
 
-    # kalman state
-    llst_ks = []
+    # aguarda as threads
+    lthr_ser.join()
+    lthr_net.join()    
 
-    # state transition model
-    l_A = np.matrix([[1.]])
-
-    # control matrix
-    l_B = np.matrix([[0.]])
-
-    # control vector
-    l_u = np.matrix([[0.]])
-
-    # observation matrix is the identity matrix, since we can get direct
-    # measurements of all values in our example
-    l_H = np.ones((li_sensors, 1))
-    # print "l_H:", l_H, l_H.shape
-
-    # initial covariance estimate
-    l_P = np.ones(1)
-    
-    # process noise covariance (estimated error in process)
-    l_Q = np.matrix([[0.005]])
-
-    # measurement noise covariances (estimated error in measurements)
-    l_R = np.eye(li_sensors) * 0.64
-    # print "l_R:", l_R, l_R.shape
-
-    # initial guess
-    l_x = [[0.]]
-
-    # create Kalman filter
-    l_kf = kfl.CKalmanFilterLinear(l_A, l_B, l_H, l_x, l_P, l_Q, l_R)
-    assert l_kf
-
+# -------------------------------------------------------------------------------------------------
+def net_sender(f_queue):
+    """
+    net sender thread
+    """
     # cria o soket
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    assert sock
+    l_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    assert l_sock
 
-    # get initial time
-    lf_ini = time.time()
+    # create altimeter
+    l_altimeter = salt.CAltimeter(l_sock, M_UDP_ADDR)
+    assert l_altimeter
 
-    # iterate through the simulation
-    while True:
-        # measurements
-        lf_alt1 = BIAS1 + 20 + math.sqrt(0.64) * np.random.randn()
-        lf_alt2 = BIAS2 + 20 + math.sqrt(0.64) * np.random.randn()
+    # while keep running...
+    while G_KEEP_RUN:
+        # block until get message
+        ls_msg = f_queue.get()
 
-        # save kalman state
-        l_ks = l_kf.get_current_state()
+        # split message
+        llst_msg = ls_msg.split('#')
 
-        # list ?
-        if list == type(l_ks):
-            lf_ks = l_ks[0][0]
+        # mensagem de altímetro ?
+        if "!@ALT" == llst_msg[0]:
+            # send altimeter message
+            l_altimeter.send_data(llst_msg[1], llst_msg[2], llst_msg[3], llst_msg[4])        
 
-        # senão, matrix
-        else:
-            lf_ks = l_ks[0, 0]            
+        # mensagem de barômetro ?
+        #elif "!@PRS" == llst_msg[0]:
+            # send barometer message
+            #l_barometer.send_data(llst_msg[1], llst_msg[2], llst_msg[3], llst_msg[4])        
 
-        # get time stamp
-        lf_ts = time.time() - lf_ini
-
-        # build string data
-        ls_data = "{}#{}#{}#{}".format(lf_ts, lf_alt1, lf_alt2, lf_ks)
-
-        # envia a string
-        sock.sendto("101#114#{}".format(ls_data), UDP_ADDR)
-
-        # step. control vector, measurement_vector
-        l_kf.step(l_u, np.matrix([[lf_alt1], 
-                                  [lf_alt2]]))
-
-        time.sleep(1)
+        # mensagem de termômetro ?
+        #elif "!@TMP" == llst_msg[0]:
+            # send termometer message
+            #l_termometer.send_data(llst_msg[1], llst_msg[2], llst_msg[3], llst_msg[4])        
 
     # fecha o socket
-    sock.close()
+    l_sock.close()
+
+# -------------------------------------------------------------------------------------------------
+def ser_read(f_queue):
+    """
+    serial reader thread
+    """
+    # open serial port
+    l_ser = serial.Serial(M_PORT, M_BAUD)
+    assert l_ser
+
+    # while keep running...
+    while G_KEEP_RUN:
+        # read serial line and queue message
+        f_queue.put(l_ser.readline())
 
 # -------------------------------------------------------------------------------------------------
 # this is the bootstrap process
@@ -146,9 +131,6 @@ if "__main__" == __name__:
 
     # logger
     logging.basicConfig()
-
-    # multiprocessing logger
-    # multiprocessing.log_to_stderr()
 
     # run application
     main()
