@@ -1,5 +1,5 @@
-/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/build/sketch/SparkFunAltimeter.ino.cpp.o: \
- /home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/build/sketch/SparkFunAltimeter.ino.cpp \
+/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/build/sketch/papi_sensors.ino.cpp.o: \
+ /home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/build/sketch/papi_sensors.ino.cpp \
  /home/mlabru/bin/arduino-1.8.2/hardware/arduino/avr/cores/arduino/Arduino.h \
  /home/mlabru/bin/arduino-1.8.2/hardware/arduino/avr/cores/arduino/binary.h \
  /home/mlabru/bin/arduino-1.8.2/hardware/arduino/avr/cores/arduino/WCharacter.h \
@@ -13,4 +13,8 @@
  /home/mlabru/bin/arduino-1.8.2/hardware/arduino/avr/variants/standard/pins_arduino.h \
  /home/mlabru/bin/arduino-1.8.2/hardware/arduino/avr/libraries/Wire/src/Wire.h \
  /home/mlabru/bin/arduino-1.8.2/hardware/arduino/avr/cores/arduino/Stream.h \
+ /home/mlabru/bin/arduino-1.8.2/hardware/arduino/avr/libraries/SPI/src/SPI.h \
+ /home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/libraries/Adafruit_Sensor/Adafruit_Sensor.h \
+ /home/mlabru/bin/arduino-1.8.2/hardware/arduino/avr/cores/arduino/Print.h \
+ /home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/libraries/BMP280/Adafruit_BMP280.h \
  /home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/libraries/SparkFun_MPL3115A2_Altitude_and_Pressure_Sensor_Breakout/src/SparkFunMPL3115A2.h

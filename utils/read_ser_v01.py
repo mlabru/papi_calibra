@@ -5,17 +5,16 @@ import serial
 import sys
 import time
 
-port = "/dev/ttyUSB0"
-
-baudrate = 9600
+M_PORT = "/dev/ttyUSB0"
+M_BAUD = 9600
 
 if len(sys.argv) == 3:
     ser = serial.Serial(sys.argv[1], sys.argv[2])
 
 else:
     print "# Please specify a port and a baudrate"
-    print "# using hard coded defaults " + port + " " + str(baudrate)
-    ser = serial.Serial(port, baudrate)
+    print "# using hard coded defaults " + M_PORT + " " + str(M_BAUD)
+    ser = serial.Serial(M_PORT, M_BAUD)
 
 # enforce a reset before we really start
 #ser.setDTR(1)

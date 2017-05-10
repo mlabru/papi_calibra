@@ -147,9 +147,6 @@ if "__main__" == __name__:
     # logger
     logging.basicConfig()
 
-    # multiprocessing logger
-    # multiprocessing.log_to_stderr()
-
     # run application
     main()
 
