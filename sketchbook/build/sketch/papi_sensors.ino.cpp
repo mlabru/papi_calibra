@@ -1,37 +1,43 @@
-# 1 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
-# 1 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
+#include <Arduino.h>
+#line 1 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
+#line 1 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
 // < includes >------------------------------------------------------------------------------------
 
-# 4 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino" 2
-# 5 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino" 2
+#include <Wire.h>
+#include <SPI.h>
 
-# 7 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino" 2
-# 8 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino" 2
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BMP280.h>
 
-# 10 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino" 2
+#include "SparkFunMPL3115A2.h"
 
 // < defines >-------------------------------------------------------------------------------------
 
-
-
+#define D_BMP280   1
+#define D_MPL3115  1
 
 // < global data >---------------------------------------------------------------------------------
 
-
+#ifdef D_BMP280
 // create an instance of the object
 Adafruit_BMP280 g_bmp280;
 
 // pressão base (QNH) (this should be adjusted to your local forcase)
 float g_QNH = 1015;
+#endif
 
-
-
+#ifdef D_MPL3115
 // create an instance of the object
 MPL3115A2 g_mpl3115;
-
+#endif
 
 // ------------------------------------------------------------------------------------------------
-void setup()
+#line 32 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
+void setup();
+#line 72 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
+void loop();
+#line 32 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
+void setup() 
 {
     // join i2c bus
     Wire.begin();
@@ -39,17 +45,17 @@ void setup()
     // start serial for output
     Serial.begin(9600);
 
-
+#ifdef D_BMP280
     // BMP 280 init ok ?
-    if (!g_bmp280.begin())
-    {
-        Serial.println((reinterpret_cast<const __FlashStringHelper *>((__extension__({static const char __c[] __attribute__((__progmem__)) = ("Could not find a valid BMP280 sensor, check wiring!"); &__c[0];})))));
+    if (!g_bmp280.begin()) 
+    {  
+        Serial.println(F("Could not find a valid BMP280 sensor, check wiring!"));
         while (1);
 
     } // end if
+#endif // D_BMP280
 
-
-
+#ifdef D_MPL3115
     // get sensor online
     g_mpl3115.begin();
 
@@ -66,14 +72,14 @@ void setup()
 
     // enable all three pressure and temp event flags
     g_mpl3115.enableEventFlags();
-
+#endif // D_MPL3115
 
 } // setup
 
 // ------------------------------------------------------------------------------------------------
-void loop()
+void loop() 
 {
-
+#ifdef D_BMP280
     Serial.print("BMP280#");
     Serial.print(g_bmp280.readTemperature());
     Serial.print("#");
@@ -83,9 +89,9 @@ void loop()
     Serial.print("#");
     Serial.print(millis() / 1000.);
     Serial.println();
+#endif // D_BMP280
 
-
-
+#ifdef D_MPL3115
     Serial.print("MPL3115#");
     Serial.print(g_mpl3115.readTemp());
     Serial.print("#");
@@ -95,7 +101,7 @@ void loop()
     Serial.print("#");
     Serial.print(millis() / 1000.);
     Serial.println();
-
+#endif // D_MPL3115
 
     // aguarda 1s
     delay(1000);
@@ -103,3 +109,4 @@ void loop()
 } // loop
 
 // < the end >-------------------------------------------------------------------------------------
+ 

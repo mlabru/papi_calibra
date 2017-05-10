@@ -1,10 +1,10 @@
 {
   "builtInLibrariesFolders": "/home/mlabru/bin/arduino-1.8.2/libraries",
-  "customBuildProperties": "build.path=./build,build.warn_data_percentage=75,runtime.tools.avr-gcc.path=/home/mlabru/bin/arduino-1.8.2/hardware/tools/avr,runtime.tools.avrdude.path=/home/mlabru/bin/arduino-1.8.2/hardware/tools/avr,runtime.tools.arduinoOTA.path=/home/mlabru/bin/arduino-1.8.2/hardware/tools/avr",
+  "customBuildProperties": "build.path=./build,build.warn_data_percentage=75,runtime.tools.avr-gcc.path=/home/mlabru/bin/arduino-1.8.2/hardware/tools/avr,runtime.tools.arduinoOTA.path=/home/mlabru/bin/arduino-1.8.2/hardware/tools/avr,runtime.tools.avrdude.path=/home/mlabru/bin/arduino-1.8.2/hardware/tools/avr",
   "fqbn": "arduino:avr:uno",
   "hardwareFolders": "/home/mlabru/bin/arduino-1.8.2/hardware",
   "otherLibrariesFolders": "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/libraries",
   "runtime.ide.version": "10802",
-  "sketchLocation": "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/SparkFunAltimeter/SparkFunAltimeter.ino",
+  "sketchLocation": "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino",
   "toolsFolders": "/home/mlabru/bin/arduino-1.8.2/tools-builder,/home/mlabru/bin/arduino-1.8.2/hardware/tools/avr"
 }
