@@ -25,6 +25,7 @@ import threading
 
 # papi_calibra
 import sns_altimeter as salt
+import sns_gps as sgps
 
 # < module data >----------------------------------------------------------------------------------
 
@@ -45,7 +46,7 @@ M_UDP_ADDR = (M_UDP_HOST, M_UDP_PORT)
 M_SER_PORT = "/dev/ttyUSB0"
 
 # serial baudrate
-M_SER_BAUD = 9600
+M_SER_BAUD = 115200
 
 # keep running
 G_KEEP_RUN = True
@@ -81,6 +82,10 @@ def net_sender(f_queue):
     l_altimeter = salt.CAltimeter(l_sock, M_UDP_ADDR)
     assert l_altimeter
 
+    # create gps
+    l_gps = sgps.CGPS(l_sock, M_UDP_ADDR)
+    assert l_gps
+
     # while keep running...
     while G_KEEP_RUN:
         # block until get message
@@ -88,22 +93,27 @@ def net_sender(f_queue):
  
         # split message
         llst_msg = ls_msg.split('#')
-        M_LOG.debug("llst_msg: {}".format(llst_msg))
+        # M_LOG.debug("llst_msg: {}".format(llst_msg))
 
         # mensagem de altímetro ?
         if "!@ALT" == llst_msg[0]:
-            # send altimeter message
+            # send altimeter message (alt1, alt2, ts)
             l_altimeter.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
 
         # mensagem de barômetro ?
         #elif "!@PRS" == llst_msg[0]:
-            # send barometer message
+            # send barometer message (bar1, bar2, ts)
             #l_barometer.send_data(llst_msg[1], llst_msg[2], llst_msg[3])
 
         # mensagem de termômetro ?
         #elif "!@TMP" == llst_msg[0]:
-            # send termometer message
+            # send termometer message (tmp1, tmp2, ts)
             #l_termometer.send_data(llst_msg[1], llst_msg[2], llst_msg[3])
+
+        # mensagem de GPS ?
+        elif "!@GPS" == llst_msg[0]:
+            # send gps message (lat, lng, sats, hdop, ts)
+            l_gps.send_data(llst_msg[1], llst_msg[2], llst_msg[3], llst_msg[4], llst_msg[5])
 
     # fecha o socket
     l_sock.close()
@@ -117,13 +127,13 @@ def ser_read(f_queue):
     l_ser = serial.Serial(M_SER_PORT, M_SER_BAUD)
     assert l_ser
 
-    M_LOG.debug("l_ser: {}".format(l_ser))
+    # M_LOG.debug("l_ser: {}".format(l_ser))
 
     # while keep running...
     while G_KEEP_RUN:
         # read serial line        
         ls_line = l_ser.readline()
-        M_LOG.debug("ls_line: {}".format(ls_line))
+        # M_LOG.debug("ls_line: {}".format(ls_line))
 
         # read serial line and queue message
         f_queue.put(ls_line[:-2])

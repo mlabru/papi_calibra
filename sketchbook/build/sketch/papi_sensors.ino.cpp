@@ -3,18 +3,27 @@
 #line 1 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
 // < includes >------------------------------------------------------------------------------------
 
-#include <Wire.h>
 #include <SPI.h>
+#include <Wire.h>
+
+#include <TinyGPS.h>
 
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BMP280.h>
+
+#include <SoftwareSerial.h>
 
 #include "SparkFunMPL3115A2.h"
 
 // < defines >-------------------------------------------------------------------------------------
 
-#define D_BMP280   1
-#define D_MPL3115  1
+#define D_BMP280
+#define D_MPL3115
+#define D_GPS
+// #define D_DEBUG
+
+// wait time (1000/D_TIM_WAIT) = Hz
+#define D_TIM_WAIT 500    // 2 Hz
 
 // < global data >---------------------------------------------------------------------------------
 
@@ -31,19 +40,26 @@ float g_QNH = 1015;
 MPL3115A2 g_mpl3115;
 #endif
 
+#ifdef D_GPS
+// create an instance of the object
+TinyGPS g_gps;
+
+SoftwareSerial g_ss(2, 3);
+#endif
+
 // ------------------------------------------------------------------------------------------------
-#line 32 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
+#line 48 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
 void setup();
-#line 72 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
+#line 93 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
 void loop();
-#line 32 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
+#line 48 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
 void setup() 
 {
     // join i2c bus
     Wire.begin();
 
     // start serial for output
-    Serial.begin(9600);
+    Serial.begin(115200);
 
 #ifdef D_BMP280
     // BMP 280 init ok ?
@@ -74,13 +90,30 @@ void setup()
     g_mpl3115.enableEventFlags();
 #endif // D_MPL3115
 
+#ifdef D_GPS
+    // init GPS connection
+    g_ss.begin(4800);
+#endif
+
 } // setup
 
 // ------------------------------------------------------------------------------------------------
 void loop() 
 {
+#ifdef D_GPS
+    // GPS new data
+    bool lv_new_data = false;
+
+    // GPS data
+    float lf_lat;
+    float lf_lon;
+
+    unsigned long lul_age;
+#endif
     // tempo inicial
     unsigned long lul_ini;
+    // elapsed time
+    unsigned long lul_elp;
 
     // get initial time (ms)
     lul_ini = millis();
@@ -124,10 +157,57 @@ void loop()
     Serial.print(millis() / 1000.);
     Serial.println();
 
-    // 1Hz
-    delay(1000 - (millis() - lul_ini));
+#ifdef D_GPS
+    // while data avaiable on RX...
+    while (g_ss.available())
+    {
+        // read RX (GPS data)
+        char l_ch = g_ss.read();
+
+        // uncomment to see the GPS data flowing
+        // Serial.write(l_ch);
+
+        // did a new valid sentence come in ?
+        if (g_gps.encode(l_ch))
+            // set flag
+            lv_new_data = true;
+
+    } // end while
+
+    if (lv_new_data)
+    {
+        g_gps.f_get_position(&lf_lat, &lf_lon, &lul_age);
+
+        Serial.print("!@GPS#");
+        Serial.print(lf_lat == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : lf_lat, 6);
+        Serial.print("#");
+        Serial.print(lf_lon == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : lf_lon, 6);
+        Serial.print("#");
+        Serial.print(g_gps.satellites() == TinyGPS::GPS_INVALID_SATELLITES ? 0 : g_gps.satellites());
+        Serial.print("#");
+        Serial.print(g_gps.hdop() == TinyGPS::GPS_INVALID_HDOP ? 0 : g_gps.hdop());
+        Serial.print("#");
+        Serial.print(millis() / 1000.);
+        Serial.println();
+
+    } // end if
+#endif
+
+#ifdef D_DEBUG
+    Serial.print("Elapsed time: ");
+    Serial.print(millis() - lul_ini);
+    Serial.println(" ms.");
+#endif
+
+    // D_TIM_WAIT - elapsed time
+    lul_elp = D_TIM_WAIT - (millis() - lul_ini);
+
+    // adiantado ?
+    if (lul_elp >= 0)
+        // aguarda completar o tempo
+        delay(lul_elp);
 
 } // loop
 
 // < the end >-------------------------------------------------------------------------------------
- 
+

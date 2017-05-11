@@ -18,13 +18,6 @@ __date__ = "2017/04"
 
 # python library
 import logging
-#import math
-#import Queue
-#import random
-#import serial
-#import socket
-#import threading
-#import time
 
 # numPy
 import numpy as np
