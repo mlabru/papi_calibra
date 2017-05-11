@@ -51,7 +51,7 @@ class CWidgetCamera(QtGui.QWidget):
     QImage for openCV
     """
     # signals
-    C_SIG_NEW_FRAME = QtCore.pyqtSignal(cv.iplimage)
+    C_SGN_DATA_FRAME = QtCore.pyqtSignal(cv.iplimage)
 
     # ---------------------------------------------------------------------------------------------
     def __init__(self, f_camera_feed, f_parent=None):
@@ -72,7 +72,7 @@ class CWidgetCamera(QtGui.QWidget):
 
         # image source
         self.__camera_feed = f_camera_feed
-        self.__camera_feed.C_SIG_NEW_FRAME.connect(self.on_new_frame)
+        self.__camera_feed.C_SGN_DATA_FRAME.connect(self.on_new_frame)
 
         # setup widget size
         self.setMinimumSize(gdefs.D_CAM_WIDTH, gdefs.D_CAM_HEIGHT)
@@ -89,7 +89,7 @@ class CWidgetCamera(QtGui.QWidget):
 
         # it emits a signal with the saved frame
         # (to process the frame is not responsibility of the widget)
-        self.C_SIG_NEW_FRAME.emit(self.__frame)
+        self.C_SGN_DATA_FRAME.emit(self.__frame)
 
         # forces a schedule of a paint event
         self.update()

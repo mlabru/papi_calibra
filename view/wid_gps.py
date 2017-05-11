@@ -49,28 +49,28 @@ class CWidgetGPS(wplt.CWidgetPlotModel):
     widget for gps
     """
     # signals
-    C_SIG_NEW_ALTM = QtCore.pyqtSignal(list)
+    C_SGN_DATA_GPS = QtCore.pyqtSignal(list)
 
     # ---------------------------------------------------------------------------------------------
-    def __init__(self, f_sensor_feed, f_parent=None):
+    def __init__(self, f_gps_feed, f_parent=None):
         """
         constructor
 
-        @param f_sensor_feed: image source
+        @param f_gps_feed: gps data source
         @param f_parent: parent widget
         """
         # check input
-        assert f_sensor_feed
+        assert f_gps_feed
 
         # init super class
-        super(CWidgetGPS, self).__init__(f_sensor_feed, f_parent)
+        super(CWidgetGPS, self).__init__(f_gps_feed, f_parent)
 
         # actual frame
         self.__s_data = None
 
         # image source
-        self.__sensor_feed = f_sensor_feed
-        self.__sensor_feed.C_SIG_NEW_ALTM.connect(self.on_new_data)
+        self.__gps_feed = f_gps_feed
+        self.__gps_feed.C_SGN_DATA_GPS.connect(self.on_new_data)
 
         # create the plot and curves
         self._create_plot("Position", M_ALT_YMIN, M_ALT_YMAX)
@@ -113,7 +113,7 @@ class CWidgetGPS(wplt.CWidgetPlotModel):
 
         # it emits a signal with the data
         # (to process the frame is not responsibility of the widget)
-        self.C_SIG_NEW_ALTM.emit(flst_data)
+        self.C_SGN_DATA_GPS.emit(flst_data)
 
 # < the end >--------------------------------------------------------------------------------------
         

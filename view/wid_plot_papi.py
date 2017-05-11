@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------------------------------------
-wid_papi_plot
+wid_plot_papi
 
 papi calibrate
 
@@ -47,102 +47,174 @@ import control.pc_defs as gdefs
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-# < CWidgetPAPIPlot >------------------------------------------------------------------------------
+# ângulo de transição baixo (caixa 1)
+M_ANG_A = 2.50
 
-class CWidgetPAPIPlot(QtGui.QWidget):
+# ângulo de transição médio-baixo (caixa 2)
+M_ANG_B = 2.83
+
+# ângulo de transição médio-alto (caixa 3)
+M_ANG_D = 3.17
+
+# ângulo de transição alto (caixa 4)
+M_ANG_E = 3.50
+
+# ângulo normal da rampa
+M_ANG_C = (M_ANG_B + M_ANG_D) / 2.
+
+# ângulo de altura mínima do olho do piloto
+M_ANG_M = M_ANG_B - 0.033
+
+# superfície de proteção de obtáculo
+M_ANG_OPS = M_ANG_A - 0.57
+
+# < CWidgetPlotPAPI >------------------------------------------------------------------------------
+
+class CWidgetPlotPAPI(QtGui.QWidget):
     """
-    QImage for openCV
+    plot PAPI graphics
     """
-    # signals
-    x = np.arange(0, 10, 0.1)
-    cos = 0
-    sin = 0
+    # signal
+    C_SIG_NEW_DATA = QtCore.pyqtSignal(float)
 
     # ---------------------------------------------------------------------------------------------
-    def __init__(self, f_camera_feed, f_parent=None):
+    def __init__(self, f_parent=None):
         """
         constructor
 
-        @param f_camera_feed: image source
         @param f_parent: parent widget
         """
         # check input
         # assert f_camera_feed
 
         # init super class
-        super(CWidgetPAPIPlot, self).__init__(f_parent)
+        super(CWidgetPlotPAPI, self).__init__(f_parent)
+
+        # connect new data signal
+        self.C_SIG_NEW_DATA.connect(self.on_new_data)
 
         # distância em metros
-        self.__f_dst = 300.
+        self.__f_dst = 60.
         
-        # altitude em metros
-        self.__f_alt = 20.
+        # altura atual em metros
+        self.__f_alt = 0.
+
+        # altura máxima em metros
+        self.__f_alt_max = self.__f_dst * math.sin(math.radians(M_ANG_E + 0.5))
 
         # setup user interface
         self.__setup_ui(self)
 
-        lf_alt = 8.5 
-
-        l_x = [0., self.__f_dst]  
-        l_y = [0., lf_alt] 
-        llbl_gr = u"{:4.3f}°".format(math.degrees(math.atan2(lf_alt, self.__f_dst)))
-
-        line = CPlotLine(l_x, l_y, mfc='red', ms=12, label=llbl_gr)
-        #line.text.set_text('line label')
-        line.text.set_color('red')
-        line.text.set_fontsize(8)
-
-        self.__drawing.add_line(line)
-
-
-        # do plot 
-        self.__plot()
+        # setup PAPI lines
+        self.__setup_lines()
 
     # ---------------------------------------------------------------------------------------------
-    def __create_slider(self, f_func, f_plot, f_parent=None):
+    @QtCore.pyqtSlot(float)
+    def on_btn_clear_clicked(self):
         """
-        create slider
+        button clear clicked
         """
-        # create slider
-        l_sld = QtGui.QSlider(QtCore.Qt.Vertical, f_parent)
-        assert l_sld
-
-        # setup
-        l_sld.setFocusPolicy(QtCore.Qt.NoFocus)
-        l_sld.valueChanged[int].connect(f_func)
-        l_sld.valueChanged.connect(f_plot)
-
-        # return
-        return l_sld
-        
-    # ---------------------------------------------------------------------------------------------
-    def __plot(self):
-        """
-        do plot
-        """
-        # escalas dos eixos
-        self.__drawing.set_xlim(0, self.__f_dst)
-        self.__drawing.set_ylim(0, self.__f_alt)
-
-        # label dos eixos
-        self.__drawing.set_ylabel(u"Altitude")
-        self.__drawing.set_xlabel(u"Distância")
+        # desenha o canvas
+        self.__drawing.clear()
 
         # desenha o canvas
         self.__canvas.draw()
 
     # ---------------------------------------------------------------------------------------------
-    def __set_cos(self, v):
-        self.cos = v / 100.
-
-    # ---------------------------------------------------------------------------------------------
-    def __set_sin(self, v):
-        self.sin = v / 100.
-
-    # ---------------------------------------------------------------------------------------------
-    def __setup_ui(self, f_parent=None):
+    @QtCore.pyqtSlot(float)
+    def on_dsb_dst_valueChanged(self, ff_val):
         """
-        setup user interface
+        spinBox distância valueChanged
+        """
+        # save new distance
+        self.__f_dst = ff_val
+
+        # axes rescale
+        self.__drawing.set_xlim(0, ff_val)
+        self.__drawing.set_ylim(0, ff_val * math.sin(math.radians(M_ANG_E + 0.5)))
+
+        self.on_new_data(ff_val / 15.)
+
+        # redraw canvas
+        self.__canvas.draw()
+
+    # ---------------------------------------------------------------------------------------------
+    @QtCore.pyqtSlot(float)
+    def on_new_data(self, ff_alt):
+        """
+        received new elevation callback
+        """
+        # salva nova altura
+        self.__f_alt = ff_alt
+
+        l_x = [0., self.__f_dst]  
+        l_y = [0., self.__f_alt] 
+
+        llbl_gr = u"{:4.3f}°".format(math.degrees(math.atan2(self.__f_alt, self.__f_dst)))
+
+        self.__line_A.set_data(l_x, l_y)
+        self.__line_A.set_label(llbl_gr)
+        
+        # desenha o canvas
+        self.__canvas.draw()
+
+    # ---------------------------------------------------------------------------------------------
+    def __setup_lines(self):
+        """
+        create PAPI lines
+        """
+        # initial data
+        l_x = [0., self.__f_dst]  
+        l_y = [0., self.__f_alt] 
+
+        # label
+        llbl_gr = u"{:4.3f}°".format(math.degrees(math.atan2(self.__f_alt, self.__f_dst)))
+
+        l_y = [0., 2.] 
+
+        # limite inferior ângulo de transição baixo (caixa 1)
+        self.__line_A_I = CPlotLine(l_x, l_y, mfc='red', ms=12, label=llbl_gr)
+        assert self.__line_A_I
+        
+        # setup
+        self.__line_A_I.text.set_color('red')
+        self.__line_A_I.text.set_fontsize(8)
+
+        # draw line
+        self.__drawing.add_line(self.__line_A_I)
+        
+
+        l_y = [0., 4.] 
+
+        # ângulo de transição baixo (caixa 1)
+        self.__line_A = CPlotLine(l_x, l_y, mfc='red', ms=12, label=llbl_gr)
+        assert self.__line_A
+        
+        # setup
+        self.__line_A.text.set_color('red')
+        self.__line_A.text.set_fontsize(8)
+
+        # draw line
+        self.__drawing.add_line(self.__line_A)
+        
+
+        l_y = [0., 6.] 
+
+        # limite superior ângulo de transição baixo (caixa 1)
+        self.__line_A_S = CPlotLine(l_x, l_y, mfc='red', ms=12, label=llbl_gr)
+        assert self.__line_A_S
+        
+        # setup
+        self.__line_A_S.text.set_color('red')
+        self.__line_A_S.text.set_fontsize(8)
+
+        # draw line
+        self.__drawing.add_line(self.__line_A_S)
+
+    # ---------------------------------------------------------------------------------------------
+    def __setup_plot(self):
+        """
+        do plot
         """
         # figure
         l_figure = plt.figure()
@@ -152,6 +224,14 @@ class CWidgetPAPIPlot(QtGui.QWidget):
         self.__drawing = l_figure.add_subplot(111)
         assert self.__drawing
 
+        # escalas dos eixos
+        self.__drawing.set_xlim(0, self.__f_dst)
+        self.__drawing.set_ylim(0, self.__f_alt_max)
+
+        # label dos eixos
+        self.__drawing.set_ylabel(u"Elevação")
+        self.__drawing.set_xlabel(u"Distância")
+
         # canvas
         self.__canvas = qt4agg.FigureCanvasQTAgg(l_figure)
         assert self.__canvas
@@ -160,35 +240,19 @@ class CWidgetPAPIPlot(QtGui.QWidget):
         self.__canvas.setFixedHeight(270)
         self.__canvas.setFixedWidth(480)
 
+    # ---------------------------------------------------------------------------------------------
+    def __setup_ui(self, f_parent=None):
+        """
+        setup user interface
+        """
         ###
-        # sliders
+        # plot
 
-        # create slider for cos
-        l_sld_cos = self.__create_slider(self.__set_cos, self.__plot)
-
-        # create slider for sin
-        l_sld_sin = self.__create_slider(self.__set_sin, self.__plot)
-
-        # create layout for sliders 
-        llay_sld = QtGui.QGridLayout()
-        assert llay_sld is not None
-
-        # put sliders on layout
-        llay_sld.addWidget(l_sld_cos, 0, 0)
-        llay_sld.addWidget(l_sld_sin, 0, 1)
-
-        # create groupBox for sliders
-        lgbx_sld = QtGui.QGroupBox("Values")
-        assert lgbx_sld
-        
-        # put sliders widgets on groupBox
-        lgbx_sld.setLayout(llay_sld)
-
-        # setup
-        lgbx_sld.setFixedWidth(70)
+        # create plot 
+        self.__setup_plot()
 
         ###
-        # frame
+        # font
 
         # create font
         l_font = QtGui.QFont()
@@ -197,6 +261,9 @@ class CWidgetPAPIPlot(QtGui.QWidget):
         # setup
         l_font.setBold(True)
         l_font.setWeight(75)
+
+        ###
+        # frame
 
         # label distância
         llbl_dst = QtGui.QLabel(u"Distância")
@@ -209,6 +276,14 @@ class CWidgetPAPIPlot(QtGui.QWidget):
         self.__dsb_dst = QtGui.QDoubleSpinBox()
         assert self.__dsb_dst
 
+        # setup
+        self.__dsb_dst.setMaximum(500.)
+        self.__dsb_dst.setMinimum(60.)
+        self.__dsb_dst.setValue(self.__f_dst)
+        
+        # connect spinBox
+        self.__dsb_dst.valueChanged.connect(self.on_dsb_dst_valueChanged)
+
         # label pto zero 
         llbl_zero = QtGui.QLabel(u"Pto.Zero")
         assert llbl_zero
@@ -217,13 +292,13 @@ class CWidgetPAPIPlot(QtGui.QWidget):
         llbl_zero.setFont(l_font)
 
         # labels lat/lng/alt
-        self.__lbl_lat = QtGui.QLabel("X:")
+        self.__lbl_lat = QtGui.QLabel("X: {}".format(-23.2463))
         assert self.__lbl_lat
 
-        self.__lbl_lng = QtGui.QLabel("Y:")
+        self.__lbl_lng = QtGui.QLabel("Y: {}".format(-45.8542))
         assert self.__lbl_lng
 
-        self.__lbl_alt = QtGui.QLabel("Z:")
+        self.__lbl_alt = QtGui.QLabel("Z: {}".format(self.__f_alt))
         assert self.__lbl_alt
 
         # clear screen button
@@ -231,14 +306,14 @@ class CWidgetPAPIPlot(QtGui.QWidget):
         assert self.__btn_clear
 
         # connect clear screen button        
-        # self.__btn_clear.clicked.connect(lwid_ppt.clear_screen)
+        self.__btn_clear.clicked.connect(self.on_btn_clear_clicked)
 
         # frame
         l_frm = QtGui.QFrame()
         assert l_frm
         
         # setup
-        l_frm.setGeometry(QtCore.QRect(60, 120, 91, 171))
+        l_frm.setGeometry(QtCore.QRect(60, 120, 100, 170))
         l_frm.setFrameShape(QtGui.QFrame.StyledPanel)
         l_frm.setFrameShadow(QtGui.QFrame.Raised)
 

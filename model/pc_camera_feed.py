@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------------------------------------
-camera_feed
+pc_camera_feed
 
-papi calibrate
+camera feed
 
 revision 0.1  2017/abr  mlabru
 initial release (Linux/Python)
@@ -33,6 +33,7 @@ from PyQt4 import QtCore
 
 # model
 import model.pc_data as gdata
+import model.pc_sensor_feed as snsf
 
 # control
 import control.pc_defs as gdefs
@@ -45,39 +46,37 @@ M_LOG.setLevel(logging.DEBUG)
 
 # < CCameraFeed >----------------------------------------------------------------------------------
 
-class CCameraFeed(QtCore.QObject):
+class CCameraFeed(snsf.CSensorFeed):
     """
-    QImage for openCV
+    camera feed
     """
     # signal
-    C_SIG_NEW_FRAME = QtCore.pyqtSignal(cv.iplimage)
+    C_SGN_NEW_MSG_CAM = QtCore.pyqtSignal(str)
+    C_SGN_DATA_FRAME  = QtCore.pyqtSignal(cv.iplimage)
 
     # ---------------------------------------------------------------------------------------------
-    def __init__(self, f_sock, f_monitor):
+    def __init__(self, f_sock, f_monitor=None):
         """
         constructor
 
         @param f_sock: receive socket
-        @param f_monitor: data monitor
         """ 
         # check input
         assert f_sock
-        assert f_monitor
 
         # init super class
-        super(CCameraFeed, self).__init__()
+        super(CCameraFeed, self).__init__(f_sock, f_monitor)
 
-        # receive socket
-        self.__sck_rcv_img = f_sock
+        # from CSensorFeed
+        # sck_rcv     # receive socket
+        # monitor     # data monitor
+        # v_paused    # flag paused (bool)
 
-        # data monitor
-        self.__monitor = f_monitor
-
-        # flag paused
-        self.__v_paused = False
+        # make connections
+        self.C_SGN_NEW_MSG_CAM.connect(self.dispatch_msg)
 
         # cria o processo de recebimento de imagens
-        l_prc = threading.Thread(target=self.__query_frame)
+        l_prc = threading.Thread(target=self.query_frame)
         assert l_prc
 
         # inicia o processo
@@ -85,12 +84,23 @@ class CCameraFeed(QtCore.QObject):
 
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot()
-    def __query_frame(self):
+    def dispatch_msg(self, fs_msg):
+        """
+        dispatch de imagens
+        """
+        # existe monitor ?
+        if self.monitor:
+            # envia mensagem ao monitor
+            self.monitor.C_SGN_NEW_MSG_SNS.emit(fs_msg)
+
+    # ---------------------------------------------------------------------------------------------
+    @QtCore.pyqtSlot()
+    def query_frame(self):
         """
         processo de recebimento de imagens
         """
         # clear to go
-        assert self.__sck_rcv_img
+        assert self.sck_rcv
 
         # application wait
         while not gdata.G_KEEP_RUN:
@@ -100,17 +110,17 @@ class CCameraFeed(QtCore.QObject):
         # application loop
         while gdata.G_KEEP_RUN:
             # paused ?
-            if self.__v_paused:
+            if self.v_paused:
                 # aguarda
                 time.sleep(1)
                 # continua
                 continue
 
             # recebe o tamanho do buffer
-            l_msg, l_addr = self.__sck_rcv_img.recvfrom(32)
+            l_msg, l_addr = self.sck_rcv.recvfrom(32)
 
-            # monitor (emit new message signal)
-            self.__monitor.C_SIG_MSG_CAM.emit(l_msg)
+            # emit new message signal
+            self.C_SGN_NEW_MSG_CAM.emit(l_msg)
 
             # split message
             llst_msg = l_msg.split('#')
@@ -124,10 +134,10 @@ class CCameraFeed(QtCore.QObject):
             li_length = int(llst_msg[2])
                 
             # recebe a imagem
-            l_msg, l_addr = self.__sck_rcv_img.recvfrom(li_length)
+            l_msg, l_addr = self.sck_rcv.recvfrom(li_length)
 
-            # monitor (emit new message signal)
-            self.__monitor.C_SIG_MSG_CAM.emit(l_msg)
+            # emit new message signal
+            self.C_SGN_NEW_MSG_CAM.emit(l_msg)
 
             # split message
             llst_msg = l_msg.split('#')
@@ -150,22 +160,9 @@ class CCameraFeed(QtCore.QObject):
             cv.SetData(l_frame, l_data.tostring(), l_data.dtype.itemsize * 3 * l_data.shape[1])
 
             # emit new frame signal
-            self.C_SIG_NEW_FRAME.emit(l_frame)
+            self.C_SGN_DATA_FRAME.emit(l_frame)
 
         # fecha a conexão
-        self.__sck_rcv_img.close()
-
-    # =============================================================================================
-    # dados
-    # =============================================================================================
-
-    # ---------------------------------------------------------------------------------------------
-    @property
-    def paused(self):
-        return self.__v_paused
-
-    @paused.setter
-    def paused(self, f_val):
-        self.__v_paused = f_val
+        self.sck_rcv.close()
 
 # < the end >--------------------------------------------------------------------------------------
