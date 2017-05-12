@@ -22,8 +22,8 @@ import logging
 # numPy
 # import numpy as np
 
-# kalman
-# import kalman_filter_linear as kfl
+# model
+# import model.pc_kalman_filter_linear as kfl
 
 # < module data >----------------------------------------------------------------------------------
 

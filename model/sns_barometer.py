@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------------------------------------
-sns_altimeter
+sns_barometer
 
 PAPI sender sensors
 
@@ -22,8 +22,11 @@ import logging
 # numPy
 import numpy as np
 
-# kalman
-import kalman_filter_linear as kfl
+# model
+import model.pc_kalman_filter_linear as kfl
+
+# control
+import control.pc_defs as gdefs
 
 # < module data >----------------------------------------------------------------------------------
 
@@ -31,10 +34,11 @@ import kalman_filter_linear as kfl
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-# -------------------------------------------------------------------------------------------------
-class CAltimeter(object):
+# < CBarometer >-----------------------------------------------------------------------------------
+
+class CBarometer(object):
     """
-    altimeter class
+    barometer class
     """
     # ---------------------------------------------------------------------------------------------
     def __init__(self, f_sock, ft_client):
@@ -86,29 +90,24 @@ class CAltimeter(object):
         assert self.__kf
 
     # ---------------------------------------------------------------------------------------------
-    def send_data(self, lf_alt1, lf_alt2, lf_ts):
+    def send_data(self, lf_prs1, lf_prs2, lf_ts):
         """
-        send altimeter data
+        send barometer data
         """
         # save kalman state
         l_ks = self.__kf.get_current_state()
 
-        # list ?
-        if list == type(l_ks):
-            lf_ks = l_ks[0][0]
-
-        # senão, matrix
-        else:
-            lf_ks = l_ks[0, 0]            
+        # list or matrix ?
+        lf_ks = l_ks[0][0] if list == type(l_ks) else l_ks[0, 0]
 
         # build string data
-        ls_data = "{}#{}#{}#{}".format(lf_ts, lf_alt1, lf_alt2, lf_ks)
+        ls_data = "{}#{}#{}#{}".format(lf_ts, lf_prs1, lf_prs2, lf_ks)
 
         # envia a string
-        self.__sock.sendto("101#114#{}".format(ls_data), self.__t_client)
+        self.__sock.sendto("{}#{}#{}".format(gdefs.D_MSG_VRS, gdefs.D_MSG_PRS, ls_data), self.__t_client)
 
         # step. control vector, measurement_vector
-        self.__kf.step(self.__u, np.matrix([[lf_alt1], 
-                                            [lf_alt2]]))
+        self.__kf.step(self.__u, np.matrix([[lf_prs1], 
+                                            [lf_prs2]]))
 
 # < the end >--------------------------------------------------------------------------------------

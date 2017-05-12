@@ -23,9 +23,11 @@ import serial
 import socket
 import threading
 
-# papi_calibra
-import sns_altimeter as salt
-import sns_gps as sgps
+# model
+import model.sns_altimeter as salt
+import model.sns_barometer as sbar
+import model.sns_gps as sgps
+import model.sns_thermometer as sthr
 
 # < module data >----------------------------------------------------------------------------------
 
@@ -60,13 +62,22 @@ def main():
     l_queue = Queue.Queue()
     assert l_queue
 
-    # create and start serial read thread
-    threading.Thread(target=ser_read, args=(l_queue,)).start()
+    # create serial read thread
+    lthr_ser = threading.Thread(target=ser_read, args=(l_queue,))
+    assert lthr_ser
+    
+    # start serial read thread
+    lthr_ser.start()
 
-    # create and start net sender thread
-    lthr_net = threading.Thread(target=net_sender, args=(l_queue,)).start()
+    # create net sender thread
+    lthr_net = threading.Thread(target=net_sender, args=(l_queue,))
+    assert lthr_net
+
+    # start net sender thread
+    lthr_net.start()
 
     # aguarda as threads
+    lthr_ser.join()
     lthr_net.join()
 
 # -------------------------------------------------------------------------------------------------
@@ -82,9 +93,17 @@ def net_sender(f_queue):
     l_altimeter = salt.CAltimeter(l_sock, M_UDP_ADDR)
     assert l_altimeter
 
+    # create barometer
+    l_barometer = sbar.CBarometer(l_sock, M_UDP_ADDR)
+    assert l_barometer
+
     # create gps
     l_gps = sgps.CGPS(l_sock, M_UDP_ADDR)
     assert l_gps
+
+    # create thermometer
+    l_termometer = sthr.CThermometer(l_sock, M_UDP_ADDR)
+    assert l_termometer
 
     # while keep running...
     while G_KEEP_RUN:
@@ -100,20 +119,20 @@ def net_sender(f_queue):
             # send altimeter message (alt1, alt2, ts)
             l_altimeter.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
 
-        # mensagem de barômetro ?
-        #elif "!@PRS" == llst_msg[0]:
-            # send barometer message (bar1, bar2, ts)
-            #l_barometer.send_data(llst_msg[1], llst_msg[2], llst_msg[3])
-
-        # mensagem de termômetro ?
-        #elif "!@TMP" == llst_msg[0]:
-            # send termometer message (tmp1, tmp2, ts)
-            #l_termometer.send_data(llst_msg[1], llst_msg[2], llst_msg[3])
-
         # mensagem de GPS ?
         elif "!@GPS" == llst_msg[0]:
             # send gps message (lat, lng, sats, hdop, ts)
-            l_gps.send_data(llst_msg[1], llst_msg[2], llst_msg[3], llst_msg[4], llst_msg[5])
+            l_gps.send_data(float(llst_msg[1]), float(llst_msg[2]), int(llst_msg[3]), int(llst_msg[4]), float(llst_msg[5]))
+
+        # mensagem de barômetro ?
+        elif "!@PRS" == llst_msg[0]:
+            # send barometer message (bar1, bar2, ts)
+            l_barometer.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
+
+        # mensagem de termômetro ?
+        elif "!@TMP" == llst_msg[0]:
+            # send thermometer message (tmp1, tmp2, ts)
+            l_termometer.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
 
     # fecha o socket
     l_sock.close()
