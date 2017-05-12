@@ -4,7 +4,7 @@
 ---------------------------------------------------------------------------------------------------
 pc_net_sock_out
 
-DOCUMENT ME!
+send socket
 
 revision 0.1  2017/may  mlabru
 initial release (Linux/Python)
@@ -26,14 +26,12 @@ import socket
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-
 # < class CNetSockOut >----------------------------------------------------------------------------
 
 class CNetSockOut(socket.socket):
     """
-    DOCUMENT ME!
+    send socket
     """
-
     # ---------------------------------------------------------------------------------------------
     def __init__(self, ft_ifce, fs_addr, fi_port):
         """
@@ -54,9 +52,11 @@ class CNetSockOut(socket.socket):
         self.__t_addr = (fs_addr, fi_port)
 
         # especificou uma interface ?
-        if ft_ifce[1] is not None:
-            # seleciona a interface (from socket.h, SO_BINDTODEVICE 25)
-            self.setsockopt(socket.SOL_SOCKET, 25, ft_ifce[1] + '\0')
+        if ft_ifce is not None:
+            # especificou uma interface de saída ?
+            if ft_ifce[1] is not None:
+                # seleciona a interface (from socket.h, SO_BINDTODEVICE 25)
+                self.setsockopt(socket.SOL_SOCKET, 25, ft_ifce[1] + '\0')
 
         # config sender socket
         self.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)

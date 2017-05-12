@@ -30,7 +30,7 @@
 // create an instance of the object
 Adafruit_BMP280 g_bmp280;
 
-// pressão base (QNH) (this should be adjusted to your local forcase)
+// pressão nível do mar (QNH) (this should be adjusted to your local forcase)
 float g_QNH = 1015;
 
 
@@ -72,13 +72,14 @@ void setup()
     // configure the sensor
 
     // measure altitude above sea level in meters
-    g_mpl3115.setModeAltimeter();
+    // g_mpl3115.setModeAltimeter();
 
     // measure pressure in Pascals from 20 to 110 kPa
-    // g_mpl3115.setModeBarometer();
+    g_mpl3115.setModeBarometer();
 
     // set oversample to the recommended 128
     g_mpl3115.setOversampleRate(7);
+
 
     // enable all three pressure and temp event flags
     g_mpl3115.enableEventFlags();
@@ -94,6 +95,10 @@ void setup()
 // ------------------------------------------------------------------------------------------------
 void loop()
 {
+
+    // altitude calc
+    float lf_Px;
+    float lf_off_h;
 
     // GPS new data
     bool lv_new_data = false;
@@ -119,27 +124,33 @@ void loop()
     Serial.print("#");
 
 
-    Serial.print(g_mpl3115.readAltitude());
+    // measure altitude above sea level in meters
+    lf_Px = 1. - pow(g_mpl3115.readPressure() / 101325, 0.1902632);
+    lf_off_h = 60.;
+
+    Serial.print((44330.77 * lf_Px) + lf_off_h);
     Serial.print("#");
 
     Serial.print(millis() / 1000.);
     Serial.println();
 
     // send pressure
-    Serial.print("!@PRS#");
+    Serial.print("!@BAR#");
 
-    Serial.print(g_bmp280.readPressure());
+    // send millibar pressure 
+    Serial.print(g_bmp280.readPressure() / 100.);
     Serial.print("#");
 
 
-    Serial.print(g_mpl3115.readPressure());
+    // send millibar pressure
+    Serial.print(g_mpl3115.readPressure() / 100.);
     Serial.print("#");
 
     Serial.print(millis() / 1000.);
     Serial.println();
 
     // send temperature
-    Serial.print("!@TMP#");
+    Serial.print("!@THR#");
 
     Serial.print(g_bmp280.readTemperature());
     Serial.print("#");
@@ -185,7 +196,7 @@ void loop()
         Serial.println();
 
     } // end if
-# 194 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
+# 205 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
     // D_TIM_WAIT - elapsed time
     lul_elp = 500 /* 2 Hz*/ - (millis() - lul_ini);
 

@@ -25,34 +25,21 @@ import socket
 import threading
 
 # model
-import model.sns_altimeter as salt
-import model.sns_barometer as sbar
-import model.sns_gps as sgps
-import model.sns_thermometer as sthr
+import model.pc_data as gdata
+
+import model.pc_sns_altimeter as salt
+import model.pc_sns_barometer as sbar
+import model.pc_sns_gps as sgps
+import model.pc_sns_thermometer as sthr
+
+# control
+import control.pc_defs as gdefs
 
 # < module data >----------------------------------------------------------------------------------
 
 # logger
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
-
-# symbolic name meaning all available interfaces
-M_UDP_HOST = "192.168.12.1"
-
-# arbitrary non-privileged port
-M_UDP_PORT = 1961
-
-# tupla
-M_UDP_ADDR = (M_UDP_HOST, M_UDP_PORT)
-
-# serial port
-M_SER_PORT = "/dev/ttyUSB0"
-
-# serial baudrate
-M_SER_BAUD = 115200
-
-# keep running
-G_KEEP_RUN = True
 
 # -------------------------------------------------------------------------------------------------
 def main():
@@ -62,6 +49,9 @@ def main():
     # create read queue
     l_queue = Queue.Queue()
     assert l_queue
+
+    # start application
+    gdata.G_KEEP_RUN = True
 
     # create serial read thread
     lthr_ser = threading.Thread(target=ser_read, args=(l_queue,))
@@ -86,28 +76,24 @@ def net_sender(f_queue):
     """
     net sender thread
     """
-    # cria o soket
-    l_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    assert l_sock
-
     # create altimeter
-    l_altimeter = salt.CAltimeter(l_sock, M_UDP_ADDR)
+    l_altimeter = salt.CAltimeter(None, gdefs.D_NET_CLI, gdefs.D_NET_PORT_ALT)
     assert l_altimeter
 
     # create barometer
-    l_barometer = sbar.CBarometer(l_sock, M_UDP_ADDR)
+    l_barometer = sbar.CBarometer(None, gdefs.D_NET_CLI, gdefs.D_NET_PORT_BAR)
     assert l_barometer
 
     # create gps
-    l_gps = sgps.CGPS(l_sock, M_UDP_ADDR)
+    l_gps = sgps.CGPS(None, gdefs.D_NET_CLI, gdefs.D_NET_PORT_GPS)
     assert l_gps
 
     # create thermometer
-    l_termometer = sthr.CThermometer(l_sock, M_UDP_ADDR)
+    l_termometer = sthr.CThermometer(None, gdefs.D_NET_CLI, gdefs.D_NET_PORT_THR)
     assert l_termometer
 
     # while keep running...
-    while G_KEEP_RUN:
+    while gdata.G_KEEP_RUN:
         # block until get message
         ls_msg = f_queue.get()
 
@@ -143,22 +129,19 @@ def net_sender(f_queue):
             # send thermometer message (tmp1, tmp2, ts)
             l_termometer.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
 
-    # fecha o socket
-    l_sock.close()
-
 # -------------------------------------------------------------------------------------------------
 def ser_read(f_queue):
     """
     serial reader thread
     """
     # open serial port
-    l_ser = serial.Serial(M_SER_PORT, M_SER_BAUD)
+    l_ser = serial.Serial(gdefs.D_SER_PORT, gdefs.D_SER_BAUD)
     assert l_ser
 
     # M_LOG.debug("l_ser: {}".format(l_ser))
 
     # while keep running...
-    while G_KEEP_RUN:
+    while gdata.G_KEEP_RUN:
         # read serial line        
         ls_line = l_ser.readline()
         # M_LOG.debug("ls_line: {}".format(ls_line))
