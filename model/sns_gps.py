@@ -25,6 +25,9 @@ import logging
 # model
 # import model.pc_kalman_filter_linear as kfl
 
+# control
+import control.pc_defs as gdefs
+
 # < module data >----------------------------------------------------------------------------------
 
 # logger
@@ -86,15 +89,15 @@ class CGPS(object):
         assert self.__kf
         '''
     # ---------------------------------------------------------------------------------------------
-    def send_data(self, lf_lat, lf_lng, li_sats, li_hdop, lf_ts):
+    def send_data(self, lf_lat, lf_lng, lf_alt, li_sats, li_hdop, lf_ts):
         """
         send gps data
         """
         # build string data
-        ls_data = "{}#{}#{}#{}#{}".format(lf_ts, lf_lat, lf_lng, li_sats, li_hdop)
+        ls_data = "{}#{}#{}#{}#{}#{}".format(lf_ts, lf_lat, lf_lng, lf_alt, li_sats, li_hdop)
 
         # envia a string
-        self.__sock.sendto("101#115#{}".format(ls_data), self.__t_client)
+        self.__sock.sendto("{}#{}#{}".format(gdefs.D_MSG_VRS, gdefs.D_MSG_GPS, ls_data), self.__t_client)
 
     # ---------------------------------------------------------------------------------------------
     def send_kf(self, lf_lat, lf_lng, lf_ts):

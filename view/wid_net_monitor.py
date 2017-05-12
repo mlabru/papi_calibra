@@ -152,6 +152,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
 
         # setup
         self.__pte_camera.setFont(l_font)
+        self.__pte_camera.setReadOnly(True)
         self.__pte_camera.setStyleSheet(gdefs.D_PTE_STYLE)
         self.__pte_camera.setMinimumSize(QtCore.QSize(500, 270))
         self.__pte_camera.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
@@ -184,15 +185,17 @@ class CWidgetNetMonitor(QtGui.QWidget):
         assert l_font
 
         l_font.setFamily("Courier")
-        l_font.setPointSize(10)
+        l_font.setPointSize(12)
 
         # create QPlainTextEdit CCC
         self.__pte_ccc = QtGui.QPlainTextEdit()
         assert self.__pte_ccc
 
         self.__pte_ccc.setFont(l_font)
+        self.__pte_ccc.setReadOnly(True)
         self.__pte_ccc.setStyleSheet(gdefs.D_PTE_STYLE)
         self.__pte_ccc.setMinimumSize(QtCore.QSize(660, 270))
+        self.__pte_ccc.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
 
         # frame to qle and btn
         lfrm_text = QtGui.QFrame()
@@ -252,13 +255,14 @@ class CWidgetNetMonitor(QtGui.QWidget):
         assert l_font
 
         l_font.setFamily("Courier")
-        l_font.setPointSize(10)
+        l_font.setPointSize(12)
 
         # create QPlainTextEdit sensor
         self.__pte_sensor = QtGui.QPlainTextEdit()
         assert self.__pte_sensor
 
         self.__pte_sensor.setFont(l_font)
+        self.__pte_sensor.setReadOnly(True)
         self.__pte_sensor.setStyleSheet(gdefs.D_PTE_STYLE)
         self.__pte_sensor.setMinimumSize(QtCore.QSize(500, 270))
         self.__pte_sensor.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
@@ -290,7 +294,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
         assert l_font
 
         l_font.setFamily("Courier")
-        l_font.setPointSize(10)
+        l_font.setPointSize(12)
 
         # create QPlainTextEdit configuração
         self.__pte_editor = QtGui.QPlainTextEdit()
@@ -300,6 +304,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
         self.__pte_editor.setReadOnly(False)
         self.__pte_editor.setStyleSheet(gdefs.D_PTE_STYLE)
         self.__pte_editor.setMinimumSize(QtCore.QSize(660, 270))
+        self.__pte_editor.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
 
         # syntax highlight
         self.highlight = sntx.CConfigHighlighter(self.__pte_editor.document())
