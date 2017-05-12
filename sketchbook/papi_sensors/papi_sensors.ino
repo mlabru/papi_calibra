@@ -117,6 +117,9 @@ void loop()
     Serial.print("#");
 #endif
 #ifdef D_MPL3115
+    // measure altitude above sea level in meters
+    g_mpl3115.setModeAltimeter();
+
     Serial.print(g_mpl3115.readAltitude());
     Serial.print("#");
 #endif
@@ -126,11 +129,16 @@ void loop()
     // send pressure
     Serial.print("!@PRS#");
 #ifdef D_BMP280
-    Serial.print(g_bmp280.readPressure());
+    // send millibar pressure 
+    Serial.print(g_bmp280.readPressure() / 100.);
     Serial.print("#");
 #endif
 #ifdef D_MPL3115
-    Serial.print(g_mpl3115.readPressure());
+    // measure pressure in Pascals from 20kPa to 110 kPa
+    g_mpl3115.setModeBarometer();
+
+    // send millibar pressure
+    Serial.print(g_mpl3115.readPressure() / 100.);
     Serial.print("#");
 #endif
     Serial.print(millis() / 1000.);
