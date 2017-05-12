@@ -4,6 +4,7 @@
 # < imports >--------------------------------------------------------------------------------------
 
 # python library
+import logging
 import socket
 
 # numPy
@@ -13,22 +14,23 @@ import numpy
 import cv2
 import cv2.cv as cv
 
+# control
+import control.pc_defs as gdefs
+
 # < module data >----------------------------------------------------------------------------------
 
-# symbolic name meaning all available interfaces
-UDP_HOST = "192.168.12.1"
-
-# arbitrary non-privileged port
-UDP_PORT = 1970
+# logger
+M_LOG = logging.getLogger(__name__)
+M_LOG.setLevel(logging.DEBUG)
 
 # tupla
-UDP_ADDR = (UDP_HOST, UDP_PORT)
+M_UDP_ADDR = (gdefs.D_NET_CLI, gdefs.D_NET_PORT_IMG)
 
 # -------------------------------------------------------------------------------------------------
 
 # cria o soket
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-assert sock
+l_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+assert l_sock
 
 # inicia a captura do vídeo
 capture = cv2.VideoCapture(0)
@@ -61,9 +63,9 @@ while True:
         continue
     
     # envia o tamanho da string 
-    sock.sendto("101#111#{}".format(len(stringData) + 8), UDP_ADDR)
+    l_sock.sendto("{}#{}#{}".format(gdefs.D_MSG_VRS, gdefs.D_MSG_SIZ, len(stringData) + 8), M_UDP_ADDR)
     # envia a string
-    sock.sendto("101#112#{}".format(stringData), UDP_ADDR)
+    l_sock.sendto("{}#{}#{}".format(gdefs.D_MSG_VRS, gdefs.D_MSG_IMG, stringData), M_UDP_ADDR)
 
     # converte de string para imagem
     # data = numpy.fromstring(stringData, dtype="uint8")
@@ -76,7 +78,7 @@ while True:
         # break
     
 # fecha o socket
-sock.close()
+l_sock.close()
 
 #cv2.waitKey(0)
 #cv2.destroyAllWindows()

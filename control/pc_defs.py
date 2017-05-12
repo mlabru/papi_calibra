@@ -83,7 +83,7 @@ D_NET_PORT_CCC = 1970
 # < serial >---------------------------------------------------------------------------------------
 
 # porta
-D_SER_PORT = "/dev/ttyACM0"
+D_SER_PORT = "/dev/ttyUSB0"
 # velocidade
 D_SER_BAUD = 115000
 
