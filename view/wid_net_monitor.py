@@ -63,11 +63,11 @@ class CWidgetNetMonitor(QtGui.QWidget):
 
         # config
         self.__config = None  # Configuration(self)
-        # assert self.__config 
+        # assert self.__config
 
         # save settings
         self.__settings = f_settings
-        
+
         # create camera groupBox
         self.__create_gbx_cam()
 
@@ -114,13 +114,13 @@ class CWidgetNetMonitor(QtGui.QWidget):
         # dirty ?
         if self.__v_document_is_dirty:
             # save ?
-            if QtGui.QMessageBox.No == QtGui.QMessageBox.warning(0, "", 
-                "Current configuration was changed but not saved.\nAre you sure you want to proceed ?", 
+            if QtGui.QMessageBox.No == QtGui.QMessageBox.warning(0, "",
+                "Current configuration was changed but not saved.\nAre you sure you want to proceed ?",
                 QtGui.QMessageBox.Yes, QtGui.QMessageBox.No | QtGui.QMessageBox.Default):
                 # return
                 return False
 
-        # return 
+        # return
         return True
 
     # ---------------------------------------------------------------------------------------------
@@ -144,11 +144,11 @@ class CWidgetNetMonitor(QtGui.QWidget):
         assert l_font
 
         l_font.setFamily("Courier")
-        l_font.setPointSize(10)
+        l_font.setPointSize(12)
 
         # create QPlainTextEdit camera
         self.__pte_camera = QtGui.QPlainTextEdit()
-        assert self.__pte_camera 
+        assert self.__pte_camera
 
         # setup
         self.__pte_camera.setFont(l_font)
@@ -166,7 +166,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
         # create groupBox camera
         self.__gbx_cam = QtGui.QGroupBox(u"Camera", self)
         assert self.__gbx_cam
-        
+
         # setup
         self.__gbx_cam.setStyleSheet(gdefs.D_GBX_STYLE)
 
@@ -189,7 +189,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
         # create QPlainTextEdit CCC
         self.__pte_ccc = QtGui.QPlainTextEdit()
         assert self.__pte_ccc
-        
+
         self.__pte_ccc.setFont(l_font)
         self.__pte_ccc.setStyleSheet(gdefs.D_PTE_STYLE)
         self.__pte_ccc.setMinimumSize(QtCore.QSize(660, 270))
@@ -209,16 +209,16 @@ class CWidgetNetMonitor(QtGui.QWidget):
         self.qle_ccc.setEnabled(True)
         self.qle_ccc.setText("")
 
-        # bottom send command 
+        # bottom send command
         self.btn_send_ccc = QtGui.QPushButton("Send", lfrm_text)
         assert self.btn_send_ccc
-         
+
         self.btn_send_ccc.setEnabled(False)
 
         # layout to frame
         llay_frm = QtGui.QHBoxLayout(lfrm_text)
         assert llay_frm is not None
-        
+
         llay_frm.setMargin(0)
         llay_frm.setSpacing(0)
         llay_frm.addWidget(self.qle_ccc)
@@ -235,7 +235,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
         # create groupBox altimeter
         self.__gbx_ccc = QtGui.QGroupBox(u"Comando/Controle/Configuração", self)
         assert self.__gbx_ccc
-        
+
         # setup
         self.__gbx_ccc.setStyleSheet(gdefs.D_GBX_STYLE)
 
@@ -257,7 +257,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
         # create QPlainTextEdit sensor
         self.__pte_sensor = QtGui.QPlainTextEdit()
         assert self.__pte_sensor
-        
+
         self.__pte_sensor.setFont(l_font)
         self.__pte_sensor.setStyleSheet(gdefs.D_PTE_STYLE)
         self.__pte_sensor.setMinimumSize(QtCore.QSize(500, 270))
@@ -273,7 +273,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
         # create groupBox altimeter
         self.__gbx_sns = QtGui.QGroupBox(u"Sensores", self)
         assert self.__gbx_sns
-        
+
         # setup
         self.__gbx_sns.setStyleSheet(gdefs.D_GBX_STYLE)
 
@@ -303,7 +303,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
 
         # syntax highlight
         self.highlight = sntx.CConfigHighlighter(self.__pte_editor.document())
-        assert self.highlight 
+        assert self.highlight
 
         self.__pte_editor.show()
 
@@ -320,7 +320,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
         # create groupBox configuração
         self.__gbx_cnf = QtGui.QGroupBox(u"Configuração", self)
         assert self.__gbx_cnf
-        
+
         # setup
         self.__gbx_cnf.setStyleSheet(gdefs.D_GBX_STYLE)
 
@@ -340,7 +340,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
 
         # senão,...
         else:
-            fs_file_path = "papical.cfg" 
+            fs_file_path = "papical.cfg"
 
         # flag ok
         lv_ok = True
@@ -392,7 +392,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
 
         self.__v_portValid = False
     '''
-    ''' 
+    '''
     # ---------------------------------------------------------------------------------------------
     # const QString&
     def __save_document(self, filePath):
@@ -419,7 +419,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
             self.statusBar.showMessage("File Saved", 2000)
 
         return lv_ok
-    ''' 
+    '''
     # ---------------------------------------------------------------------------------------------
     # const QString&
     def __updateDocumentFilePath(self, filePath):
@@ -478,7 +478,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
         if not __check_document():
             return
 
-        filePath = QFileDialog.getOpenFileName(self, tr("Open File"), 
+        filePath = QFileDialog.getOpenFileName(self, tr("Open File"),
                        documentFilePath, tr("TTY Monitor Configuration (*.scc)All Files (*.*)"))
 
         if not filePath.isEmpty():
@@ -563,7 +563,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
     def __on_msg_camera(self, fs_msg):
         """
         message from camera
-        """    
+        """
         # put text on textEditor
         self.__pte_camera.appendPlainText(fs_msg)
 
@@ -572,7 +572,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
     def __on_msg_ccc(self, fs_msg):
         """
         message of command/control/config
-        """    
+        """
         # put text on textEditor
         self.__pte_ccc.appendPlainText(fs_msg)
 
@@ -581,7 +581,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
     def __on_msg_sensor(self, fs_msg):
         """
         message from sensors
-        """    
+        """
         # put text on textEditor
         self.__pte_sensor.appendPlainText(fs_msg)
     '''
@@ -592,6 +592,3 @@ class CWidgetNetMonitor(QtGui.QWidget):
             port.send(self.sendText.text())
     '''
 # < the end >--------------------------------------------------------------------------------------
-        
-        
-        

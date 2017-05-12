@@ -88,10 +88,10 @@ class CAltimeterFeed(snsf.CSensorFeed):
         # existe monitor ?
         if self.monitor:
             # envia mensagem ao monitor
-            self.monitor.C_SGN_NEW_MSG_SNS.emit(fs_msg)
+            self.monitor.C_SGN_NEW_MSG_SNS.emit(str(fs_msg))
 
         # split message
-        llst_msg = fs_msg.split('#')
+        llst_msg = str(fs_msg).split('#')
         
         # mensagem válida de altímetro ?
         if (gdefs.D_MSG_VRS == int(llst_msg[0])) and (gdefs.D_MSG_ALT == int(llst_msg[1])):

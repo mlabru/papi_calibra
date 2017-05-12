@@ -138,7 +138,7 @@ class CWidgetSensors(QtGui.QWidget):
         assert self.__control.sck_rcv_img
 
         # create camera feed
-        self.__cam_feed = camfd.CCameraFeed(self.__control.sck_rcv_img)
+        self.__cam_feed = camfd.CCameraFeed(self.__control.sck_rcv_img, self.__monitor)
         assert self.__cam_feed
 
         # create camera widget

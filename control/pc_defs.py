@@ -40,18 +40,19 @@ D_DIR_TAB = "tabs"
 D_MSG_VRS = 101
 
 # códigos das mensagens
-
-D_MSG_SIZ = 111    # mensagens de imagens
-D_MSG_IMG = 112    # mensagens de imagens
+D_MSG_SIZ = 111    # mensagens de imagens (tamanho)
+D_MSG_IMG = 112    # mensagens de imagens (frame)
 D_MSG_SNS = 113    # mensagens de sensores
 D_MSG_ALT = 114    # mensagens de altímetro
-D_MSG_GPS = 115    # mensagens de altímetro
+D_MSG_GPS = 115    # mensagens de GPS
+D_MSG_PRS = 116    # mensagens de barômetro
+D_MSG_TMP = 117    # mensagens de termômetro
 
 # separador de campos na mensagem
 D_MSG_SEP = '#'
 
 # mensagens válidas
-SET_MSG_VALIDAS = [D_MSG_IMG, D_MSG_SNS]
+SET_MSG_VALIDAS = [D_MSG_SIZ, D_MSG_IMG, D_MSG_SNS, D_MSG_ALT, D_MSG_GPS, D_MSG_PRS, D_MSG_TMP]
 
 # < rede >-----------------------------------------------------------------------------------------
 

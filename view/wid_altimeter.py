@@ -40,7 +40,7 @@ M_LOG.setLevel(logging.DEBUG)
 
 # altimeter plot widget
 M_ALT_YMAX = 600
-M_ALT_YMIN = 520
+M_ALT_YMIN = 510
 
 # < CWidgetAltimeter >-----------------------------------------------------------------------------
 

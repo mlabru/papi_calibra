@@ -83,7 +83,7 @@ class CCameraFeed(snsf.CSensorFeed):
         l_prc.start()
 
     # ---------------------------------------------------------------------------------------------
-    @QtCore.pyqtSlot()
+    @QtCore.pyqtSlot(str)
     def dispatch_msg(self, fs_msg):
         """
         dispatch de imagens
@@ -91,7 +91,7 @@ class CCameraFeed(snsf.CSensorFeed):
         # existe monitor ?
         if self.monitor:
             # envia mensagem ao monitor
-            self.monitor.C_SGN_NEW_MSG_SNS.emit(fs_msg)
+            self.monitor.C_SGN_NEW_MSG_CAM.emit(fs_msg)
 
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot()
@@ -120,7 +120,7 @@ class CCameraFeed(snsf.CSensorFeed):
             l_msg, l_addr = self.sck_rcv.recvfrom(32)
 
             # emit new message signal
-            self.C_SGN_NEW_MSG_CAM.emit(l_msg)
+            self.C_SGN_NEW_MSG_CAM.emit(str(l_msg))
 
             # split message
             llst_msg = l_msg.split('#')
@@ -137,7 +137,7 @@ class CCameraFeed(snsf.CSensorFeed):
             l_msg, l_addr = self.sck_rcv.recvfrom(li_length)
 
             # emit new message signal
-            self.C_SGN_NEW_MSG_CAM.emit(l_msg)
+            self.C_SGN_NEW_MSG_CAM.emit(str(l_msg))
 
             # split message
             llst_msg = l_msg.split('#')
