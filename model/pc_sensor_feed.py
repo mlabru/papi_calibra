@@ -17,7 +17,9 @@ __date__ = "2017/05"
 # < imports >--------------------------------------------------------------------------------------
 
 # python library
+import errno
 import logging
+import socket
 import threading
 import time
 
@@ -29,6 +31,7 @@ import model.pc_data as gdata
 
 # control
 import control.pc_defs as gdefs
+import control.pc_net_sock_in as nsck
 
 # < module data >----------------------------------------------------------------------------------
 
@@ -46,20 +49,25 @@ class CSensorFeed(QtCore.QObject):
     C_SGN_NEW_MSG_SNS = QtCore.pyqtSignal(str)
 
     # ---------------------------------------------------------------------------------------------
-    def __init__(self, f_sock, f_monitor=None):
+    def __init__(self, ft_ifc, fs_addr, fi_port, f_monitor=None):
         """
         constructor
 
-        @param f_sock: receive socket
+        @param ft_ifc: socket interface
+        @param fs_addr: socket address
+        @param fi_port: receive socket port
         """ 
         # check input
-        assert f_sock
+        assert ft_ifc
+        assert fs_addr
+        assert fi_port
 
         # init super class
         super(CSensorFeed, self).__init__()
 
         # receive socket
-        self.__sck_rcv = f_sock
+        self.__sck_rcv = nsck.CNetSockIn(ft_ifc, fs_addr, fi_port)
+        assert self.__sck_rcv
 
         # data monitor
         self.__monitor = f_monitor
@@ -76,6 +84,10 @@ class CSensorFeed(QtCore.QObject):
         # clear to go
         assert self.__sck_rcv
 
+        # non-blocking socket
+        self.__sck_rcv.settimeout(0.)
+        self.__sck_rcv.setblocking(0)
+
         # application wait
         while not gdata.G_KEEP_RUN:
             # aguarda
@@ -87,14 +99,44 @@ class CSensorFeed(QtCore.QObject):
             if self.__v_paused:
                 # aguarda
                 time.sleep(1)
+
                 # continua
                 continue
 
-            # recebe uma mensagem
-            l_msg, l_addr = self.__sck_rcv.recvfrom(1024)
+            try:
+                # recebe uma mensagem (até 1024 bytes)
+                l_msg, l_addr = self.__sck_rcv.recvfrom(1024)
 
-            # emit new message signal
-            self.C_SGN_NEW_MSG_SNS.emit(l_msg)
+            # em caso de erro...
+            except socket.error, l_err:
+                # ger error code
+                li_err = l_err.args[0]
+
+                # no data available ?
+                if (errno.EAGAIN == li_err) or (errno.EWOULDBLOCK == li_err):
+                    # no data available
+                    continue
+
+                # senão,...
+                else:
+                    # logger
+                    M_LOG.critical ("<E01: pc_sensor_feed: {}".format(l_err))
+
+                    # a "real" error occurred
+                    sys.exit(1)
+
+            # zero len message ?
+            if 0 == len(msg):
+                # logger
+                M_LOG.warning("<E02: pc_sensor_feed: zero len message.")
+
+                # continue
+                continue
+
+            # senão,...
+            else:
+                # emit new message signal
+                self.C_SGN_NEW_MSG_SNS.emit(l_msg)
 
         # fecha a conexão
         self.__sck_rcv.close()

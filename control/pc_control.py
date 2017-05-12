@@ -16,6 +16,7 @@ __date__ = "2017/04"
 import logging
 import multiprocessing
 import sys
+import time
 
 # PyQt
 from PyQt4 import QtCore
@@ -113,33 +114,6 @@ class CPAPICalControl(object):
         gdata.G_KEEP_RUN = True
 
     # ---------------------------------------------------------------------------------------------
-    def cbk_termina(self):
-        """
-        termina a aplicação
-        """
-        # clear to go
-        assert self.__event
-
-        # cria um evento de quit
-        l_evt = events.CQuit()
-        assert l_evt
-
-        # dissemina o evento
-        self.__event.post(l_evt)
-        '''
-        print "threadings:", threading.enumerate()
-
-        import traceback
-
-        for thread_id, frame in sys._current_frames().iteritems():
-            name = thread_id
-            for thread in threading.enumerate():
-                if thread.ident == thread_id:
-                    name = thread.name
-
-            traceback.print_stack(frame)
-        '''
-    # ---------------------------------------------------------------------------------------------
     def create_app(self, fs_name):
         """
         create application
@@ -204,7 +178,33 @@ class CPAPICalControl(object):
         create connections
         """
         pass
+
+    # ---------------------------------------------------------------------------------------------
+    # @staticmethod
+    def notify(self, f_evt):
+        """
+        event handling callback
+
+        @param f_event: received event
+        """
+        # check input
+        assert f_evt
         
+        M_LOG.debug("pc_control: recebeu notificacao...")
+        
+        # received quit event ?
+        if isinstance(f_evt, events.CQuit):
+            M_LOG.debug("pc_control:...de FIM")
+
+            # para todos os processos
+            gdata.G_KEEP_RUN = False
+
+            # wait all tasks terminate
+            time.sleep(1)
+
+            # ends application
+            sys.exit()
+
     # =============================================================================================
     # dados     
     # =============================================================================================

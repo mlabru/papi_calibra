@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------------------------------------
-wid_sensors
+wid_papi_cal
 
 a serial port packet monitor that plots live data using PyQwt
 
@@ -27,16 +27,15 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 
 # model
-import model.pc_altimeter_feed as altfd
-import model.pc_barometer_feed as barfd
-import model.pc_gps_feed as gpsfd
-import model.pc_thermometer_feed as thrfd
+#import model.pc_altimeter_feed as altfd
+import model.pc_camera_feed as camfd
+#import model.pc_gps_feed as gpsfd
 
 # view
-import view.wid_altimeter as walt
-import view.wid_barometer as wbar
-import view.wid_gps as wgps
-import view.wid_thermometer as wthr
+#import view.wid_altimeter as walt
+import view.wid_camera as wcam
+#import view.wid_gps as wgps
+import view.wid_plot_papi as wplp
 
 # control
 import control.pc_defs as gdefs
@@ -47,9 +46,9 @@ import control.pc_defs as gdefs
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-# < CWidgetSensors >-------------------------------------------------------------------------------
+# < CWidgetPAPICal >-------------------------------------------------------------------------------
 
-class CWidgetSensors(QtGui.QWidget):
+class CWidgetPAPICal(QtGui.QWidget):
     """
     a port packet monitor that plots live data using PyQwt
     """
@@ -67,7 +66,7 @@ class CWidgetSensors(QtGui.QWidget):
         assert f_monitor
         
         # init super class
-        super(CWidgetSensors, self).__init__(f_parent)
+        super(CWidgetPAPICal, self).__init__(f_parent)
 
         # control
         self.__control = f_control
@@ -75,35 +74,35 @@ class CWidgetSensors(QtGui.QWidget):
         # monitor
         self.__monitor = f_monitor
         
+        # create camera groupBox
+        self.__create_gbx_cam()
+
+        # create plot groupBox
+        self.__create_gbx_plot()
+
         # create altimeter groupBox
-        self.__create_gbx_alt()
+        # self.__create_gbx_alt()
 
         # create GPS groupBox
-        self.__create_gbx_gps()
-
-        # create barameter groupBox
-        self.__create_gbx_bar()
-
-        # create thermometer groupBox
-        self.__create_gbx_thr()
+        # self.__create_gbx_gps()
 
         # create frame layout
         llo_grid = QtGui.QGridLayout(self)
         assert llo_grid is not None
 
         # put all groupBoxes on a grid
-        llo_grid.addWidget(self.__gbx_alt, 0, 0, 1, 1)
-        llo_grid.addWidget(self.__gbx_gps, 0, 1, 1, 1)
-        llo_grid.addWidget(self.__gbx_bar, 1, 0, 1, 1)
-        llo_grid.addWidget(self.__gbx_thr, 1, 1, 1, 1)
-
+        llo_grid.addWidget(self.__gbx_cam,  0, 0, 1, 1)
+        llo_grid.addWidget(self.__gbx_plot, 0, 1, 1, 1)
+        # llo_grid.addWidget(self.__gbx_gps,  1, 0, 1, 1)
+        # llo_grid.addWidget(self.__gbx_alt,  1, 1, 1, 1)
+    '''
     # ---------------------------------------------------------------------------------------------
     def __create_gbx_alt(self):
         """
         create altimeter groupBox
         """
         # create altimeter feed
-        self.__alt_feed = altfd.CAltimeterFeed(self.__control, self.__monitor)
+        self.__alt_feed = altfd.CAltimeterFeed(self.__control.sck_rcv_sns, self.__monitor)
         assert self.__alt_feed
 
         # create altimeter widget
@@ -129,47 +128,47 @@ class CWidgetSensors(QtGui.QWidget):
 
         # set groupBox layout 
         self.__gbx_alt.setLayout(llay_gbx)
-
+    '''
     # ---------------------------------------------------------------------------------------------
-    def __create_gbx_bar(self):
+    def __create_gbx_cam(self):
         """
-        create barometer groupBox
+        create camera groupBox
         """
-        # create barometer feed
-        self.__bar_feed = barfd.CBarometerFeed(self.__control, self.__monitor)
-        assert self.__bar_feed
+        # clear to go
+        assert self.__control.sck_rcv_img
 
-        # create barometer widget
-        lwid_barometer = wbar.CWidgetBarometer(self.__bar_feed, self)
-        assert lwid_barometer
+        # create camera feed
+        self.__cam_feed = camfd.CCameraFeed(self.__control, self.__monitor)
+        assert self.__cam_feed
 
-        # setup
-        lwid_barometer.setFixedHeight(280)
+        # create camera widget
+        lwid_camera = wcam.CWidgetCamera(self.__cam_feed, self)
+        assert lwid_camera
 
         # create horizontal layout
         llay_gbx = QtGui.QHBoxLayout()
         assert llay_gbx is not None
         
-        # put barometer on layout 
-        llay_gbx.addWidget(lwid_barometer)
+        # put camera on layout 
+        llay_gbx.addWidget(lwid_camera)
 
-        # create groupBox barometer
-        self.__gbx_bar = QtGui.QGroupBox(u"Barômetro", self)
-        assert self.__gbx_bar
+        # create groupBox camera
+        self.__gbx_cam = QtGui.QGroupBox("Camera", self)
+        assert self.__gbx_cam
 
         # setup
-        self.__gbx_bar.setStyleSheet(gdefs.D_GBX_STYLE)
+        self.__gbx_cam.setStyleSheet(gdefs.D_GBX_STYLE)
 
         # set groupBox layout 
-        self.__gbx_bar.setLayout(llay_gbx)
-
+        self.__gbx_cam.setLayout(llay_gbx)
+    '''
     # ---------------------------------------------------------------------------------------------
     def __create_gbx_gps(self):
         """
         create GPS groupBox
         """
         # create GPS feed
-        self.__gps_feed = gpsfd.CGPSFeed(self.__control, self.__monitor)
+        self.__gps_feed = gpsfd.CGPSFeed(self.__control.sck_rcv_sns)
         assert self.__gps_feed
 
         # create GPS widget
@@ -195,39 +194,32 @@ class CWidgetSensors(QtGui.QWidget):
 
         # set groupBox layout 
         self.__gbx_gps.setLayout(llay_gbx)
-
+    '''
     # ---------------------------------------------------------------------------------------------
-    def __create_gbx_thr(self):
+    def __create_gbx_plot(self):
         """
-        create thermometer groupBox
+        create plot groupBox
         """
-        # create thermometer feed
-        self.__thr_feed = thrfd.CThermometerFeed(self.__control, self.__monitor)
-        assert self.__thr_feed
+        # create the plot and curves
+        lwid_plp = wplp.CWidgetPlotPAPI(self) 
+        assert lwid_plp 
 
-        # create thermometer widget
-        lwid_thermometer = wthr.CWidgetThermometer(self.__thr_feed, self)
-        assert lwid_thermometer
-
-        # setup
-        lwid_thermometer.setFixedHeight(280)
-
-        # create horizontal layout
+        # place the horizontal panel widget
         llay_gbx = QtGui.QHBoxLayout()
         assert llay_gbx is not None
         
-        # put thermometer on layout 
-        llay_gbx.addWidget(lwid_thermometer)
+        # put plot on layout
+        llay_gbx.addWidget(lwid_plp)
 
-        # create groupBox thermometer
-        self.__gbx_thr = QtGui.QGroupBox(u"Termometro", self)
-        assert self.__gbx_thr
+        # create groupBox plot
+        self.__gbx_plot = QtGui.QGroupBox("Plot", self)
+        assert self.__gbx_plot
 
         # setup
-        self.__gbx_thr.setStyleSheet(gdefs.D_GBX_STYLE)
+        self.__gbx_plot.setStyleSheet(gdefs.D_GBX_STYLE)
 
         # set groupBox layout 
-        self.__gbx_thr.setLayout(llay_gbx)
+        self.__gbx_plot.setLayout(llay_gbx)
 
 # < the end >--------------------------------------------------------------------------------------
         

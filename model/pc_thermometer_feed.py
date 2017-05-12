@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------------------------------------
-pc_gps_feed
+pc_thermometer_feed
 
-gps feed
+thermometer feed
 
 revision 0.1  2017/abr  mlabru
 initial release (Linux/Python)
@@ -36,14 +36,14 @@ import control.pc_defs as gdefs
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-# < CGPSFeed >-------------------------------------------------------------------------------------
+# < CThermometerFeed >-----------------------------------------------------------------------------
 
-class CGPSFeed(snsf.CSensorFeed):
+class CThermometerFeed(snsf.CSensorFeed):
     """
-    gps feed
+    thermometer feed
     """
     # signal
-    C_SGN_DATA_GPS = QtCore.pyqtSignal(list)
+    C_SGN_DATA_THR = QtCore.pyqtSignal(list)
 
     # ---------------------------------------------------------------------------------------------
     def __init__(self, f_control, f_monitor=None):
@@ -60,24 +60,24 @@ class CGPSFeed(snsf.CSensorFeed):
         # network address
         ls_addr = f_control.config.dct_config["net.adr"]
         # port
-        li_port = int(f_control.config.dct_config["net.gps"])
+        li_port = int(f_control.config.dct_config["net.thr"])
 
         # init super class
-        super(CGPSFeed, self).__init__(lt_ifc, ls_addr, li_port, f_monitor)
+        super(CThermometerFeed, self).__init__(lt_ifc, ls_addr, li_port, f_monitor)
 
         # from CSensorFeed
         # sck_rcv     # receive socket
-        # monitor     # data monitor 
+        # monitor     # data monitor
         # v_paused    # flag paused (bool)
 
         # make connections
         self.C_SGN_NEW_MSG_SNS.connect(self.trata_msg)
 
-        # cria o processo de recebimento de dados
+        # create receive data process
         l_prc = threading.Thread(target=self.query_data)
         assert l_prc
 
-        # inicia o processo
+        # start process
         l_prc.start()
 
     # ---------------------------------------------------------------------------------------------
@@ -91,17 +91,17 @@ class CGPSFeed(snsf.CSensorFeed):
         # check input
         assert fs_msg
 
-       # existe monitor ?
+        # monitor exists ?
         if self.monitor:
-            # envia mensagem ao monitor
+            # send message to monitor
             self.monitor.C_SGN_NEW_MSG_SNS.emit(str(fs_msg))
 
         # split message
         llst_msg = str(fs_msg).split('#')
         
-        # mensagem válida de GPS ?
-        if (gdefs.D_MSG_VRS == int(llst_msg[0])) and (gdefs.D_MSG_GPS == int(llst_msg[1])):
-            # emit new gps data signal
-            self.C_SGN_DATA_GPS.emit(llst_msg[2:])
+        # valid thermometer message ?
+        if (gdefs.D_MSG_VRS == int(llst_msg[0])) and (gdefs.D_MSG_THR == int(llst_msg[1])):
+            # emit new thermometer data signal
+            self.C_SGN_DATA_THR.emit(llst_msg[2:])
 
 # < the end >--------------------------------------------------------------------------------------

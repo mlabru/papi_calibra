@@ -134,12 +134,12 @@ def net_sender(f_queue):
             l_gps.send_data(float(llst_msg[1]), float(llst_msg[2]), int(llst_msg[3]), int(llst_msg[4]), float(llst_msg[5]))
 
         # mensagem de barômetro ?
-        elif "!@PRS" == llst_msg[0]:
+        elif "!@BAR" == llst_msg[0]:
             # send barometer message (bar1, bar2, ts)
             l_barometer.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
 
         # mensagem de termômetro ?
-        elif "!@TMP" == llst_msg[0]:
+        elif "!@THR" == llst_msg[0]:
             # send thermometer message (tmp1, tmp2, ts)
             l_termometer.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
 

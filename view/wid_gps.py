@@ -39,8 +39,8 @@ M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
 # gps plot widget
-M_ALT_YMAX = 30
-M_ALT_YMIN = 10
+M_ALT_YMAX = -20
+M_ALT_YMIN = -50
 
 # < CWidgetGPS >-----------------------------------------------------------------------------------
 
@@ -73,7 +73,7 @@ class CWidgetGPS(wplt.CWidgetPlotModel):
         self.__gps_feed.C_SGN_DATA_GPS.connect(self.on_new_data)
 
         # create the plot and curves
-        self._create_plot("Position", M_ALT_YMIN, M_ALT_YMAX)
+        self._create_plot("Position (l/l)", M_ALT_YMIN, M_ALT_YMAX)
 
         # curves checkBoxes
         self.lst_checkboxes = [self._create_checkbox("Lat (G)", QtCore.Qt.green,  self._activate_curve, 0),

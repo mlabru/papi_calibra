@@ -163,12 +163,14 @@ class CWidgetPlotModel(QtGui.QWidget):
         self.__plot.setCanvasBackground(QtCore.Qt.black)
 
         # config bottom axis
-        self.__plot.setAxisTitle(Qwt5.QwtPlot.xBottom, "Time")
+        self.__plot.setAxisTitle(Qwt5.QwtPlot.xBottom, "Time (s)")
         self.__plot.setAxisScale(Qwt5.QwtPlot.xBottom, 0, 10, 1)
 
         # config left axis
         self.__plot.setAxisTitle(Qwt5.QwtPlot.yLeft, fs_title)
         self.__plot.setAxisScale(Qwt5.QwtPlot.yLeft, fi_ymin, fi_ymax, (fi_ymax - fi_ymin) / 10.)
+        # self.__plot.setAxisAutoScale(Qwt5.QwtPlot.yLeft)
+        # self.__plot.axisScaleEngine(Qwt5.QwtPlot.yLeft).setAttribute(Qwt5.QwtScaleEngine.Floating, True)
 
         # redraw
         self.__plot.replot()
@@ -177,7 +179,7 @@ class CWidgetPlotModel(QtGui.QWidget):
         self.__lst_curves = [None] * M_CURVES
 
         # define pen
-        l_pen = [QtGui.QPen(QtGui.QColor("limegreen")),
+        l_pen = [QtGui.QPen(QtGui.QColor("limeGreen")),
                  QtGui.QPen(QtGui.QColor("red")),
                  QtGui.QPen(QtGui.QColor("yellow"))]
 
@@ -255,7 +257,7 @@ class CWidgetPlotModel(QtGui.QWidget):
 
             # update plot
             self.__plot.replot()
-
+        
     # =============================================================================================
     # data
     # =============================================================================================

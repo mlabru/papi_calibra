@@ -17,7 +17,9 @@ __date__ = "2017/05"
 # < imports >--------------------------------------------------------------------------------------
 
 # python library
+import errno
 import logging
+import socket
 import threading
 import time
 
@@ -55,17 +57,24 @@ class CCameraFeed(snsf.CSensorFeed):
     C_SGN_DATA_FRAME  = QtCore.pyqtSignal(cv.iplimage)
 
     # ---------------------------------------------------------------------------------------------
-    def __init__(self, f_sock, f_monitor=None):
+    def __init__(self, f_control, f_monitor=None):
         """
         constructor
 
-        @param f_sock: receive socket
+        @param f_control: control
         """ 
         # check input
-        assert f_sock
+        assert f_control
+
+        # network interface
+        lt_ifc = f_control.config.dct_config["net.ifc"]
+        # network address
+        ls_addr = f_control.config.dct_config["net.adr"]
+        # port
+        li_port = int(f_control.config.dct_config["net.img"])
 
         # init super class
-        super(CCameraFeed, self).__init__(f_sock, f_monitor)
+        super(CCameraFeed, self).__init__(lt_ifc, ls_addr, li_port, f_monitor)
 
         # from CSensorFeed
         # sck_rcv     # receive socket
@@ -94,6 +103,55 @@ class CCameraFeed(snsf.CSensorFeed):
             self.monitor.C_SGN_NEW_MSG_CAM.emit(fs_msg)
 
     # ---------------------------------------------------------------------------------------------
+    def __receive_msg(self, f_sock, fi_size, fi_type):
+        """
+        receive a message
+        """
+        try:
+            # receive image size
+            l_msg, l_addr = f_sock.recvfrom(fi_size)
+
+        # em caso de erro...
+        except socket.error, l_err:
+            # ger error code
+            li_err = l_err.args[0]
+
+            # no data available ?
+            if (errno.EAGAIN == li_err) or (errno.EWOULDBLOCK == li_err):
+                # no data available
+                return False, None, None
+
+            # senão,...
+            else:
+                # logger
+                M_LOG.critical ("<E01: pc_camera_feed: {}".format(l_err))
+
+                # a "real" error occurred
+                sys.exit(1)
+
+        # zero len message ?
+        if 0 == len(l_msg):
+            # logger
+            M_LOG.warning("<E02: pc_camera_feed: zero len message.")
+
+            # continue
+            return False, None, None
+
+        # emit new message signal
+        self.C_SGN_NEW_MSG_CAM.emit(str(l_msg))
+
+        # split message
+        llst_msg = l_msg.split('#')
+        
+        # mensagem inválida ?
+        if (gdefs.D_MSG_VRS != int(llst_msg[0])) or (fi_type != int(llst_msg[1])):
+            # return error
+            return False, None, None
+
+        # return message
+        return True, llst_msg, l_msg
+
+    # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot()
     def query_frame(self):
         """
@@ -116,35 +174,30 @@ class CCameraFeed(snsf.CSensorFeed):
                 # continua
                 continue
 
-            # recebe o tamanho do buffer
-            l_msg, l_addr = self.sck_rcv.recvfrom(32)
+            # non-blocking socket
+            self.sck_rcv.settimeout(0.)
+            self.sck_rcv.setblocking(0)
 
-            # emit new message signal
-            self.C_SGN_NEW_MSG_CAM.emit(str(l_msg))
-
-            # split message
-            llst_msg = l_msg.split('#')
+            # receive image size
+            lv_ok, llst_msg, _ = self.__receive_msg(self.sck_rcv, 32, gdefs.D_MSG_SIZ)
             
-            # mensagem inválida ?
-            if (gdefs.D_MSG_VRS != int(llst_msg[0])) or (gdefs.D_MSG_SIZ != int(llst_msg[1])):
-                # próxima mensagem
+            # invalid message ?
+            if not lv_ok:
+                # next message 
                 continue
-
+            
             # tamanho da mensagem
-            li_length = int(llst_msg[2])
-                
-            # recebe a imagem
-            l_msg, l_addr = self.sck_rcv.recvfrom(li_length)
+            li_len = int(llst_msg[2])
 
-            # emit new message signal
-            self.C_SGN_NEW_MSG_CAM.emit(str(l_msg))
+            # change to blocking socket
+            self.sck_rcv.setblocking(1)
 
-            # split message
-            llst_msg = l_msg.split('#')
-
-            # mensagem inválida ?
-            if (gdefs.D_MSG_VRS != int(llst_msg[0])) or (gdefs.D_MSG_IMG != int(llst_msg[1])):
-                # próxima mensagem
+            # receive image
+            lv_ok, llst_msg, l_msg = self.__receive_msg(self.sck_rcv, li_len, gdefs.D_MSG_IMG)
+            
+            # invalid message ?
+            if not lv_ok:
+                # next message 
                 continue
 
             # converte de string para imagem

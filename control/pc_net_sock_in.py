@@ -33,14 +33,12 @@ import control.pc_defs as gdefs
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-
-# < class CNetSockIn >---------------------------------------------------------------------------
+# < CNetSockIn >-----------------------------------------------------------------------------------
 
 class CNetSockIn(socket.socket):
     """
     communication socket to receive messages
     """
-
     # ---------------------------------------------------------------------------------------------
     def __init__(self, ft_ifce, fs_addr, fi_port):
         """

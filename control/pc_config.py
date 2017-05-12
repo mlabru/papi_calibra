@@ -54,7 +54,10 @@ class CPAPICalConfig(object):
 
                      "net.ccc": gdefs.D_NET_PORT_CCC,     # porta de comando/controle/comunicação
                      "net.img": gdefs.D_NET_PORT_IMG,     # porta de imagens
-                     "net.sns": gdefs.D_NET_PORT_SNS,     # porta de sensores
+                     "net.alt": gdefs.D_NET_PORT_ALT,     # porta de altímetro
+                     "net.bar": gdefs.D_NET_PORT_BAR,     # porta de barômetro
+                     "net.gps": gdefs.D_NET_PORT_GPS,     # porta de GPS
+                     "net.thr": gdefs.D_NET_PORT_THR,     # porta de termômetro
 
                      "ser.baud": gdefs.D_SER_PORT,        # porta serial default
                      "ser.port": gdefs.D_SER_BAUD,        # baudrate default

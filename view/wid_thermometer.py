@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------------------------------------
-wid_altimeter
+wid_thermometer
 
 papi calibrate
 
@@ -38,18 +38,18 @@ import control.pc_defs as gdefs
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-# altimeter plot widget
-M_ALT_YMAX = 600
-M_ALT_YMIN = 500
+# thermometer plot widget
+M_THR_YMAX = 50
+M_THR_YMIN = 10
 
-# < CWidgetAltimeter >-----------------------------------------------------------------------------
+# < CWidgetThermometer >---------------------------------------------------------------------------
 
-class CWidgetAltimeter(wplt.CWidgetPlotModel):
+class CWidgetThermometer(wplt.CWidgetPlotModel):
     """
-    widget for altimeter
+    widget for thermometer
     """
     # signals
-    C_SGN_DATA_ALT = QtCore.pyqtSignal(list)
+    C_SGN_DATA_THR = QtCore.pyqtSignal(list)
 
     # ---------------------------------------------------------------------------------------------
     def __init__(self, f_sensor_feed, f_parent=None):
@@ -63,18 +63,18 @@ class CWidgetAltimeter(wplt.CWidgetPlotModel):
         assert f_sensor_feed
 
         # init super class
-        super(CWidgetAltimeter, self).__init__(f_sensor_feed, f_parent)
+        super(CWidgetThermometer, self).__init__(f_sensor_feed, f_parent)
 
         # image source
         self.__sensor_feed = f_sensor_feed
-        self.__sensor_feed.C_SGN_DATA_ALT.connect(self.on_new_data)
+        self.__sensor_feed.C_SGN_DATA_THR.connect(self.on_new_data)
 
         # create the plot and curves
-        self._create_plot("Altitude (m)", M_ALT_YMIN, M_ALT_YMAX)
+        self._create_plot(u"Temperatura (°C)", M_THR_YMIN, M_THR_YMAX)
 
         # curves checkBoxes
-        self.lst_checkboxes = [self._create_checkbox("Altm 1(G)", QtCore.Qt.green,  self._activate_curve, 0),
-                               self._create_checkbox("Altm 2(R)", QtCore.Qt.red,    self._activate_curve, 1),
+        self.lst_checkboxes = [self._create_checkbox("Thrm 1(G)", QtCore.Qt.green,  self._activate_curve, 0),
+                               self._create_checkbox("Thrm 2(R)", QtCore.Qt.red,    self._activate_curve, 1),
                                self._create_checkbox("Fusion(Y)", QtCore.Qt.yellow, self._activate_curve, 2)]
 
         # clear plot button
@@ -107,7 +107,7 @@ class CWidgetAltimeter(wplt.CWidgetPlotModel):
 
         # it emits a signal with the data
         # (to process the data is not responsibility of the widget)
-        self.C_SGN_DATA_ALT.emit(flst_data)
+        self.C_SGN_DATA_THR.emit(flst_data)
 
 # < the end >--------------------------------------------------------------------------------------
         

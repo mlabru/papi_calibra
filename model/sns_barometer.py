@@ -104,7 +104,7 @@ class CBarometer(object):
         ls_data = "{}#{}#{}#{}".format(lf_ts, lf_prs1, lf_prs2, lf_ks)
 
         # envia a string
-        self.__sock.sendto("{}#{}#{}".format(gdefs.D_MSG_VRS, gdefs.D_MSG_PRS, ls_data), self.__t_client)
+        self.__sock.sendto("{}#{}#{}".format(gdefs.D_MSG_VRS, gdefs.D_MSG_BAR, ls_data), self.__t_client)
 
         # step. control vector, measurement_vector
         self.__kf.step(self.__u, np.matrix([[lf_prs1], 

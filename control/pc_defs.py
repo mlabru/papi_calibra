@@ -40,19 +40,19 @@ D_DIR_TAB = "tabs"
 D_MSG_VRS = 101
 
 # códigos das mensagens
-D_MSG_SIZ = 111    # mensagens de imagens (tamanho)
-D_MSG_IMG = 112    # mensagens de imagens (frame)
-D_MSG_SNS = 113    # mensagens de sensores
-D_MSG_ALT = 114    # mensagens de altímetro
-D_MSG_GPS = 115    # mensagens de GPS
-D_MSG_PRS = 116    # mensagens de barômetro
-D_MSG_TMP = 117    # mensagens de termômetro
+D_MSG_ALT = 1923    # mensagens de altímetro
+D_MSG_BAR = 1926    # mensagens de barômetro
+D_MSG_GPS = 1920    # mensagens de GPS
+D_MSG_THR = 1940    # mensagens de termômetro
+
+D_MSG_IMG = 1961    # mensagens de imagens (frame)
+D_MSG_SIZ = 1970    # mensagens de imagens (tamanho)
 
 # separador de campos na mensagem
 D_MSG_SEP = '#'
 
 # mensagens válidas
-SET_MSG_VALIDAS = [D_MSG_SIZ, D_MSG_IMG, D_MSG_SNS, D_MSG_ALT, D_MSG_GPS, D_MSG_PRS, D_MSG_TMP]
+SET_MSG_VALIDAS = [D_MSG_ALT, D_MSG_BAR, D_MSG_GPS, D_MSG_THR, D_MSG_IMG, D_MSG_SIZ]
 
 # < rede >-----------------------------------------------------------------------------------------
 
@@ -66,12 +66,17 @@ D_NET_SRV = "192.168.12.2"
 
 # arbitrary non-privileged ports
 
-# comnado/controle/configuração
-D_NET_PORT_CCC = 1923
-# imagens
-D_NET_PORT_IMG = 1970
 # sensores
-D_NET_PORT_SNS = 1961
+D_NET_PORT_ALT = 1923
+D_NET_PORT_BAR = 1926
+D_NET_PORT_GPS = 1929
+D_NET_PORT_THR = 1940
+
+# imagens
+D_NET_PORT_IMG = 1961
+
+# comnado/controle/configuração
+D_NET_PORT_CCC = 1970
 
 # < serial >---------------------------------------------------------------------------------------
 
