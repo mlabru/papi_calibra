@@ -37,22 +37,24 @@ D_DIR_TAB = "tabs"
 # < mensagens >------------------------------------------------------------------------------------
 
 # versão do conjunto de mensagens
-D_MSG_VRS = 101
+D_MSG_VRS = 1202
 
 # códigos das mensagens
 D_MSG_ALT = 1923    # mensagens de altímetro
 D_MSG_BAR = 1926    # mensagens de barômetro
-D_MSG_GPS = 1920    # mensagens de GPS
+D_MSG_GPS = 1929    # mensagens de GPS
 D_MSG_THR = 1940    # mensagens de termômetro
 
 D_MSG_IMG = 1961    # mensagens de imagens (frame)
-D_MSG_SIZ = 1970    # mensagens de imagens (tamanho)
+D_MSG_SIZ = 1962    # mensagens de imagens (tamanho)
+
+D_MSG_FIM = 1970    # mensagem de fim de execução
 
 # separador de campos na mensagem
 D_MSG_SEP = '#'
 
 # mensagens válidas
-SET_MSG_VALIDAS = [D_MSG_ALT, D_MSG_BAR, D_MSG_GPS, D_MSG_THR, D_MSG_IMG, D_MSG_SIZ]
+SET_MSG_VALIDAS = [D_MSG_ALT, D_MSG_BAR, D_MSG_GPS, D_MSG_THR, D_MSG_IMG, D_MSG_SIZ, D_MSG_FIM]
 
 # < rede >-----------------------------------------------------------------------------------------
 
