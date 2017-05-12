@@ -169,7 +169,7 @@ class CWidgetPlotModel(QtGui.QWidget):
         # config left axis
         self.__plot.setAxisTitle(Qwt5.QwtPlot.yLeft, fs_title)
         self.__plot.setAxisScale(Qwt5.QwtPlot.yLeft, fi_ymin, fi_ymax, (fi_ymax - fi_ymin) / 10.)
-        # self.__plot.setAxisAutoScale(Qwt5.QwtPlot.yLeft)
+        self.__plot.setAxisAutoScale(Qwt5.QwtPlot.yLeft)
         # self.__plot.axisScaleEngine(Qwt5.QwtPlot.yLeft).setAttribute(Qwt5.QwtScaleEngine.Floating, True)
 
         # redraw

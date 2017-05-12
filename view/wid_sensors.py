@@ -75,6 +75,9 @@ class CWidgetSensors(QtGui.QWidget):
         # monitor
         self.__monitor = f_monitor
         
+        # parent
+        self.__parent = f_parent
+        
         # create altimeter groupBox
         self.__create_gbx_alt()
 
@@ -220,7 +223,7 @@ class CWidgetSensors(QtGui.QWidget):
         llay_gbx.addWidget(lwid_thermometer)
 
         # create groupBox thermometer
-        self.__gbx_thr = QtGui.QGroupBox(u"Termometro", self)
+        self.__gbx_thr = QtGui.QGroupBox(u"Termômetro", self)
         assert self.__gbx_thr
 
         # setup

@@ -73,6 +73,9 @@ class CWidgetPAPICal(QtGui.QWidget):
 
         # monitor
         self.__monitor = f_monitor
+
+        # parent
+        self.__parent = f_parent
         
         # create camera groupBox
         self.__create_gbx_cam()
@@ -135,7 +138,8 @@ class CWidgetPAPICal(QtGui.QWidget):
         create camera groupBox
         """
         # clear to go
-        assert self.__control.sck_rcv_img
+        assert self.__control
+        assert self.__monitor
 
         # create camera feed
         self.__cam_feed = camfd.CCameraFeed(self.__control, self.__monitor)
@@ -153,7 +157,7 @@ class CWidgetPAPICal(QtGui.QWidget):
         llay_gbx.addWidget(lwid_camera)
 
         # create groupBox camera
-        self.__gbx_cam = QtGui.QGroupBox("Camera", self)
+        self.__gbx_cam = QtGui.QGroupBox(u"Camera", self)
         assert self.__gbx_cam
 
         # setup

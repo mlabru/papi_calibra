@@ -62,6 +62,7 @@ class CCameraFeed(snsf.CSensorFeed):
         constructor
 
         @param f_control: control
+        @param f_monitor: data monitor
         """ 
         # check input
         assert f_control
@@ -124,7 +125,7 @@ class CCameraFeed(snsf.CSensorFeed):
             # senão,...
             else:
                 # logger
-                M_LOG.critical ("<E01: pc_camera_feed: {}".format(l_err))
+                M_LOG.critical("<E01: pc_camera_feed: {}".format(l_err))
 
                 # a "real" error occurred
                 sys.exit(1)
@@ -138,7 +139,7 @@ class CCameraFeed(snsf.CSensorFeed):
             return False, None, None
 
         # emit new message signal
-        self.C_SGN_NEW_MSG_CAM.emit(str(l_msg))
+        self.C_SGN_NEW_MSG_CAM.emit(l_msg)
 
         # split message
         llst_msg = l_msg.split('#')
@@ -200,8 +201,11 @@ class CCameraFeed(snsf.CSensorFeed):
                 # next message 
                 continue
 
+            # calc offset to image start byte
+            li_offset = len(llst_msg[0]) + len(llst_msg[1]) + 2
+
             # converte de string para imagem
-            l_data = np.fromstring(l_msg[8:], dtype="uint8")
+            l_data = np.fromstring(l_msg[li_offset:], dtype="uint8")
 
             # decodifica a imagem
             l_data = cv2.imdecode(l_data, 1)

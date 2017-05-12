@@ -126,7 +126,7 @@ class CSensorFeed(QtCore.QObject):
                     sys.exit(1)
 
             # zero len message ?
-            if 0 == len(msg):
+            if 0 == len(l_msg):
                 # logger
                 M_LOG.warning("<E02: pc_sensor_feed: zero len message.")
 

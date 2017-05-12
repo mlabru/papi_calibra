@@ -202,34 +202,22 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
         """
         create toolbars
         """
-        # create toolBar file
-        ltbr_file = self.addToolBar(self.tr("File"))
-        assert ltbr_file is not None
+        # create toolBar base
+        ltbr_base = self.addToolBar(self.tr("Base"))
+        assert ltbr_base is not None
         
         # exit
-        ltbr_file.addAction(self.__create_action(self.tr("E&xit"), f_shortcut="Ctrl+X", f_icon="quit",
+        ltbr_base.addAction(self.__create_action(self.tr("E&xit"), f_shortcut="Ctrl+X", f_icon="quit",
                             f_slot=self.close, f_tip=self.tr("Exit the application")))
 
-        #ltbr_file.addAction(self.__act_pause)
+        #ltbr_base.addAction(self.__act_pause)
         
-        # create toolBar view
-        ltbr_view = self.addToolBar(self.tr("View"))
-        assert ltbr_view is not None
-        
-        #ltbr_view.addAction(self.__act_zoom_out)
-        #ltbr_view.addAction(self.__act_zoom_in)
-        #ltbr_view.addAction(self.__act_invert)
-        
-        # create toolBar help
-        ltbr_help = self.addToolBar(self.tr("Help"))
-        assert ltbr_help is not None
-
         # about
-        ltbr_help.addAction(self.__create_action(self.tr("&About"), f_shortcut="F1", 
+        ltbr_base.addAction(self.__create_action(self.tr("&About"), f_shortcut="F1", 
                             f_slot=self.__on_about, f_tip=self.tr("About PAPI Calibra")))
 
         # about Qt
-        ltbr_help.addAction(self.__create_action(self.tr("About &Qt"),
+        ltbr_base.addAction(self.__create_action(self.tr("About &Qt"),
                             f_slot=QtGui.qApp.aboutQt, f_tip=self.tr("About Qt")))
 
     # ---------------------------------------------------------------------------------------------
@@ -378,17 +366,18 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
         """
         # clear to go
         assert self.__control
+        assert self.__settings
 
         # create widget monitor (network) page
-        self.wid_mon = nwid.CWidgetNetMonitor(self.__settings)
+        self.wid_mon = nwid.CWidgetNetMonitor(self.__settings, self)
         assert self.wid_mon
 
         # create widget sensors page
-        self.wid_sns = swid.CWidgetSensors(self.__control, self.wid_mon)
+        self.wid_sns = swid.CWidgetSensors(self.__control, self.wid_mon, self)
         assert self.wid_sns
 
         # create widget PAPICal page
-        self.wid_pap = spap.CWidgetPAPICal(self.__control, self.wid_mon)
+        self.wid_pap = spap.CWidgetPAPICal(self.__control, self.wid_mon, self)
         assert self.wid_pap
 
         # create tabWidget

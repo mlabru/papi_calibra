@@ -81,13 +81,11 @@ class CPAPICalControl(object):
 
         # portas
         li_ccc = int(self.__config.dct_config["net.ccc"])
-        li_img = int(self.__config.dct_config["net.img"])
-        li_sns = int(self.__config.dct_config["net.sns"])
 
         # server mode ?
         if self.__config.dct_config["glb.server"]:
             # create connections
-            self.create_connections_server(lt_ifc, ls_adr, li_ccc, li_img, li_sns)
+            self.create_connections_server(lt_ifc, ls_adr, li_ccc)
 
             # instancia o modelo
             self.__model = mdsrv.CPAPICalModelSrv(self)
@@ -100,7 +98,7 @@ class CPAPICalControl(object):
         # senão, client mode
         else:
             # create connections
-            self.create_connections_client(lt_ifc, ls_adr, li_ccc, li_img, li_sns)        
+            self.create_connections_client(lt_ifc, ls_adr, li_ccc)        
         
             # instancia o modelo
             self.__model = mdcli.CPAPICalModelCli(self)
@@ -144,7 +142,7 @@ class CPAPICalControl(object):
         self.__app.processEvents()
 
     # ---------------------------------------------------------------------------------------------
-    def create_connections_client(self, ft_ifc, fs_adr, fi_ccc, fi_img, fi_sns):
+    def create_connections_client(self, ft_ifc, fs_adr, fi_ccc):
         """
         create connections
         """
@@ -164,16 +162,8 @@ class CPAPICalControl(object):
         self.__sck_rcv_ccc = listener.CNetListener(ft_ifc, fs_adr, fi_ccc, self.__q_rcv_ccc)
         assert self.__sck_rcv_ccc
 
-        # cria o socket de recebimento de imagens
-        self.__sck_rcv_img = sockin.CNetSockIn(ft_ifc, fs_adr, fi_img)
-        assert self.__sck_rcv_img
-
-        # cria o socket de recebimento de dados de sensores
-        self.__sck_rcv_sns = sockin.CNetSockIn(ft_ifc, fs_adr, fi_sns)
-        assert self.__sck_rcv_sns
-
     # ---------------------------------------------------------------------------------------------
-    def create_connections_server(self, ft_ifc, fs_adr, fi_ccc, fi_img, fi_sns):
+    def create_connections_server(self, ft_ifc, fs_adr, fi_ccc):
         """
         create connections
         """
@@ -243,21 +233,6 @@ class CPAPICalControl(object):
     @property
     def sck_rcv_ccc(self):
         return self.__sck_rcv_ccc
-
-    # ---------------------------------------------------------------------------------------------
-    @property
-    def q_rcv_img(self):
-        return self.__q_rcv_img
-
-    # ---------------------------------------------------------------------------------------------
-    @property
-    def sck_rcv_img(self):
-        return self.__sck_rcv_img
-
-    # ---------------------------------------------------------------------------------------------
-    @property
-    def sck_rcv_sns(self):
-        return self.__sck_rcv_sns
 
     # ---------------------------------------------------------------------------------------------
     @property

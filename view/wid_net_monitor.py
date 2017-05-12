@@ -55,6 +55,12 @@ class CWidgetNetMonitor(QtGui.QWidget):
         # init super class
         super(CWidgetNetMonitor, self).__init__(f_parent)
 
+        # save settings
+        self.__settings = f_settings
+
+        # parent
+        self.__parent = f_parent
+
         # flag dirty
         self.__v_document_is_dirty = False
 
@@ -64,9 +70,6 @@ class CWidgetNetMonitor(QtGui.QWidget):
         # config
         self.__config = None  # Configuration(self)
         # assert self.__config
-
-        # save settings
-        self.__settings = f_settings
 
         # create camera groupBox
         self.__create_gbx_cam()

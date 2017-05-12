@@ -39,8 +39,8 @@ M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
 # barometer plot widget
-M_BAR_YMAX = 3000
-M_BAR_YMIN = 1000
+M_BAR_YMAX = 1080
+M_BAR_YMIN =  950
 
 # < CWidgetBarometer >-----------------------------------------------------------------------------
 
@@ -70,7 +70,7 @@ class CWidgetBarometer(wplt.CWidgetPlotModel):
         self.__sensor_feed.C_SGN_DATA_BAR.connect(self.on_new_data)
 
         # create the plot and curves
-        self._create_plot(u"Pressão (kPa)", M_BAR_YMIN, M_BAR_YMAX)
+        self._create_plot(u"Pressão (mBar)", M_BAR_YMIN, M_BAR_YMAX)
 
         # curves checkBoxes
         self.lst_checkboxes = [self._create_checkbox("Barm 1(G)", QtCore.Qt.green,  self._activate_curve, 0),

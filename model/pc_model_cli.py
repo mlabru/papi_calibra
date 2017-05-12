@@ -18,7 +18,7 @@ __date__ = "2017/04"
 import logging
 import Queue
 #import threading
-#import time
+import time
 #import serial
 import sys
 
