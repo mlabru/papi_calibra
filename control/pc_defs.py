@@ -85,7 +85,7 @@ D_NET_PORT_CCC = 1970
 # porta
 D_SER_PORT = "/dev/ttyUSB0"
 # velocidade
-D_SER_BAUD = 115000
+D_SER_BAUD = 57600
 
 # < stylesheet >-----------------------------------------------------------------------------------
 

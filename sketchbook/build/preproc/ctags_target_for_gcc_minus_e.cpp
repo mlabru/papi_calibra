@@ -53,7 +53,7 @@ void setup()
     Wire.begin();
 
     // start serial for output
-    Serial.begin(115200);
+    Serial.begin(57600);
 
 
     // BMP 280 init ok ?

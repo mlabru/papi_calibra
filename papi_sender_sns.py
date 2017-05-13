@@ -108,26 +108,30 @@ def net_sender(f_queue):
 
         # mensagem de altímetro ?
         if "!@ALT" == llst_msg[0]:
-            # send altimeter message (alt1, alt2, ts)
-            l_altimeter.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
+            if len(llst_msg) > 3:
+                # send altimeter message (alt1, alt2, ts)
+                l_altimeter.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
 
             # send gps message (lat, lng, alt, sats, hdop, ts) (SJC: 23.2237° S, 45.9009° W)
             l_gps.send_data(-23.22 - random.random(), -45.90 - random.random(), 540 + random.random(), 0, 0, float(llst_msg[3]))
 
         # mensagem de GPS ?
         elif "!@GPS" == llst_msg[0]:
-            # send gps message (lat, lng, sats, hdop, ts)
-            l_gps.send_data(float(llst_msg[1]), float(llst_msg[2]), int(llst_msg[3]), int(llst_msg[4]), float(llst_msg[5]))
+            if len(llst_msg) > 5:
+                # send gps message (lat, lng, sats, hdop, ts)
+                l_gps.send_data(float(llst_msg[1]), float(llst_msg[2]), int(llst_msg[3]), int(llst_msg[4]), float(llst_msg[5]))
 
         # mensagem de barômetro ?
         elif "!@BAR" == llst_msg[0]:
-            # send barometer message (bar1, bar2, ts)
-            l_barometer.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
+            if len(llst_msg) > 3:
+                # send barometer message (bar1, bar2, ts)
+                l_barometer.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
 
         # mensagem de termômetro ?
         elif "!@THR" == llst_msg[0]:
-            # send thermometer message (tmp1, tmp2, ts)
-            l_termometer.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
+            if len(llst_msg) > 3:
+                # send thermometer message (tmp1, tmp2, ts)
+                l_termometer.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
 
 # -------------------------------------------------------------------------------------------------
 def ser_read(f_queue):

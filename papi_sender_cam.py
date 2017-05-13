@@ -62,10 +62,13 @@ while True:
         # descarta a mensagem 
         continue
     
+    # header
+    ls_header = "{}#{}#".format(gdefs.D_MSG_VRS, gdefs.D_MSG_IMG)
+
     # envia o tamanho da string 
-    l_sock.sendto("{}#{}#{}".format(gdefs.D_MSG_VRS, gdefs.D_MSG_SIZ, len(stringData) + 8), M_UDP_ADDR)
+    l_sock.sendto("{}#{}#{}".format(gdefs.D_MSG_VRS, gdefs.D_MSG_SIZ, len(ls_header) + len(stringData)), M_UDP_ADDR)
     # envia a string
-    l_sock.sendto("{}#{}#{}".format(gdefs.D_MSG_VRS, gdefs.D_MSG_IMG, stringData), M_UDP_ADDR)
+    l_sock.sendto("{}{}".format(ls_header, stringData), M_UDP_ADDR)
 
     # converte de string para imagem
     # data = numpy.fromstring(stringData, dtype="uint8")
