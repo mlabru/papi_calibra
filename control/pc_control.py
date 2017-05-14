@@ -82,31 +82,16 @@ class CPAPICalControl(object):
         # portas
         li_ccc = int(self.__config.dct_config["net.ccc"])
 
-        # server mode ?
-        if self.__config.dct_config["glb.server"]:
-            # create connections
-            self.create_connections_server(lt_ifc, ls_adr, li_ccc)
+        # create connections
+        self.create_connections_client(lt_ifc, ls_adr, li_ccc)        
+    
+        # instancia o modelo
+        self.__model = mdcli.CPAPICalModelCli(self)
+        assert self.__model
 
-            # instancia o modelo
-            self.__model = mdsrv.CPAPICalModelSrv(self)
-            assert self.__model
-
-            # create view
-            self.__view = vsrv.CPAPICalViewSrv(self, self.__model)
-            assert self.__view
-
-        # senão, client mode
-        else:
-            # create connections
-            self.create_connections_client(lt_ifc, ls_adr, li_ccc)        
-        
-            # instancia o modelo
-            self.__model = mdcli.CPAPICalModelCli(self)
-            assert self.__model
-
-            # create view
-            self.__view = vcli.CPAPICalViewCli(self, self.__model)
-            assert self.__view
+        # create view
+        self.__view = vcli.CPAPICalViewCli(self, self.__model)
+        assert self.__view
 
         # inicia
         gdata.G_KEEP_RUN = True
@@ -126,7 +111,7 @@ class CPAPICalControl(object):
         self.__app.setApplicationName(fs_name)
         
         # load logo
-        l_pix_logo = QtGui.QPixmap(":/images/logos/logo.png")
+        l_pix_logo = QtGui.QPixmap(":/images/logo_python.png")
         assert l_pix_logo
         
         # create splash screen
@@ -163,13 +148,6 @@ class CPAPICalControl(object):
         assert self.__sck_rcv_ccc
 
     # ---------------------------------------------------------------------------------------------
-    def create_connections_server(self, ft_ifc, fs_adr, fi_ccc):
-        """
-        create connections
-        """
-        pass
-
-    # ---------------------------------------------------------------------------------------------
     # @staticmethod
     def notify(self, f_evt):
         """
@@ -180,12 +158,8 @@ class CPAPICalControl(object):
         # check input
         assert f_evt
         
-        M_LOG.debug("pc_control: recebeu notificacao...")
-        
         # received quit event ?
         if isinstance(f_evt, events.CQuit):
-            M_LOG.debug("pc_control:...de FIM")
-
             # para todos os processos
             gdata.G_KEEP_RUN = False
 

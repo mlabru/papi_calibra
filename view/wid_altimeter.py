@@ -67,7 +67,7 @@ class CWidgetAltimeter(wplt.CWidgetPlotModel):
 
         # image source
         self.__sensor_feed = f_sensor_feed
-        self.__sensor_feed.C_SGN_DATA_ALT.connect(self.on_new_data)
+        self.__sensor_feed.C_SGN_DATA_ALT.connect(self.__on_new_data)
 
         # create the plot and curves
         self._create_plot("Altitude (m)", M_ALT_YMIN, M_ALT_YMAX)
@@ -98,7 +98,7 @@ class CWidgetAltimeter(wplt.CWidgetPlotModel):
 
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(list)
-    def on_new_data(self, flst_data):
+    def __on_new_data(self, flst_data):
         """
         callback new data arrived
         """

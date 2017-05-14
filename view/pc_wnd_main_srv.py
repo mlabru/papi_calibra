@@ -43,11 +43,9 @@ import view.wid_calibra as cwid
 import view.wid_sensors as swid
 import view.wid_tty_monitor as twid
 
-import view.pc_wnd_main_ui as wmui
-
 # control
 import control.events.events_basic as events
-import control.events_tty as evttty
+import control.events.events_tty as evttty
 
 # < module data >----------------------------------------------------------------------------------
 
@@ -71,7 +69,7 @@ M_CURVES = [M_GYRO_X, M_GYRO_Y, M_GYRO_Z, \
 '''
 # < CPAPICalWndMainSrv >---------------------------------------------------------------------------
 
-class CPAPICalWndMainSrv(QtGui.QMainWindow, wmui.Ui_wndMain):
+class CPAPICalWndMainSrv(QtGui.QMainWindow):
     """
     a serial port packet monitor that plots live data using PyQwt
 

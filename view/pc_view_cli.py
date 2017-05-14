@@ -44,7 +44,7 @@ class CPAPICalViewCli(object):
         assert self.__model
 
         # show message
-        self.__control.splash.showMessage("loading colour table...", QtCore.Qt.AlignHCenter | QtCore.Qt.AlignBottom, QtCore.Qt.white)
+        self.__control.splash.showMessage("loading view...", QtCore.Qt.AlignHCenter | QtCore.Qt.AlignBottom, QtCore.Qt.white)
 
     # ---------------------------------------------------------------------------------------------
     def run(self):

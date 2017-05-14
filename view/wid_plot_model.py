@@ -179,9 +179,9 @@ class CWidgetPlotModel(QtGui.QWidget):
         self.__lst_curves = [None] * M_CURVES
 
         # define pen
-        l_pen = [QtGui.QPen(QtGui.QColor("limeGreen")),
-                 QtGui.QPen(QtGui.QColor("red")),
-                 QtGui.QPen(QtGui.QColor("yellow"))]
+        llst_pen = [QtGui.QPen(QtGui.QColor("limeGreen")),
+                    QtGui.QPen(QtGui.QColor("red")),
+                    QtGui.QPen(QtGui.QColor("yellow"))]
 
         # for all curves...
         for li_ndx in xrange(M_CURVES):
@@ -193,10 +193,10 @@ class CWidgetPlotModel(QtGui.QWidget):
             self.__lst_curves[li_ndx].setRenderHint(Qwt5.QwtPlotItem.RenderAntialiased)
 
             # config pen
-            l_pen[li_ndx].setWidth(2)
+            llst_pen[li_ndx].setWidth(2)
 
             # set pen
-            self.__lst_curves[li_ndx].setPen(l_pen[li_ndx])
+            self.__lst_curves[li_ndx].setPen(llst_pen[li_ndx])
 
             # attach curve to plot
             self.__lst_curves[li_ndx].attach(self.__plot)
@@ -211,24 +211,6 @@ class CWidgetPlotModel(QtGui.QWidget):
 
         @param flst_data: data list
         """
-        # save csv data ?
-            # self.csvdata.append([data["timestamp"], data["gx"], data["gy"], data["gz"]] )
-
-            #if len(self.csvdata) > self.max_spin.value():
-            #    f = open(time.strftime("%H%M%S") + ".csv", "wt")
-
-            #    try:
-            #        writer = csv.writer(f)
-            #        for i in range(self.max_spin.value()):
-            #            writer.writerow( self.csvdata[i] )
-
-            #        print "transfer data to csv after 1000 samples"
-
-            #    finally:
-            #        f.close()
-
-            #    self.csvdata = []
-
         # save timestamp
         self.__lst_timestamps.append(float(flst_data[0]))
 

@@ -30,7 +30,6 @@ import time
 # PyQt
 from PyQt4 import QtCore
 from PyQt4 import QtGui
-from PyQt4 import Qwt5
 
 # model
 import model.pc_data as gdata
@@ -44,7 +43,7 @@ import view.wid_papi_cal as spap
 
 # control
 import control.events.events_basic as events
-import control.events_tty as evttty
+import control.events.events_tty as evttty
 
 # resources
 import view.resources_qrc
@@ -59,7 +58,7 @@ M_LOG.setLevel(logging.DEBUG)
 
 class CPAPICalWndMainCli(QtGui.QMainWindow):
     """
-    a serial port packet monitor that plots live data using PyQwt
+    a port packet monitor that plots live data using PyQwt
 
     the monitor expects to receive 8 bytes data packets with a line return as a packet EOF on the
     serial port. Each received packet is analysed to extract gx, gy and gz.
@@ -103,7 +102,7 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
         assert self.__settings
 
         # create main Ui
-        self.__setup_ui()
+        self.__setup_ui(f_control, self.__settings)
         self.__create_toolbars()
         self.__create_status_bar()
 
@@ -115,11 +114,6 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
 
         # set size 
         self.resize(self.__settings.value("size", QtCore.QSize(1024, 768)).toSize())
-
-        # config UI
-        # activate start-stop button connections
-        #self.btn_start.clicked.connect(self.__on_start)
-        #self.btn_stop.clicked.connect(self.__on_stop)
 
         # update timer
         self.__timer_update = QtCore.QTimer()
@@ -153,7 +147,7 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
             f_evt.ignore()
 
     # ---------------------------------------------------------------------------------------------
-    def __create_action(self, f_text, f_slot=None, f_shortcut=None, f_icon=None, f_tip=None, f_checkable=False, f_signal="triggered()"):
+    def create_action(self, f_text, f_slot=None, f_shortcut=None, f_icon=None, f_tip=None, f_checkable=False, f_signal="triggered()"):
         """
         create action
         """
@@ -163,23 +157,35 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
 
         # icon ?
         if f_icon is not None:
-            l_action.setIcon(QtGui.QIcon(":%s.png" % f_icon))
+            # create icon
+            l_icon = QtGui.QIcon()
+            assert l_icon
+
+            # convert pixmap
+            l_icon.addPixmap(QtGui.QPixmap(":/images/{}".format(f_icon)))
+
+            # set icon
+            l_action.setIcon(l_icon)
 
         # shortcut ?
         if f_shortcut is not None:
+            # set shortcut
             l_action.setShortcut(f_shortcut)
 
         # tip ?
         if f_tip is not None:
+            # set tooltip
             l_action.setToolTip(f_tip)
             l_action.setStatusTip(f_tip)
 
         # slot ?
         if f_slot is not None:
+            # make connection
             self.connect(l_action, QtCore.SIGNAL(f_signal), f_slot)
 
         # checkable ?
         if f_checkable:
+            # set checkable
             l_action.setCheckable(True)
 
         # return
@@ -207,17 +213,17 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
         assert ltbr_base is not None
         
         # exit
-        ltbr_base.addAction(self.__create_action(self.tr("E&xit"), f_shortcut="Ctrl+X", f_icon="quit",
+        ltbr_base.addAction(self.create_action(self.tr("E&xit"), f_shortcut="Ctrl+X", f_icon="quit.png",
                             f_slot=self.close, f_tip=self.tr("Exit the application")))
 
         #ltbr_base.addAction(self.__act_pause)
         
         # about
-        ltbr_base.addAction(self.__create_action(self.tr("&About"), f_shortcut="F1", 
+        ltbr_base.addAction(self.create_action(self.tr("&About"), f_shortcut="F1", 
                             f_slot=self.__on_about, f_tip=self.tr("About PAPI Calibra")))
 
         # about Qt
-        ltbr_base.addAction(self.__create_action(self.tr("About &Qt"),
+        ltbr_base.addAction(self.create_action(self.tr("About &Qt"),
                             f_slot=QtGui.qApp.aboutQt, f_tip=self.tr("About Qt")))
 
     # ---------------------------------------------------------------------------------------------
@@ -231,11 +237,9 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
         # check input
         assert f_evt
 
-        M_LOG.debug("pc_wnd_main_cli: recebeu notificacao...")
-        
         # received quit event ?
         if isinstance(f_evt, events.CQuit):
-            M_LOG.debug("pc_wnd_main_cli: ...de FIM")
+            pass
         
     # ---------------------------------------------------------------------------------------------
     def __on_about(self):
@@ -247,137 +251,54 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
         
         # show message box
         QtGui.QMessageBox.about(self, "About the PAPI Calibra", ls_msg.strip())
-    '''
-    # ---------------------------------------------------------------------------------------------
-    def __on_start(self):
-        """ 
-        start the monitor: com_monitor thread and the update timer
-        """
-        # get port comboBox current index
-        li_ndx = self.cbx_port.currentIndex()
-        # get current selected port
-        ls_port = self.__lst_available_tty[li_ndx]
-
-        # get baud comboBox current index
-        li_ndx = self.cbx_baud.currentIndex()
-        # get current selected baud
-        li_baud = self.__lst_available_baud[li_ndx]
-
-        # disable start button
-        self.btn_start.setEnabled(False)
-        # enable stop button 
-        self.btn_stop.setEnabled(True)
-        # disable port comboBox
-        self.cbx_port.setEnabled(False)
-        # disable baud comboBox
-        self.cbx_baud.setEnabled(False)
-
-        # create TTYMonitorStart event
-        l_evt = evttty.CTTYMonitorStart(ls_port, li_baud)
-        assert l_evt
-
-        # send event
-        self.__event.post(l_evt)
-
-        # config timer update method
-        self.__timer_update.timeout.connect(self.__on_timer)
-
-        # get update frequency
-        lf_update_freq = self.__knb_update_freq.value()
-
-        if lf_update_freq > 0:
-            # start timer update
-            self.__timer_update.start(1000. / lf_update_freq)
-
-        # update statusBar
-        self.__lbl_status.setText("Monitor running")
 
     # ---------------------------------------------------------------------------------------------
-    def __on_stop(self):
-        """ 
-        stop the monitor
+    def on_qtw_sensors_currentChanged(self, fi_ndx):
         """
-        if self.com_monitor is not None:
-            self.com_monitor.join(1000)
-            self.com_monitor = None
-
-        # reset flag
-        self.monitor_active = False
-
-        # enable start button
-        self.btn_start.setEnabled(True)
-        # disable stop button
-        self.btn_stop.setEnabled(False)
-        # enable tty port comboBox
-        self.cbx_port.setEnabled(True)
-
-        # stops update timer
-        self.__timer_update.stop()
-
-        # update status bar
-        self.__lbl_status.setText("Monitor idle")
-
-    # ---------------------------------------------------------------------------------------------
-    def __on_timer(self):
-        """ 
-        executed periodically when the monitor update timer is fired
+        tabWidget page change callback
         """
-        # create TTYMonitorUpdate event
-        l_evt = evttty.CTTYMonitorUpdate()
-        assert l_evt
+        # emit signals
+        if self.wid_pap:
+            self.wid_pap.C_SGN_PAGE_ON.emit(0 == fi_ndx)
 
-        # send event
-        self.__event.post(l_evt)
+        if self.wid_sns:
+            self.wid_sns.C_SGN_PAGE_ON.emit(1 == fi_ndx)
 
-        # update
-        self.update_monitor()
-    '''
+        if self.wid_mon:
+            self.wid_mon.C_SGN_PAGE_ON.emit(2 == fi_ndx)
+
     # ---------------------------------------------------------------------------------------------
     def __really_quit(self):
         """
         show message to confirm if user wants really quit appliction
         """
+        # show message box
         l_ret = QtGui.QMessageBox.warning(self, self.tr("PAPI Calibra"),
                     self.tr("Do you want to quit PAPI Calibra ?"),
                     QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default, QtGui.QMessageBox.No)
 
         # return
         return QtGui.QMessageBox.Yes == l_ret
-    '''
-    # ---------------------------------------------------------------------------------------------
-    def set_actions_enable_state(self):
-        """
-        set actions enable state
-        """
-        if "" == self.portname.text():
-            lv_start_enable = lv_stop_enable = False
 
-        else:
-            lv_start_enable = not self.monitor_active
-            lv_stop_enable = self.monitor_active
-
-        self.__act_start.setEnabled(lv_start_enable)
-        self.__act_stop.setEnabled(lv_stop_enable)
-    '''
     # ---------------------------------------------------------------------------------------------
-    def __setup_ui(self):
+    def __setup_ui(self, f_control, f_settings):
         """
         setup user interface
         """
         # clear to go
-        assert self.__control
-        assert self.__settings
+        assert f_control
+        assert f_settings
 
         # create widget monitor (network) page
-        self.wid_mon = nwid.CWidgetNetMonitor(self.__settings, self)
+        self.wid_mon = nwid.CWidgetNetMonitor(f_settings, self)
         assert self.wid_mon
 
         # create widget sensors page
-        self.wid_sns = swid.CWidgetSensors(self.__control, self.wid_mon, self)
+        self.wid_sns = swid.CWidgetSensors(f_control, self.wid_mon, self)
         assert self.wid_sns
 
         # create widget PAPICal page
-        self.wid_pap = spap.CWidgetPAPICal(self.__control, self.wid_mon, self)
+        self.wid_pap = spap.CWidgetPAPICal(f_control, self.wid_mon, self)
         assert self.wid_pap
 
         # create tabWidget
@@ -386,6 +307,7 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
         
         # setup
         self.qtw_sensors.setStyleSheet("background-color: rgb(180, 180, 180);")
+        self.qtw_sensors.currentChanged[int].connect(self.on_qtw_sensors_currentChanged)
         
         # put pages on tabWidget
         self.qtw_sensors.addTab(self.wid_pap, "PAPI")
