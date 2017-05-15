@@ -25,7 +25,6 @@ import time
 from PyQt4 import QtCore
 
 # model
-import model.pc_data as gdata
 import model.pc_sensor_feed as snsf
 
 # control
@@ -47,17 +46,24 @@ class CGPSFeed(snsf.CSensorFeed):
     C_SGN_DATA_GPS = QtCore.pyqtSignal(list)
 
     # ---------------------------------------------------------------------------------------------
-    def __init__(self, f_sock, f_monitor=None):
+    def __init__(self, f_control, f_monitor=None):
         """
         constructor
 
-        @param f_sock: receive socket
+        @param f_control: control
         """ 
         # check input
-        assert f_sock
+        assert f_control
+
+        # network interface
+        lt_ifc = f_control.config.dct_config["net.ifc"]
+        # network address
+        ls_addr = f_control.config.dct_config["net.adr"]
+        # port
+        li_port = int(f_control.config.dct_config["net.gps"])
 
         # init super class
-        super(CGPSFeed, self).__init__(f_sock, f_monitor)
+        super(CGPSFeed, self).__init__(lt_ifc, ls_addr, li_port, f_monitor)
 
         # from CSensorFeed
         # sck_rcv     # receive socket
@@ -88,10 +94,10 @@ class CGPSFeed(snsf.CSensorFeed):
        # existe monitor ?
         if self.monitor:
             # envia mensagem ao monitor
-            self.monitor.C_SGN_NEW_MSG_SNS.emit(fs_msg)
+            self.monitor.C_SGN_NEW_MSG_SNS.emit(str(fs_msg))
 
         # split message
-        llst_msg = fs_msg.split('#')
+        llst_msg = str(fs_msg).split('#')
         
         # mensagem válida de GPS ?
         if (gdefs.D_MSG_VRS == int(llst_msg[0])) and (gdefs.D_MSG_GPS == int(llst_msg[1])):

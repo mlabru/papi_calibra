@@ -37,21 +37,24 @@ D_DIR_TAB = "tabs"
 # < mensagens >------------------------------------------------------------------------------------
 
 # versão do conjunto de mensagens
-D_MSG_VRS = 101
+D_MSG_VRS = 1202
 
 # códigos das mensagens
+D_MSG_ALT = 1923    # mensagens de altímetro
+D_MSG_BAR = 1926    # mensagens de barômetro
+D_MSG_GPS = 1929    # mensagens de GPS
+D_MSG_THR = 1940    # mensagens de termômetro
 
-D_MSG_SIZ = 111    # mensagens de imagens
-D_MSG_IMG = 112    # mensagens de imagens
-D_MSG_SNS = 113    # mensagens de sensores
-D_MSG_ALT = 114    # mensagens de altímetro
-D_MSG_GPS = 115    # mensagens de altímetro
+D_MSG_IMG = 1961    # mensagens de imagens (frame)
+D_MSG_SIZ = 1962    # mensagens de imagens (tamanho)
+
+D_MSG_FIM = 1970    # mensagem de fim de execução
 
 # separador de campos na mensagem
 D_MSG_SEP = '#'
 
 # mensagens válidas
-SET_MSG_VALIDAS = [D_MSG_IMG, D_MSG_SNS]
+SET_MSG_VALIDAS = [D_MSG_ALT, D_MSG_BAR, D_MSG_GPS, D_MSG_THR, D_MSG_IMG, D_MSG_SIZ, D_MSG_FIM]
 
 # < rede >-----------------------------------------------------------------------------------------
 
@@ -65,19 +68,24 @@ D_NET_SRV = "192.168.12.2"
 
 # arbitrary non-privileged ports
 
-# comnado/controle/configuração
-D_NET_PORT_CCC = 1923
-# imagens
-D_NET_PORT_IMG = 1970
 # sensores
-D_NET_PORT_SNS = 1961
+D_NET_PORT_ALT = 1923
+D_NET_PORT_BAR = 1926
+D_NET_PORT_GPS = 1929
+D_NET_PORT_THR = 1940
+
+# imagens
+D_NET_PORT_IMG = 1961
+
+# comnado/controle/configuração
+D_NET_PORT_CCC = 1970
 
 # < serial >---------------------------------------------------------------------------------------
 
 # porta
-D_SER_PORT = "/dev/ttyACM0"
+D_SER_PORT = "/dev/ttyUSB0"
 # velocidade
-D_SER_BAUD = 115000
+D_SER_BAUD = 57600
 
 # < stylesheet >-----------------------------------------------------------------------------------
 

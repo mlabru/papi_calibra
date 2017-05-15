@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------------------------------------
-sns_altimeter
+sns_thermometer
 
 PAPI sender sensors
 
@@ -18,19 +18,16 @@ __date__ = "2017/04"
 
 # python library
 import logging
-#import math
-#import Queue
-#import random
-#import serial
-#import socket
-#import threading
-#import time
 
 # numPy
 import numpy as np
 
-# kalman
-import kalman_filter_linear as kfl
+# model
+import model.pc_kalman_filter_linear as kfl
+
+# control
+import control.pc_defs as gdefs   
+import control.pc_net_sock_out as nsck
 
 # < module data >----------------------------------------------------------------------------------
 
@@ -38,25 +35,31 @@ import kalman_filter_linear as kfl
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-# -------------------------------------------------------------------------------------------------
-class CAltimeter(object):
+# < CThermometer >---------------------------------------------------------------------------------
+
+class CThermometer(object):
     """
-    altimeter class
+    thermometer class
     """
     # ---------------------------------------------------------------------------------------------
-    def __init__(self, f_sock, ft_client):
+    def __init__(self, ft_ifc, fs_addr, fi_port):
         """
         constructor
+
+        @param ft_ifc: network interface
+        @param fs_addr: client address
+        @param fi_port: port
         """
         # check input
-        assert f_sock
-        assert ft_client
-
-        # save socket
-        self.__sock = f_sock
-        
+        assert fs_addr
+        assert fi_port
+                        
+        # receive socket
+        self.__sck_snd = nsck.CNetSockOut(ft_ifc, fs_addr, fi_port)
+        assert self.__sck_snd
+                                                        
         # save client tuple
-        self.__t_client = ft_client
+        self.__t_client = (fs_addr, fi_port)
 
         # how many sensors ?
         li_sensors = 2
@@ -93,29 +96,24 @@ class CAltimeter(object):
         assert self.__kf
 
     # ---------------------------------------------------------------------------------------------
-    def send_data(self, lf_alt1, lf_alt2, lf_ts):
+    def send_data(self, lf_tmp1, lf_tmp2, lf_ts):
         """
-        send altimeter data
+        send thermometer data
         """
         # save kalman state
         l_ks = self.__kf.get_current_state()
 
-        # list ?
-        if list == type(l_ks):
-            lf_ks = l_ks[0][0]
-
-        # senão, matrix
-        else:
-            lf_ks = l_ks[0, 0]            
+        # list or matrix ?
+        lf_ks = l_ks[0][0] if list == type(l_ks) else l_ks[0, 0]
 
         # build string data
-        ls_data = "{}#{}#{}#{}".format(lf_ts, lf_alt1, lf_alt2, lf_ks)
+        ls_data = "{}#{}#{}#{}".format(lf_ts, lf_tmp1, lf_tmp2, lf_ks)
 
         # envia a string
-        self.__sock.sendto("101#114#{}".format(ls_data), self.__t_client)
+        self.__sck_snd.sendto("{}#{}#{}".format(gdefs.D_MSG_VRS, gdefs.D_MSG_THR, ls_data), self.__t_client)
 
         # step. control vector, measurement_vector
-        self.__kf.step(self.__u, np.matrix([[lf_alt1], 
-                                            [lf_alt2]]))
+        self.__kf.step(self.__u, np.matrix([[lf_tmp1], 
+                                            [lf_tmp2]]))
 
 # < the end >--------------------------------------------------------------------------------------

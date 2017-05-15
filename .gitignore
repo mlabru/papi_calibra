@@ -4,6 +4,7 @@
 *.pyo
 *.out
 *.old
+*.ori
 *.log
 *.err
 *.docx

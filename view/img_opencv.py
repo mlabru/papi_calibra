@@ -23,7 +23,6 @@ __date__ = "2017/04"
 
 # openCV
 import cv
-# import cv2.cv as cv
 
 # pyQt4
 from PyQt4 import QtGui
@@ -43,7 +42,6 @@ class CImageOpenCV(QtGui.QImage):
         """
         # get depth and channels
         l_depth, ln_channels = f_opencv_bgr_img.depth, f_opencv_bgr_img.nChannels
-        # print "l_depth, ln_channels:", l_depth, ln_channels
 
         # not valid image ?
         if (cv.IPL_DEPTH_8U != l_depth) or (3 != ln_channels):
@@ -52,7 +50,6 @@ class CImageOpenCV(QtGui.QImage):
 
         # get image size
         l_w, l_h = cv.GetSize(f_opencv_bgr_img)
-        # print "l_w, l_h:", l_w, l_h
 
         # create image
         l_opencv_rgb_img = cv.CreateImage((l_w, l_h), l_depth, ln_channels)

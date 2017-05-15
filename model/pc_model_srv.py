@@ -18,7 +18,7 @@ __date__ = "2017/04"
 import logging
 import Queue
 #import threading
-#import time
+import time
 #import serial
 import sys
 
@@ -32,7 +32,7 @@ import model.tty_monitor as tmon
 
 # control
 import control.events.events_basic as events
-import control.events_tty as evttty
+import control.events.events_tty as evttty
 
 # < module data >----------------------------------------------------------------------------------
 

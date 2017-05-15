@@ -39,8 +39,8 @@ M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
 # altimeter plot widget
-M_ALT_YMAX = 600
-M_ALT_YMIN = 520
+M_ALT_YMAX = 620
+M_ALT_YMIN = 580
 
 # < CWidgetAltimeter >-----------------------------------------------------------------------------
 
@@ -65,15 +65,12 @@ class CWidgetAltimeter(wplt.CWidgetPlotModel):
         # init super class
         super(CWidgetAltimeter, self).__init__(f_sensor_feed, f_parent)
 
-        # actual frame
-        self.__s_data = None
-
         # image source
         self.__sensor_feed = f_sensor_feed
-        self.__sensor_feed.C_SGN_DATA_ALT.connect(self.on_new_data)
+        self.__sensor_feed.C_SGN_DATA_ALT.connect(self.__on_new_data)
 
         # create the plot and curves
-        self._create_plot("Altitude", M_ALT_YMIN, M_ALT_YMAX)
+        self._create_plot("Altitude (m)", M_ALT_YMIN, M_ALT_YMAX)
 
         # curves checkBoxes
         self.lst_checkboxes = [self._create_checkbox("Altm 1(G)", QtCore.Qt.green,  self._activate_curve, 0),
@@ -101,15 +98,17 @@ class CWidgetAltimeter(wplt.CWidgetPlotModel):
 
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(list)
-    def on_new_data(self, flst_data):
+    def __on_new_data(self, flst_data):
         """
-        callback new frame arrived
+        new altimeter data arrived callback
+
+        @patam flst_data: data list (timestamp#alt_1#alt_2#fusion)
         """
         # update plot
         self._update_plot(flst_data)
 
         # it emits a signal with the data
-        # (to process the frame is not responsibility of the widget)
+        # (to process the data is not responsibility of the widget)
         self.C_SGN_DATA_ALT.emit(flst_data)
 
 # < the end >--------------------------------------------------------------------------------------

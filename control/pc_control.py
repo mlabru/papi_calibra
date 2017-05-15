@@ -16,6 +16,7 @@ __date__ = "2017/04"
 import logging
 import multiprocessing
 import sys
+import time
 
 # PyQt
 from PyQt4 import QtCore
@@ -80,65 +81,21 @@ class CPAPICalControl(object):
 
         # portas
         li_ccc = int(self.__config.dct_config["net.ccc"])
-        li_img = int(self.__config.dct_config["net.img"])
-        li_sns = int(self.__config.dct_config["net.sns"])
 
-        # server mode ?
-        if self.__config.dct_config["glb.server"]:
-            # create connections
-            self.create_connections_server(lt_ifc, ls_adr, li_ccc, li_img, li_sns)
+        # create connections
+        self.create_connections_client(lt_ifc, ls_adr, li_ccc)        
+    
+        # instancia o modelo
+        self.__model = mdcli.CPAPICalModelCli(self)
+        assert self.__model
 
-            # instancia o modelo
-            self.__model = mdsrv.CPAPICalModelSrv(self)
-            assert self.__model
-
-            # create view
-            self.__view = vsrv.CPAPICalViewSrv(self, self.__model)
-            assert self.__view
-
-        # senão, client mode
-        else:
-            # create connections
-            self.create_connections_client(lt_ifc, ls_adr, li_ccc, li_img, li_sns)        
-        
-            # instancia o modelo
-            self.__model = mdcli.CPAPICalModelCli(self)
-            assert self.__model
-
-            # create view
-            self.__view = vcli.CPAPICalViewCli(self, self.__model)
-            assert self.__view
+        # create view
+        self.__view = vcli.CPAPICalViewCli(self, self.__model)
+        assert self.__view
 
         # inicia
         gdata.G_KEEP_RUN = True
 
-    # ---------------------------------------------------------------------------------------------
-    def cbk_termina(self):
-        """
-        termina a aplicação
-        """
-        # clear to go
-        assert self.__event
-
-        # cria um evento de quit
-        l_evt = events.CQuit()
-        assert l_evt
-
-        # dissemina o evento
-        self.__event.post(l_evt)
-        '''
-        print "threadings:", threading.enumerate()
-
-        import traceback
-
-        for thread_id, frame in sys._current_frames().iteritems():
-            name = thread_id
-            for thread in threading.enumerate():
-                if thread.ident == thread_id:
-                    name = thread.name
-
-            traceback.print_stack(frame)
-        '''
     # ---------------------------------------------------------------------------------------------
     def create_app(self, fs_name):
         """
@@ -154,7 +111,7 @@ class CPAPICalControl(object):
         self.__app.setApplicationName(fs_name)
         
         # load logo
-        l_pix_logo = QtGui.QPixmap(":/images/logos/logo.png")
+        l_pix_logo = QtGui.QPixmap(":/images/logo_python.png")
         assert l_pix_logo
         
         # create splash screen
@@ -170,7 +127,7 @@ class CPAPICalControl(object):
         self.__app.processEvents()
 
     # ---------------------------------------------------------------------------------------------
-    def create_connections_client(self, ft_ifc, fs_adr, fi_ccc, fi_img, fi_sns):
+    def create_connections_client(self, ft_ifc, fs_adr, fi_ccc):
         """
         create connections
         """
@@ -190,21 +147,28 @@ class CPAPICalControl(object):
         self.__sck_rcv_ccc = listener.CNetListener(ft_ifc, fs_adr, fi_ccc, self.__q_rcv_ccc)
         assert self.__sck_rcv_ccc
 
-        # cria o socket de recebimento de imagens
-        self.__sck_rcv_img = sockin.CNetSockIn(ft_ifc, fs_adr, fi_img)
-        assert self.__sck_rcv_img
-
-        # cria o socket de recebimento de dados de sensores
-        self.__sck_rcv_sns = sockin.CNetSockIn(ft_ifc, fs_adr, fi_sns)
-        assert self.__sck_rcv_sns
-
     # ---------------------------------------------------------------------------------------------
-    def create_connections_server(self, ft_ifc, fs_adr, fi_ccc, fi_img, fi_sns):
+    # @staticmethod
+    def notify(self, f_evt):
         """
-        create connections
+        event handling callback
+
+        @param f_event: received event
         """
-        pass
+        # check input
+        assert f_evt
         
+        # received quit event ?
+        if isinstance(f_evt, events.CQuit):
+            # para todos os processos
+            gdata.G_KEEP_RUN = False
+
+            # wait all tasks terminate
+            time.sleep(1)
+
+            # ends application
+            sys.exit()
+
     # =============================================================================================
     # dados     
     # =============================================================================================
@@ -243,21 +207,6 @@ class CPAPICalControl(object):
     @property
     def sck_rcv_ccc(self):
         return self.__sck_rcv_ccc
-
-    # ---------------------------------------------------------------------------------------------
-    @property
-    def q_rcv_img(self):
-        return self.__q_rcv_img
-
-    # ---------------------------------------------------------------------------------------------
-    @property
-    def sck_rcv_img(self):
-        return self.__sck_rcv_img
-
-    # ---------------------------------------------------------------------------------------------
-    @property
-    def sck_rcv_sns(self):
-        return self.__sck_rcv_sns
 
     # ---------------------------------------------------------------------------------------------
     @property
