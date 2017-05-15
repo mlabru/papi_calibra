@@ -28,6 +28,7 @@ import model.pc_camera_feed as camfd
 
 # view
 import view.wid_camera as wcam
+import view.wid_papi_light_box as wplb
 import view.wid_plot_papi as wplp
 
 # control
@@ -71,15 +72,19 @@ class CWidgetPAPICal(QtGui.QWidget):
         lgbx_cam = self.__create_gbx_cam(f_control, f_monitor)
 
         # create plot groupBox
-        lgbx_plt = self.__create_gbx_plot()
+        lgbx_plp = self.__create_gbx_plot()
+
+        # create lightBox groupBox
+        lgbx_lbx = self.__create_gbx_light_box()
 
         # create frame layout
         llo_grid = QtGui.QGridLayout(self)
         assert llo_grid is not None
 
-        # put all groupBoxes on a grid
-        llo_grid.addWidget(lgbx_cam, 0, 0, 1, 1)
-        llo_grid.addWidget(lgbx_plt, 0, 1, 1, 1)
+        # put all groupBoxes
+        llo_grid.addWidget(lgbx_cam, 0, 0, 1,  1)
+        llo_grid.addWidget(lgbx_plp, 0, 1, 1,  1)
+        llo_grid.addWidget(lgbx_lbx, 1, 0, 1, -1)
 
         # make connections
         self.C_SGN_PAGE_ON.connect(self.__on_page_on)
@@ -136,6 +141,36 @@ class CWidgetPAPICal(QtGui.QWidget):
         return lgbx_cam
 
     # ---------------------------------------------------------------------------------------------
+    def __create_gbx_light_box(self):
+        """
+        create lightBox groupBox
+        """
+        # create the lightBoxes
+        self.__lst_boxes = [wplb.CPAPILightBoxWidget("Caixa {}".format(i+1), self) for i in xrange(4)] 
+        assert self.__lst_boxes 
+
+        # place the horizontal panel widget
+        llay_gbx = QtGui.QHBoxLayout()
+        assert llay_gbx is not None
+        
+        for bx in self.__lst_boxes:
+            # put lightBox on layout
+            llay_gbx.addWidget(bx)
+
+        # create groupBox lightBox
+        lgbx_lightBox = QtGui.QGroupBox("Light Boxes", self)
+        assert lgbx_lightBox
+
+        # setup
+        lgbx_lightBox.setStyleSheet(gdefs.D_GBX_STYLE)
+
+        # set groupBox layout 
+        lgbx_lightBox.setLayout(llay_gbx)
+
+        # return
+        return lgbx_lightBox
+
+    # ---------------------------------------------------------------------------------------------
     def __create_gbx_plot(self):
         """
         create plot groupBox
@@ -163,7 +198,7 @@ class CWidgetPAPICal(QtGui.QWidget):
 
         # return
         return lgbx_plot
-
+    
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(bool)
     def __on_page_on(self, fv_on):

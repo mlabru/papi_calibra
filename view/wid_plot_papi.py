@@ -136,10 +136,6 @@ class CWidgetPlotPAPI(QtGui.QWidget):
         # separator
         self.__tbr_plot.addSeparator()
 
-        # mark
-        self.__tbr_plot.addAction(f_parent.create_action(self.tr("&Mark"), f_shortcut="Ctrl+M",
-            f_icon="mark.png", f_slot=self.on_act_mark, f_tip=self.tr("Mark light point")))
-
         # clear
         self.__tbr_plot.addAction(f_parent.create_action(self.tr("&Clear"), f_shortcut="Ctrl+C",
             f_icon="clear.png", f_slot=self.on_act_clear, f_tip=self.tr("Clear plot")))
@@ -147,18 +143,6 @@ class CWidgetPlotPAPI(QtGui.QWidget):
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot()
     def on_act_clear(self):
-        """
-        button clear clicked
-        """
-        # desenha o canvas
-        self.__drawing.clear()
-
-        # desenha o canvas
-        self.__canvas.draw()
-
-    # ---------------------------------------------------------------------------------------------
-    @QtCore.pyqtSlot()
-    def on_act_mark(self):
         """
         button clear clicked
         """
@@ -437,13 +421,6 @@ class CWidgetPlotPAPI(QtGui.QWidget):
         # setup
         lbtn_start.setIcon(QtGui.QIcon(QtGui.QPixmap(":/images/start.png")))
 
-        # mark button
-        lbtn_mark = QtGui.QPushButton("mark")
-        assert lbtn_mark
-
-        # setup
-        lbtn_mark.setIcon(QtGui.QIcon(QtGui.QPixmap(":/images/mark.png")))
-
         # clear screen button
         lbtn_clear = QtGui.QPushButton("clear plot")
         assert lbtn_clear
@@ -460,7 +437,6 @@ class CWidgetPlotPAPI(QtGui.QWidget):
 
         # setup
         llay_btn.addWidget(lbtn_start)
-        llay_btn.addWidget(lbtn_mark)
         llay_btn.addWidget(lbtn_clear)
 
         # frame
