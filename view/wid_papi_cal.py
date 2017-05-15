@@ -47,6 +47,7 @@ class CWidgetPAPICal(QtGui.QWidget):
     a port packet monitor that plots live data using PyQwt
     """
     # signal
+    C_SGN_DATA_ALT = QtCore.pyqtSignal(list)
     C_SGN_PAGE_ON = QtCore.pyqtSignal(bool)
 
     # ---------------------------------------------------------------------------------------------
@@ -87,6 +88,7 @@ class CWidgetPAPICal(QtGui.QWidget):
         llo_grid.addWidget(lgbx_lbx, 1, 0, 1, -1)
 
         # make connections
+        self.C_SGN_DATA_ALT.connect(self.__on_data_alt)
         self.C_SGN_PAGE_ON.connect(self.__on_page_on)
 
     # ---------------------------------------------------------------------------------------------
@@ -153,9 +155,10 @@ class CWidgetPAPICal(QtGui.QWidget):
         llay_gbx = QtGui.QHBoxLayout()
         assert llay_gbx is not None
         
-        for bx in self.__lst_boxes:
+        # for all boxes... 
+        for l_lbx in self.__lst_boxes:
             # put lightBox on layout
-            llay_gbx.addWidget(bx)
+            llay_gbx.addWidget(l_lbx)
 
         # create groupBox lightBox
         lgbx_lightBox = QtGui.QGroupBox("Light Boxes", self)
@@ -199,6 +202,20 @@ class CWidgetPAPICal(QtGui.QWidget):
         # return
         return lgbx_plot
     
+    # ---------------------------------------------------------------------------------------------
+    @QtCore.pyqtSlot(list)
+    def __on_data_alt(self, flst_data):
+        """
+        new altimeter data arrived
+        """
+        # for all boxes... 
+        for l_lbx in self.__lst_boxes:
+            # emit altimeter data signal
+            l_lbx.C_SGN_DATA_ALT.emit(flst_data)
+
+        # emit altimeter data signal
+        self.__wid_plp.C_SGN_DATA_ALT.emit(flst_data)
+
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(bool)
     def __on_page_on(self, fv_on):

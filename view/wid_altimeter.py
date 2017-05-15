@@ -100,7 +100,9 @@ class CWidgetAltimeter(wplt.CWidgetPlotModel):
     @QtCore.pyqtSlot(list)
     def __on_new_data(self, flst_data):
         """
-        callback new data arrived
+        new altimeter data arrived callback
+
+        @patam flst_data: data list (timestamp#alt_1#alt_2#fusion)
         """
         # update plot
         self._update_plot(flst_data)

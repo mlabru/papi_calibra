@@ -54,6 +54,7 @@ class CWidgetSensors(QtGui.QWidget):
     a port packet monitor that plots live data using PyQwt
     """
     # signals
+    C_SGN_DATA_ALT = QtCore.pyqtSignal(list)
     C_SGN_PAGE_ON = QtCore.pyqtSignal(bool)
 
     # ---------------------------------------------------------------------------------------------
@@ -115,6 +116,9 @@ class CWidgetSensors(QtGui.QWidget):
 
         # setup
         lwid_altimeter.setMaximumHeight(300)
+
+        # make connections
+        lwid_altimeter.C_SGN_DATA_ALT.connect(self.__on_data_alt)
 
         # create horizontal layout
         llay_gbx = QtGui.QHBoxLayout()
@@ -243,6 +247,15 @@ class CWidgetSensors(QtGui.QWidget):
 
         # return
         return lgbx_thr
+
+    # ---------------------------------------------------------------------------------------------
+    @QtCore.pyqtSlot(list)
+    def __on_data_alt(self, flst_data):
+        """
+        altimeter new data
+        """
+        # emit data_alt signal
+        self.C_SGN_DATA_ALT.emit(flst_data)
 
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(bool)

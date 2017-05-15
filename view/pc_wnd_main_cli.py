@@ -38,7 +38,7 @@ import model.pc_utils as util
 # view
 import view.wid_calibra as cwid
 import view.wid_sensors as swid
-import view.wid_net_monitor as nwid
+import view.wid_monitor_net as mwid
 import view.wid_papi_cal as spap
 
 # control
@@ -253,6 +253,15 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
         QtGui.QMessageBox.about(self, "About the PAPI Calibra", ls_msg.strip())
 
     # ---------------------------------------------------------------------------------------------
+    @QtCore.pyqtSlot(list)
+    def on_data_alt(self, flst_data):
+        """
+        new altimeter data arrived
+        """
+        # generate PAPI Cal widget signal
+        self.wid_pap.C_SGN_DATA_ALT.emit(flst_data)        
+        
+    # ---------------------------------------------------------------------------------------------
     def on_qtw_sensors_currentChanged(self, fi_ndx):
         """
         tabWidget page change callback
@@ -290,12 +299,15 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
         assert f_settings
 
         # create widget monitor (network) page
-        self.wid_mon = nwid.CWidgetNetMonitor(f_settings, self)
+        self.wid_mon = mwid.CWidgetMonitorNet(f_settings, self)
         assert self.wid_mon
 
         # create widget sensors page
         self.wid_sns = swid.CWidgetSensors(f_control, self.wid_mon, self)
         assert self.wid_sns
+
+        # make connections
+        self.wid_sns.C_SGN_DATA_ALT.connect(self.on_data_alt)
 
         # create widget PAPICal page
         self.wid_pap = spap.CWidgetPAPICal(f_control, self.wid_mon, self)

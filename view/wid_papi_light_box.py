@@ -41,6 +41,11 @@ M_LOG.setLevel(logging.DEBUG)
 # < CPAPILightBoxWidget >--------------------------------------------------------------------------------
 
 class CPAPILightBoxWidget(QtGui.QGroupBox):
+    """
+    PAPI lights box
+    """
+    # signal
+    C_SGN_DATA_ALT = QtCore.pyqtSignal(list)
 
     # ---------------------------------------------------------------------------------------------
     def __init__(self, f_title, f_parent=None):
@@ -50,8 +55,14 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         # init super class
         super(CPAPILightBoxWidget, self).__init__(f_title, f_parent)
 
+        # altitude atual
+        self.__f_alt = 0.
+
         # setupUI
         self.__setup_ui()
+
+        # make connections
+        self.C_SGN_DATA_ALT.connect(self.on_data_alt)
 
         # create state machine
         self.create_state_machine()
@@ -86,7 +97,7 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         # return
         return lightState
 
-    # ---------------------------------------------------------------------------------------------  r/c
+    # ---------------------------------------------------------------------------------------------
     def create_state_machine(self):
         """
         create state machine
@@ -106,17 +117,43 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         pink2Red.addTransition(pink2Red, QtCore.SIGNAL("finished()"), red2Pink)
 
         # state machine 
-        machine = QtCore.QStateMachine(self)
-        assert machine
+        l_machine = QtCore.QStateMachine(self)
+        assert l_machine
 
         # setup
-        machine.addState(red2Pink)
-        machine.addState(pink2White)
-        machine.addState(white2Pink)
-        machine.addState(pink2Red)
+        l_machine.addState(red2Pink)
+        l_machine.addState(pink2White)
+        l_machine.addState(white2Pink)
+        l_machine.addState(pink2Red)
 
-        machine.setInitialState(red2Pink)
-        machine.start()
+        l_machine.setInitialState(red2Pink)
+        l_machine.start()
+
+    # ---------------------------------------------------------------------------------------------
+    def on_btn_r2p(self):
+        """
+        transição de vermelho -> rosa
+        """
+        # calcula os graus
+                
+        # traça o gráfico
+
+    # ---------------------------------------------------------------------------------------------
+    def on_btn_p2w(self):
+        """
+        transição de rosa -> branco
+        """
+    # ---------------------------------------------------------------------------------------------
+    @QtCore.pyqtSlot(list)
+    def on_data_alt(self, flst_data):
+        """
+        new altimeter data arrived
+        """
+        # save sample time stamp
+        self.__l_time = int(flst_data[0])
+
+        # save altimeter data
+        self.__f_alt = float(flst_data[3])
 
     # ---------------------------------------------------------------------------------------------
     def __setup_ui(self):
@@ -144,7 +181,7 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         assert lbtn_r2p
 
         # make connections
-        lbtn_r2p.clicked.connect(self.on_btn_r2p.clicked)
+        lbtn_r2p.clicked.connect(self.on_btn_r2p)
 
         # create label altura P2W
         llbl_alt_p2w = QtGui.QLabel("Alt:")
@@ -159,7 +196,7 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         assert lbtn_p2w
 
         # make connections
-        lbtn_r2p.clicked.connect(self.on_btn_p2w.clicked)
+        lbtn_r2p.clicked.connect(self.on_btn_p2w)
 
         # create layout
         llo_gbx = QtGui.QGridLayout()
@@ -176,7 +213,7 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         llo_gbx.addWidget(lbtn_r2p, 0, 3, 2, 1)
         llo_gbx.addWidget(lbtn_p2w, 3, 3, 2, 1)
 
-        llo_gbx.setContentsMargins(0, 0, 0, 0)
+        llo_gbx.setContentsMargins(4, 4, 4, 4)
 
         # groubBox layout         
         self.setLayout(llo_gbx)
