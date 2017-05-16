@@ -56,6 +56,32 @@ D_MSG_SEP = '#'
 # mensagens válidas
 SET_MSG_VALIDAS = [D_MSG_ALT, D_MSG_BAR, D_MSG_GPS, D_MSG_THR, D_MSG_IMG, D_MSG_SIZ, D_MSG_FIM]
 
+# < PAPI >-----------------------------------------------------------------------------------------
+
+# linhas de transição
+M_LINES = ['A', 'B', 'D', 'E']
+
+# ângulo de transição baixo (caixa 1)
+M_ANG_A = 2.50
+
+# ângulo de transição médio-baixo (caixa 2)
+M_ANG_B = 2.83
+
+# ângulo de transição médio-alto (caixa 3)
+M_ANG_D = 3.17
+
+# ângulo de transição alto (caixa 4)
+M_ANG_E = 3.50
+
+# ângulo normal da rampa
+M_ANG_C = (M_ANG_B + M_ANG_D) / 2.
+
+# ângulo de altura mínima do olho do piloto
+M_ANG_M = M_ANG_B - 0.033
+
+# superfície de proteção de obtáculo
+M_ANG_OPS = M_ANG_A - 0.57
+
 # < rede >-----------------------------------------------------------------------------------------
 
 # interface de rede

@@ -21,6 +21,7 @@ __date__ = "2017/04"
 
 # python library
 import logging
+import math
 
 # PyQt4
 from PyQt4 import QtGui
@@ -38,7 +39,7 @@ import control.pc_defs as gdefs
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-# < CPAPILightBoxWidget >--------------------------------------------------------------------------------
+# < CPAPILightBoxWidget >--------------------------------------------------------------------------
 
 class CPAPILightBoxWidget(QtGui.QGroupBox):
     """
@@ -46,114 +47,141 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
     """
     # signal
     C_SGN_DATA_ALT = QtCore.pyqtSignal(list)
+    C_SGN_NEW_DIST = QtCore.pyqtSignal(float)
+
+    C_SGN_PLOT_R2P = QtCore.pyqtSignal(int, float)
+    C_SGN_PLOT_P2W = QtCore.pyqtSignal(int, float)
 
     # ---------------------------------------------------------------------------------------------
-    def __init__(self, f_title, f_parent=None):
+    def __init__(self, f_title, fi_box, f_parent=None):
         """
         constructor
+
+        @param f_title: widget title
+        @param fi_box: box no.
+        @param f_parent: parent widget
         """
         # init super class
         super(CPAPILightBoxWidget, self).__init__(f_title, f_parent)
 
+        # save box no.
+        self.__i_box = fi_box
+
         # altitude atual
         self.__f_alt = 0.
 
+        # distância atual
+        self.__f_dist = 0.
+
+        # timestamp
+        self.__f_time = 0
+
         # setupUI
-        self.__setup_ui()
+        l_light_box = self.__setup_ui()
 
         # make connections
-        self.C_SGN_DATA_ALT.connect(self.on_data_alt)
+        self.C_SGN_DATA_ALT.connect(self.__on_data_alt)
+        self.C_SGN_NEW_DIST.connect(self.__on_new_dist)
 
         # create state machine
-        self.create_state_machine()
+        self.create_state_machine(l_light_box)
 
     # ---------------------------------------------------------------------------------------------
-    def create_light_state(self, lights, duration, parent=None):
+    def create_light_state(self, f_lights, f_parent=None):
         """
         create light state
         """
-        lightState = QtCore.QState(parent)
-        assert lightState
+        l_lightState = QtCore.QState(f_parent)
+        assert l_lightState
 
-        # create timer
-        timer = QtCore.QTimer(lightState)
-        timer.setInterval(duration)
-        timer.setSingleShot(True)
-
-        # create internal state
-        timing = QtCore.QState(lightState)
-        timing.entered.connect(timer.start)
-
-        for light in lights:
-            timing.entered.connect(light.turnOn)
-            timing.exited.connect(light.turnOff)
-
-        done = QtCore.QFinalState(lightState)
-
-        timing.addTransition(timer, QtCore.SIGNAL("timeout()"), done)
-
-        lightState.setInitialState(timing)
+        for l_light in f_lights:
+            l_lightState.entered.connect(l_light.turnOn)
+            l_lightState.exited.connect(l_light.turnOff)
 
         # return
-        return lightState
+        return l_lightState
 
     # ---------------------------------------------------------------------------------------------
-    def create_state_machine(self):
+    def create_state_machine(self, f_light_box):
         """
         create state machine
         """
-        # subindo
-        red2Pink = self.create_light_state([self.__light_box.red_light, self.__light_box.white_light], 1000)
-        pink2White = self.create_light_state([self.__light_box.white_light], 1000)
+        # check input
+        assert f_light_box 
 
-        # descendo
-        white2Pink = self.create_light_state([self.__light_box.red_light, self.__light_box.white_light], 1000)
-        pink2Red = self.create_light_state([self.__light_box.red_light], 1000)
+        # states
+        lstt_red = self.create_light_state([f_light_box.red_light])
+        lstt_pink = self.create_light_state([f_light_box.red_light, f_light_box.white_light])
+        lstt_white = self.create_light_state([f_light_box.white_light])
 
         # transitions
-        red2Pink.addTransition(red2Pink, QtCore.SIGNAL("finished()"), pink2White)
-        pink2White.addTransition(pink2White, QtCore.SIGNAL("finished()"), white2Pink)
-        white2Pink.addTransition(white2Pink, QtCore.SIGNAL("finished()"), pink2Red)
-        pink2Red.addTransition(pink2Red, QtCore.SIGNAL("finished()"), red2Pink)
+        lstt_red.addTransition(self.__btn_r2p, QtCore.SIGNAL("clicked()"), lstt_pink)
+        lstt_pink.addTransition(self.__btn_p2w, QtCore.SIGNAL("clicked()"), lstt_white)
 
         # state machine 
         l_machine = QtCore.QStateMachine(self)
         assert l_machine
 
         # setup
-        l_machine.addState(red2Pink)
-        l_machine.addState(pink2White)
-        l_machine.addState(white2Pink)
-        l_machine.addState(pink2Red)
+        l_machine.addState(lstt_red)
+        l_machine.addState(lstt_pink)
+        l_machine.addState(lstt_white)
 
-        l_machine.setInitialState(red2Pink)
+        l_machine.setInitialState(lstt_red)
         l_machine.start()
 
     # ---------------------------------------------------------------------------------------------
-    def on_btn_r2p(self):
+    def __on_btn_r2p(self):
         """
         transição de vermelho -> rosa
         """
-        # calcula os graus
+        # altitude setup
+        self.__lbl_alt_r2p.setText(u"Alt.:\t{:4.3f}m".format(self.__f_alt))
+        self.__lbl_alt_r2p.setStyleSheet("QLabel { background-color: lightgray; color: green; }");
+
+        # degrees setup
+        self.__lbl_dgr_r2p.setText(u"Deg.:\t{:4.3f}°".format(math.degrees(math.atan2(self.__f_alt, self.__f_dist))))
+        self.__lbl_dgr_r2p.setStyleSheet("QLabel { background-color: lightgray; color: green; }");
                 
-        # traça o gráfico
+        # emit plot signal
+        self.C_SGN_PLOT_R2P.emit(self.__i_box, self.__f_alt)
 
     # ---------------------------------------------------------------------------------------------
-    def on_btn_p2w(self):
+    def __on_btn_p2w(self):
         """
         transição de rosa -> branco
         """
+        # altitude setup
+        self.__lbl_alt_p2w.setText(u"Alt.:\t{:4.3f}m".format(self.__f_alt))
+        self.__lbl_alt_p2w.setStyleSheet("QLabel { background-color: lightgray; color: green; }");
+
+        # degrees setup
+        self.__lbl_dgr_p2w.setText(u"Deg.:\t{:4.3f}°".format(math.degrees(math.atan2(self.__f_alt, self.__f_dist))))
+        self.__lbl_dgr_p2w.setStyleSheet("QLabel { background-color: lightgray; color: green; }");
+                
+        # emit plot signal
+        self.C_SGN_PLOT_P2W.emit(self.__i_box, self.__f_alt)
+
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(list)
-    def on_data_alt(self, flst_data):
+    def __on_data_alt(self, flst_data):
         """
         new altimeter data arrived
         """
         # save sample time stamp
-        self.__l_time = int(flst_data[0])
+        self.__f_time = float(flst_data[0])
 
         # save altimeter data
         self.__f_alt = float(flst_data[3])
+
+    # ---------------------------------------------------------------------------------------------
+    @QtCore.pyqtSlot(float)
+    def __on_new_dist(self, ff_dist):
+        """
+        new distance data arrived
+        """
+        # save distance
+        self.__f_dist = ff_dist
 
     # ---------------------------------------------------------------------------------------------
     def __setup_ui(self):
@@ -161,57 +189,57 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         setup ui
         """
         # create light box
-        self.__light_box = wlbx.CLightBoxWidget()
-        assert self.__light_box
+        l_light_box = wlbx.CLightBoxWidget()
+        assert l_light_box
 
         # setup
-        self.__light_box.resize(55, 100)
-        self.__light_box.show()
+        l_light_box.resize(55, 100)
+        l_light_box.show()
 
         # create label altura V2P
-        llbl_alt_r2p = QtGui.QLabel("Alt:")
-        assert llbl_alt_r2p
+        self.__lbl_alt_r2p = QtGui.QLabel("Alt.:")
+        assert self.__lbl_alt_r2p
 
         # create label graus V2P
-        llbl_dgr_r2p = QtGui.QLabel("Gr.:")
-        assert llbl_dgr_r2p
+        self.__lbl_dgr_r2p = QtGui.QLabel("Deg.:")
+        assert self.__lbl_dgr_r2p
 
         # create button V2P
-        lbtn_r2p = QtGui.QPushButton("V->R")
-        assert lbtn_r2p
+        self.__btn_r2p = QtGui.QPushButton("V->R")
+        assert self.__btn_r2p
 
         # make connections
-        lbtn_r2p.clicked.connect(self.on_btn_r2p)
+        self.__btn_r2p.clicked.connect(self.__on_btn_r2p)
 
         # create label altura P2W
-        llbl_alt_p2w = QtGui.QLabel("Alt:")
-        assert llbl_alt_p2w
+        self.__lbl_alt_p2w = QtGui.QLabel("Alt.:")
+        assert self.__lbl_alt_p2w
 
         # create label graus V2P
-        llbl_dgr_p2w = QtGui.QLabel("Gr.:")
-        assert llbl_dgr_p2w
+        self.__lbl_dgr_p2w = QtGui.QLabel("Deg.:")
+        assert self.__lbl_dgr_p2w
 
         # create button V2P
-        lbtn_p2w = QtGui.QPushButton("R->B")
-        assert lbtn_p2w
+        self.__btn_p2w = QtGui.QPushButton("R->B")
+        assert self.__btn_p2w
 
         # make connections
-        lbtn_r2p.clicked.connect(self.on_btn_p2w)
+        self.__btn_p2w.clicked.connect(self.__on_btn_p2w)
 
         # create layout
         llo_gbx = QtGui.QGridLayout()
         assert llo_gbx is not None
 
-        llo_gbx.addWidget(self.__light_box, 0, 0, -1, 1)
+        llo_gbx.addWidget(l_light_box, 0, 0, -1, 1)
 
-        llo_gbx.addWidget(llbl_alt_r2p, 0, 1, 1, 2)
-        llo_gbx.addWidget(llbl_dgr_r2p, 1, 1, 1, 2)
+        llo_gbx.addWidget(self.__lbl_alt_p2w, 0, 1, 1, 2)
+        llo_gbx.addWidget(self.__lbl_dgr_p2w, 1, 1, 1, 2)
  
-        llo_gbx.addWidget(llbl_alt_p2w, 3, 1, 1, 2)
-        llo_gbx.addWidget(llbl_dgr_p2w, 4, 1, 1, 2)
+        llo_gbx.addWidget(self.__lbl_alt_r2p, 3, 1, 1, 2)
+        llo_gbx.addWidget(self.__lbl_dgr_r2p, 4, 1, 1, 2)
  
-        llo_gbx.addWidget(lbtn_r2p, 0, 3, 2, 1)
-        llo_gbx.addWidget(lbtn_p2w, 3, 3, 2, 1)
+        llo_gbx.addWidget(self.__btn_p2w, 0, 3, 2, 1)
+        llo_gbx.addWidget(self.__btn_r2p, 3, 3, 2, 1)
 
         llo_gbx.setContentsMargins(4, 4, 4, 4)
 
@@ -224,5 +252,8 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         # setup
         self.setMaximumHeight(143)
         self.setMaximumWidth(275)
+
+        # return
+        return l_light_box
 
 # < the end >--------------------------------------------------------------------------------------

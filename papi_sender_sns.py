@@ -23,6 +23,7 @@ import random
 import serial
 import socket
 import threading
+import time
 
 # model
 import model.pc_data as gdata
@@ -41,6 +42,9 @@ import control.pc_defs as gdefs
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
+# degug mode
+M_DEBUG = True
+
 # -------------------------------------------------------------------------------------------------
 def main():
     """
@@ -53,9 +57,20 @@ def main():
     # start application
     gdata.G_KEEP_RUN = True
 
-    # create serial read thread
-    lthr_ser = threading.Thread(target=ser_read, args=(l_queue,))
-    assert lthr_ser
+    # debug mode ?
+    if M_DEBUG:
+        # fake client address 
+        gdefs.D_NET_CLI = "192.168.11.151"
+
+        # create serial read thread
+        lthr_ser = threading.Thread(target=ser_fake, args=(l_queue,))
+        assert lthr_ser
+
+    # senão, real mode...
+    else:    
+        # create serial read thread
+        lthr_ser = threading.Thread(target=ser_read, args=(l_queue,))
+        assert lthr_ser
     
     # start serial read thread
     lthr_ser.start()
@@ -134,6 +149,32 @@ def net_sender(f_queue):
                 l_termometer.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
 
 # -------------------------------------------------------------------------------------------------
+def ser_fake(f_queue):
+    """
+    serial reader thread
+    """
+    # tempo ini
+    ll_init = time.time()
+
+    # altitude
+    lf_alt = 0.
+
+    # while keep running...
+    while gdata.G_KEEP_RUN:
+        # altitude
+        lf_alt += 0.05
+
+        # read serial line        
+        ls_line = "!@ALT#{}#{}#{}".format(lf_alt + random.random(), lf_alt - random.random(), time.time() - ll_init)
+        # M_LOG.debug("ls_line: {}".format(ls_line))
+
+        # queue message
+        f_queue.put(ls_line)
+
+        # sleep
+        time.sleep(0.5)
+
+# -------------------------------------------------------------------------------------------------
 def ser_read(f_queue):
     """
     serial reader thread
@@ -150,7 +191,7 @@ def ser_read(f_queue):
         ls_line = l_ser.readline()
         # M_LOG.debug("ls_line: {}".format(ls_line))
 
-        # read serial line and queue message
+        # queue message
         f_queue.put(ls_line[:-2])
 
 # -------------------------------------------------------------------------------------------------

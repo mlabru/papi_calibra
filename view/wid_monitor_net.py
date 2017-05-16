@@ -37,9 +37,9 @@ import control.pc_defs as gdefs
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-# < CWidgetNetMonitor >----------------------------------------------------------------------------
+# < CMonitorNetWidget >----------------------------------------------------------------------------
 
-class CWidgetNetMonitor(QtGui.QWidget):
+class CMonitorNetWidget(QtGui.QWidget):
     """
     network packet monitor that plots live data using PyQwt
     """
@@ -54,7 +54,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
         constructor
         """
         # init super class
-        super(CWidgetNetMonitor, self).__init__(f_parent)
+        super(CMonitorNetWidget, self).__init__(f_parent)
 
         # save settings
         self.__settings = f_settings
@@ -109,7 +109,7 @@ class CWidgetNetMonitor(QtGui.QWidget):
     # QEvent
     def changeEvent(self, e):
 
-        super(CWidgetNetMonitor, self).changeEvent(e)
+        super(CMonitorNetWidget, self).changeEvent(e)
 
         if QtCore.QEvent.LanguageChange == e.type():
             self.retranslateUi(self)
