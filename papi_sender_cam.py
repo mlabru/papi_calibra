@@ -33,32 +33,30 @@ l_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 assert l_sock
 
 # inicia a captura do vídeo
-capture = cv2.VideoCapture(0)
-capture.set(cv.CV_CAP_PROP_FRAME_WIDTH, 320)
-capture.set(cv.CV_CAP_PROP_FRAME_HEIGHT, 240)
+l_capture = cv2.VideoCapture(0)
+l_capture.set(cv.CV_CAP_PROP_FRAME_WIDTH, gdefs.D_VID_HORZ)
+l_capture.set(cv.CV_CAP_PROP_FRAME_HEIGHT, gdefs.D_VID_VERT)
 
 # para todo o sempre...
 while True:
     # obtém um frame
-    ret, frame = capture.read()
-    # print ret
+    l_ret, l_frame = l_capture.read()
 
     # encode em jpeg
-    encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
+    l_encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
 
     # faz o encode
-    result, imgencode = cv2.imencode(".jpg", frame, encode_param)
-    # print result
+    l_result, l_img_encode = cv2.imencode(".jpg", l_frame, l_encode_param)
 
     # converte em um array
-    data = numpy.array(imgencode)
+    l_data = numpy.array(l_img_encode)
 
     # converte em string
-    stringData = data.tostring()
-    # print len(stringData)
+    l_stringData = l_data.tostring()
+    # print len(l_stringData)
 
     # tamanho da imagem excede o tamanho máximo de UDP ?
-    if len(stringData) > 65507:
+    if len(l_stringData) > 65507:
         # descarta a mensagem 
         continue
     
@@ -66,9 +64,9 @@ while True:
     ls_header = "{}#{}#".format(gdefs.D_MSG_VRS, gdefs.D_MSG_IMG)
 
     # envia o tamanho da string 
-    l_sock.sendto("{}#{}#{}".format(gdefs.D_MSG_VRS, gdefs.D_MSG_SIZ, len(ls_header) + len(stringData)), M_UDP_ADDR)
+    l_sock.sendto("{}#{}#{}".format(gdefs.D_MSG_VRS, gdefs.D_MSG_SIZ, len(ls_header) + len(l_stringData)), M_UDP_ADDR)
     # envia a string
-    l_sock.sendto("{}{}".format(ls_header, stringData), M_UDP_ADDR)
+    l_sock.sendto("{}{}".format(ls_header, l_stringData), M_UDP_ADDR)
 
 # fecha o socket
 l_sock.close()
