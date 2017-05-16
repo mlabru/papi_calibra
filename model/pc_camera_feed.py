@@ -125,7 +125,9 @@ class CCameraFeed(snsf.CSensorFeed):
             # senão,...
             else:
                 # logger
-                M_LOG.critical("<E01: pc_camera_feed: {}".format(l_err))
+                l_log = logging.getLogger("CCameraFeed::__receive_msg")
+                l_log.setLevel(logging.CRITICAL)
+                l_log.critical(u"<E01: error: {}".format(l_err))
 
                 # a "real" error occurred
                 sys.exit(1)
@@ -133,7 +135,9 @@ class CCameraFeed(snsf.CSensorFeed):
         # zero len message ?
         if 0 == len(l_msg):
             # logger
-            M_LOG.warning("<E02: pc_camera_feed: zero len message.")
+            l_log = logging.getLogger("CCameraFeed::__receive_msg")
+            l_log.setLevel(logging.CRITICAL)
+            l_log.critical(u"<E02: error: zero len message.")
 
             # continue
             return False, None, None
