@@ -62,8 +62,8 @@ class CConfigWidget(QtGui.QWidget):
         super(CConfigWidget, self).__init__(f_parent)
 
         # events
-        #self.__event = f_parent.event
-        #assert self.__event
+        self.__event = f_parent.evtmgr
+        assert self.__event
 
         # distância em metros
         self.__f_dst = gdefs.D_DFL_DIST
@@ -188,15 +188,18 @@ class CConfigWidget(QtGui.QWidget):
         # altura atual em metros
         self.__f_alt = 0.
 
+        # reset spinBox
+        self.__dsb_dst.setValue(self.__f_dst)
+
         # emit signal
         self.C_SGN_NEW_DIST.emit(self.__f_dst)
 
         # create CReset event
-        #l_evt = events.CReset()
-        #assert l_evt
+        l_evt = events.CReset()
+        assert l_evt
 
         # dispatch event
-        #self.__event.post(l_evt)
+        self.__event.post(l_evt)
 
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(float)
@@ -283,7 +286,7 @@ class CConfigWidget(QtGui.QWidget):
         assert lwid_btn
 
         # start button
-        lbtn_start = QtGui.QPushButton("start")
+        lbtn_start = QtGui.QPushButton("&Start")
         assert lbtn_start
 
         # setup
@@ -291,7 +294,7 @@ class CConfigWidget(QtGui.QWidget):
         lbtn_start.setEnabled(False)
 
         # reset screen button
-        lbtn_reset = QtGui.QPushButton("reset plot")
+        lbtn_reset = QtGui.QPushButton("&Reset")
         assert lbtn_reset
 
         # setup

@@ -74,6 +74,9 @@ D_ANG_M = D_ANG_B - 0.033
 # superfície de proteção de obtáculo
 D_ANG_OPS = D_ANG_A - 0.57
 
+# ângulo máximo
+D_ANG_MAX = D_ANG_E + 2.
+
 # linhas de transição
 D_LINES = ['A', 'B', 'D', 'E']
 

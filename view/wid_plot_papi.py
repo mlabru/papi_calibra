@@ -81,11 +81,11 @@ class CPlotPAPIWidget(QtGui.QWidget):
         self.__parent = f_parent
         
         # events
-        #self.__event = f_parent.event
-        #assert self.__event
+        self.__event = f_parent.evtmgr
+        assert self.__event
 
         # register as event listener
-        #self.__event.register_listener(self)
+        self.__event.register_listener(self)
 
         # distância em metros
         self.__f_dst = gdefs.D_DFL_DIST
@@ -94,7 +94,7 @@ class CPlotPAPIWidget(QtGui.QWidget):
         self.__f_alt = 0.
 
         # altura máxima em metros
-        self.__f_alt_max = self.__f_dst * math.sin(math.radians(gdefs.D_ANG_E + 1.0))
+        self.__f_alt_max = self.__f_dst * math.sin(math.radians(gdefs.D_ANG_MAX))
 
         # setup user interface
         self.__setup_ui(self)
@@ -141,11 +141,11 @@ class CPlotPAPIWidget(QtGui.QWidget):
         assert f_evt
 
         # received reset event ?
-        #if isinstance(f_evt, events.CReset):
+        if isinstance(f_evt, events.CReset):
             # reset distance
-            #self.__on_new_dist(gdefs.D_DFL_DIST)
+            self.__on_new_dist(gdefs.D_DFL_DIST)
             # clear plot
-            #self.__on_act_clear()
+            self.__on_act_clear()
 
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot()
@@ -175,7 +175,7 @@ class CPlotPAPIWidget(QtGui.QWidget):
         """
         # distância em metros
         self.__f_dst = ff_dist
-        self.__f_alt_max = ff_dist * math.sin(math.radians(gdefs.D_ANG_E + 1.0))
+        self.__f_alt_max = ff_dist * math.sin(math.radians(gdefs.D_ANG_MAX))
 
         # axes rescale
         self.__drawing.set_xlim(0, self.__f_dst)
@@ -376,7 +376,7 @@ class CPlotPAPIWidget(QtGui.QWidget):
         self.__setup_plot()
 
         # clear screen button
-        lbtn_clear = QtGui.QPushButton("clear plot")
+        lbtn_clear = QtGui.QPushButton("&Clear")
         assert lbtn_clear
 
         # setup

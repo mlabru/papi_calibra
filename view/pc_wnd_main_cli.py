@@ -43,7 +43,6 @@ import view.wid_papi as spap
 
 # control
 import control.events.events_basic as events
-import control.events.events_tty as evttty
 
 # resources
 import view.resources_qrc
@@ -353,11 +352,7 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
             
     # ---------------------------------------------------------------------------------------------
     @property
-    def event(self):
+    def evtmgr(self):
         return self.__event
         
-    @event.setter
-    def event(self, f_val):
-        self.__event = f_val
-
 # < the end >--------------------------------------------------------------------------------------

@@ -29,6 +29,7 @@ import model.pc_camera_feed as camfd
 # view
 import view.wid_camera as wcam
 import view.wid_config as wcfg
+import view.wid_lateral_box as wlbx
 import view.wid_papi_light_box as wplb
 import view.wid_plot_papi as wplp
 
@@ -72,8 +73,8 @@ class CPAPIWidget(QtGui.QWidget):
         self.__parent = f_parent
         
         # events
-        #self.__event = f_parent.event
-        #assert self.__event
+        self.__event = f_parent.evtmgr
+        assert self.__event
 
         # create camera groupBox
         lgbx_cam = self.__create_gbx_cam(f_control, f_monitor)
@@ -197,6 +198,13 @@ class CPAPIWidget(QtGui.QWidget):
         llay_gbx = QtGui.QHBoxLayout()
         assert llay_gbx is not None
         
+        # create left lateral widget
+        lgbx_left = wlbx.CLateralBoxWidget("Left", self)
+        assert lgbx_left
+
+        # put left lateral widget on layout
+        llay_gbx.addWidget(lgbx_left)
+
         # for all boxes... 
         for l_lbx in self.__lst_boxes:
             # make connections
@@ -205,6 +213,13 @@ class CPAPIWidget(QtGui.QWidget):
 
             # put lightBox on layout
             llay_gbx.addWidget(l_lbx)
+
+        # create right lateral widget
+        lgbx_right = wlbx.CLateralBoxWidget("Right", self)
+        assert lgbx_right
+
+        # put right lateral widget on layout
+        llay_gbx.addWidget(lgbx_right)
 
         # create groupBox lightBox
         lgbx_lightBox = QtGui.QGroupBox("Light Boxes", self)
@@ -311,9 +326,9 @@ class CPAPIWidget(QtGui.QWidget):
     # =============================================================================================
             
     # ---------------------------------------------------------------------------------------------
-    #@property
-    #def event(self):
-        #return self.__event
+    @property
+    def evtmgr(self):
+        return self.__event
 
 # < the end >--------------------------------------------------------------------------------------
         

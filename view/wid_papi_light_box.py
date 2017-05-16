@@ -49,9 +49,12 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
     # signal
     C_SGN_DATA_ALT = QtCore.pyqtSignal(list)
     C_SGN_NEW_DIST = QtCore.pyqtSignal(float)
+    C_SGN_RESET = QtCore.pyqtSignal()
 
     C_SGN_PLOT_R2P = QtCore.pyqtSignal(int, float)
     C_SGN_PLOT_P2W = QtCore.pyqtSignal(int, float)
+
+    reset = QtCore.pyqtSignal(name="reset")
 
     # ---------------------------------------------------------------------------------------------
     def __init__(self, f_title, fi_box, f_parent):
@@ -69,11 +72,11 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         super(CPAPILightBoxWidget, self).__init__(f_title, f_parent)
 
         # events
-        #self.__event = f_parent.event
-        #assert self.__event
+        self.__event = f_parent.evtmgr
+        assert self.__event
 
         # register as event listener
-        #self.__event.register_listener(self)
+        self.__event.register_listener(self)
 
         # save box no.
         self.__i_box = fi_box
@@ -87,25 +90,40 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         # timestamp
         self.__f_time = 0
 
-        # setupUI
-        l_light_box = self.__setup_ui()
+        self.__wid_lbox = self.__setup_ui()
+        assert self.__wid_lbox
+
+        # connect
+        # self.connect(self, QtCore.SIGNAL("reset"), self.__on_reset)
+        # self.reset.connect(self.__on_reset)
+
+        # create states
+        self.__lst_states = self.create_states(self.__wid_lbox)
+        assert self.__lst_states
+
+        # create state machine
+        self.__state_machine = self.create_state_machine(self.__lst_states)
+        assert self.__state_machine
+
+        # start state machine
+        self.__state_machine.start()
 
         # make connections
         self.C_SGN_DATA_ALT.connect(self.__on_data_alt)
         self.C_SGN_NEW_DIST.connect(self.__on_new_dist)
-
-        # create state machine
-        self.create_state_machine(l_light_box)
 
     # ---------------------------------------------------------------------------------------------
     def create_light_state(self, f_lights, f_parent=None):
         """
         create light state
         """
+        # create light state
         l_lightState = QtCore.QState(f_parent)
         assert l_lightState
 
+        # for all lights...
         for l_light in f_lights:
+            # make connections
             l_lightState.entered.connect(l_light.turnOn)
             l_lightState.exited.connect(l_light.turnOff)
 
@@ -113,7 +131,32 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         return l_lightState
 
     # ---------------------------------------------------------------------------------------------
-    def create_state_machine(self, f_light_box):
+    def create_state_machine(self, flst_states):
+        """
+        create state machine
+
+        @param flst_states: states (initial state is the first one) 
+        """
+        # check input
+        assert flst_states 
+
+        # state machine 
+        l_machine = QtCore.QStateMachine(self)
+        assert l_machine
+
+        # for all states...
+        for l_stt in flst_states:
+            # add state to machine
+            l_machine.addState(l_stt)
+
+        # set initial state
+        l_machine.setInitialState(flst_states[0])
+
+        # return
+        return l_machine
+
+    # ---------------------------------------------------------------------------------------------
+    def create_states(self, f_light_box):
         """
         create state machine
         """
@@ -129,17 +172,14 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         lstt_red.addTransition(self.__btn_r2p, QtCore.SIGNAL("clicked()"), lstt_pink)
         lstt_pink.addTransition(self.__btn_p2w, QtCore.SIGNAL("clicked()"), lstt_white)
 
-        # state machine 
-        l_machine = QtCore.QStateMachine(self)
-        assert l_machine
+        #lstt_pink.addTransition(self, QtCore.SIGNAL("reset"), lstt_red)
+        #lstt_white.addTransition(self, QtCore.SIGNAL("reset"), lstt_red)
 
-        # setup
-        l_machine.addState(lstt_red)
-        l_machine.addState(lstt_pink)
-        l_machine.addState(lstt_white)
+        lstt_pink.addTransition(self.C_SGN_RESET, lstt_red)
+        lstt_white.addTransition(self.C_SGN_RESET, lstt_red)
 
-        l_machine.setInitialState(lstt_red)
-        l_machine.start()
+        # return
+        return [lstt_red, lstt_pink, lstt_white] 
 
     # ---------------------------------------------------------------------------------------------
     # @staticmethod
@@ -153,16 +193,9 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         assert f_evt
 
         # received reset event ?
-        #if isinstance(f_evt, events.CReset):
-            # reset texts
-            #self.__lbl_alt_r2p.setText("")
-            #self.__lbl_dgr_r2p.setText("")
-
-            #self.__lbl_alt_p2w.setText("")
-            #self.__lbl_dgr_p2w.setText("")
-
-            # save distance
-            #self.__f_dist = gdefs.D_DFL_DIST
+        if isinstance(f_evt, events.CReset):
+            # reset light box
+            self.__on_evt_reset()
 
     # ---------------------------------------------------------------------------------------------
     def __on_btn_r2p(self):
@@ -209,6 +242,52 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         self.__f_alt = float(flst_data[3])
 
     # ---------------------------------------------------------------------------------------------
+    @QtCore.pyqtSlot()
+    def __on_evt_reset(self):
+        """
+        event CReset
+        """
+        ''' 
+        # stop state machine
+        self.__state_machine.stop() 
+
+        # for all states... 
+        for l_stt in self.__lst_states:
+            # free state
+            del l_stt
+
+        # free state list
+        del self.__lst_states
+        # free state machine
+        del self.__state_machine
+
+        # recreate states
+        self.__lst_states = self.create_states(self.__wid_lbox)
+        assert self.__lst_states
+
+        # recreate state machine
+        self.__state_machine = self.create_state_machine(self.__lst_states)
+        assert self.__state_machine
+
+        # start new state machine
+        self.__state_machine.start()
+        '''
+        # reset state machine
+        #self.emit(QtCore.SIGNAL("reset"))
+        #self.reset.emit()
+        self.C_SGN_RESET.emit()
+        
+        # reset texts
+        self.__lbl_alt_r2p.setText("")
+        self.__lbl_dgr_r2p.setText("")
+
+        self.__lbl_alt_p2w.setText("")
+        self.__lbl_dgr_p2w.setText("")
+
+        # save distance
+        self.__f_dist = gdefs.D_DFL_DIST
+
+    # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(float)
     def __on_new_dist(self, ff_dist):
         """
@@ -242,6 +321,9 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         self.__btn_r2p = QtGui.QPushButton("V->R")
         assert self.__btn_r2p
 
+        # setup
+        self.__btn_r2p.setMinimumHeight(44)
+
         # make connections
         self.__btn_r2p.clicked.connect(self.__on_btn_r2p)
 
@@ -256,6 +338,9 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         # create button V2P
         self.__btn_p2w = QtGui.QPushButton("R->B")
         assert self.__btn_p2w
+
+        # setup
+        self.__btn_p2w.setMinimumHeight(44)
 
         # make connections
         self.__btn_p2w.clicked.connect(self.__on_btn_p2w)
