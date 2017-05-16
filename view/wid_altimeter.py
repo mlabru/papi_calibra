@@ -67,7 +67,7 @@ class CWidgetAltimeter(wplt.CWidgetPlotModel):
 
         # image source
         self.__sensor_feed = f_sensor_feed
-        self.__sensor_feed.C_SGN_DATA_ALT.connect(self.on_new_data)
+        self.__sensor_feed.C_SGN_DATA_ALT.connect(self.__on_new_data)
 
         # create the plot and curves
         self._create_plot("Altitude (m)", M_ALT_YMIN, M_ALT_YMAX)
@@ -75,7 +75,7 @@ class CWidgetAltimeter(wplt.CWidgetPlotModel):
         # curves checkBoxes
         self.lst_checkboxes = [self._create_checkbox("Altm 1(G)", QtCore.Qt.green,  self._activate_curve, 0),
                                self._create_checkbox("Altm 2(R)", QtCore.Qt.red,    self._activate_curve, 1),
-                               self._create_checkbox("Fusion(Y)", QtCore.Qt.yellow, self._activate_curve, 2)]
+                               self._create_checkbox("Kalman(Y)", QtCore.Qt.yellow, self._activate_curve, 2)]
 
         # clear plot button
         lbtn_clear = QtGui.QPushButton("clear plot")
@@ -98,9 +98,11 @@ class CWidgetAltimeter(wplt.CWidgetPlotModel):
 
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(list)
-    def on_new_data(self, flst_data):
+    def __on_new_data(self, flst_data):
         """
-        callback new data arrived
+        new altimeter data arrived callback
+
+        @patam flst_data: data list (timestamp#alt_1#alt_2#fusion)
         """
         # update plot
         self._update_plot(flst_data)

@@ -70,20 +70,7 @@ while True:
     # envia a string
     l_sock.sendto("{}{}".format(ls_header, stringData), M_UDP_ADDR)
 
-    # converte de string para imagem
-    # data = numpy.fromstring(stringData, dtype="uint8")
-        
-    # decimg = cv2.imdecode(data, 1)
-    # cv2.imshow("SEND...", decimg)
-
-    # press q to quit
-    # if cv2.waitKey(1) & 0xFF == ord('q'):
-        # break
-    
 # fecha o socket
 l_sock.close()
-
-#cv2.waitKey(0)
-#cv2.destroyAllWindows()
 
 # <the end>----------------------------------------------------------------------------------------

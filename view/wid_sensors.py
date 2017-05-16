@@ -47,12 +47,16 @@ import control.pc_defs as gdefs
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-# < CWidgetSensors >-------------------------------------------------------------------------------
+# < CSensorsWidget >-------------------------------------------------------------------------------
 
-class CWidgetSensors(QtGui.QWidget):
+class CSensorsWidget(QtGui.QWidget):
     """
     a port packet monitor that plots live data using PyQwt
     """
+    # signals
+    C_SGN_DATA_ALT = QtCore.pyqtSignal(list)
+    C_SGN_PAGE_ON = QtCore.pyqtSignal(bool)
+
     # ---------------------------------------------------------------------------------------------
     def __init__(self, f_control, f_monitor, f_parent=None):
         """
@@ -67,54 +71,54 @@ class CWidgetSensors(QtGui.QWidget):
         assert f_monitor
         
         # init super class
-        super(CWidgetSensors, self).__init__(f_parent)
+        super(CSensorsWidget, self).__init__(f_parent)
 
-        # control
-        self.__control = f_control
-
-        # monitor
-        self.__monitor = f_monitor
-        
         # parent
-        self.__parent = f_parent
+        # self.__parent = f_parent
         
         # create altimeter groupBox
-        self.__create_gbx_alt()
+        lgbx_alt = self.__create_gbx_alt(f_control, f_monitor)
 
         # create GPS groupBox
-        self.__create_gbx_gps()
+        lgbx_gps = self.__create_gbx_gps(f_control, f_monitor)
 
         # create barameter groupBox
-        self.__create_gbx_bar()
+        lgbx_bar = self.__create_gbx_bar(f_control, f_monitor)
 
         # create thermometer groupBox
-        self.__create_gbx_thr()
+        lgbx_thr = self.__create_gbx_thr(f_control, f_monitor)
 
         # create frame layout
         llo_grid = QtGui.QGridLayout(self)
         assert llo_grid is not None
 
         # put all groupBoxes on a grid
-        llo_grid.addWidget(self.__gbx_alt, 0, 0, 1, 1)
-        llo_grid.addWidget(self.__gbx_gps, 0, 1, 1, 1)
-        llo_grid.addWidget(self.__gbx_bar, 1, 0, 1, 1)
-        llo_grid.addWidget(self.__gbx_thr, 1, 1, 1, 1)
+        llo_grid.addWidget(lgbx_alt, 0, 0, 1, 1)
+        llo_grid.addWidget(lgbx_gps, 0, 1, 1, 1)
+        llo_grid.addWidget(lgbx_bar, 1, 0, 1, 1)
+        llo_grid.addWidget(lgbx_thr, 1, 1, 1, 1)
+
+        # connect new data signal
+        self.C_SGN_PAGE_ON.connect(self.__on_page_on)
 
     # ---------------------------------------------------------------------------------------------
-    def __create_gbx_alt(self):
+    def __create_gbx_alt(self, f_control, f_monitor):
         """
         create altimeter groupBox
         """
         # create altimeter feed
-        self.__alt_feed = altfd.CAltimeterFeed(self.__control, self.__monitor)
-        assert self.__alt_feed
+        lfeed_alt = altfd.CAltimeterFeed(f_control, f_monitor)
+        assert lfeed_alt
 
         # create altimeter widget
-        lwid_altimeter = walt.CWidgetAltimeter(self.__alt_feed, self)
+        lwid_altimeter = walt.CWidgetAltimeter(lfeed_alt, self)
         assert lwid_altimeter
 
         # setup
-        lwid_altimeter.setFixedHeight(280)
+        lwid_altimeter.setMaximumHeight(300)
+
+        # make connections
+        lwid_altimeter.C_SGN_DATA_ALT.connect(self.__on_data_alt)
 
         # create horizontal layout
         llay_gbx = QtGui.QHBoxLayout()
@@ -124,30 +128,33 @@ class CWidgetSensors(QtGui.QWidget):
         llay_gbx.addWidget(lwid_altimeter)
 
         # create groupBox altimeter
-        self.__gbx_alt = QtGui.QGroupBox(u"Altímetro", self)
-        assert self.__gbx_alt
+        lgbx_alt = QtGui.QGroupBox(u"Altímetro", self)
+        assert lgbx_alt
 
         # setup
-        self.__gbx_alt.setStyleSheet(gdefs.D_GBX_STYLE)
+        lgbx_alt.setStyleSheet(gdefs.D_GBX_STYLE)
 
         # set groupBox layout 
-        self.__gbx_alt.setLayout(llay_gbx)
+        lgbx_alt.setLayout(llay_gbx)
+
+        # return
+        return lgbx_alt
 
     # ---------------------------------------------------------------------------------------------
-    def __create_gbx_bar(self):
+    def __create_gbx_bar(self, f_control, f_monitor):
         """
         create barometer groupBox
         """
         # create barometer feed
-        self.__bar_feed = barfd.CBarometerFeed(self.__control, self.__monitor)
-        assert self.__bar_feed
+        lfeed_bar = barfd.CBarometerFeed(f_control, f_monitor)
+        assert lfeed_bar
 
         # create barometer widget
-        lwid_barometer = wbar.CWidgetBarometer(self.__bar_feed, self)
+        lwid_barometer = wbar.CWidgetBarometer(lfeed_bar, self)
         assert lwid_barometer
 
         # setup
-        lwid_barometer.setFixedHeight(280)
+        lwid_barometer.setMaximumHeight(300)
 
         # create horizontal layout
         llay_gbx = QtGui.QHBoxLayout()
@@ -157,30 +164,33 @@ class CWidgetSensors(QtGui.QWidget):
         llay_gbx.addWidget(lwid_barometer)
 
         # create groupBox barometer
-        self.__gbx_bar = QtGui.QGroupBox(u"Barômetro", self)
-        assert self.__gbx_bar
+        lgbx_bar = QtGui.QGroupBox(u"Barômetro", self)
+        assert lgbx_bar
 
         # setup
-        self.__gbx_bar.setStyleSheet(gdefs.D_GBX_STYLE)
+        lgbx_bar.setStyleSheet(gdefs.D_GBX_STYLE)
 
         # set groupBox layout 
-        self.__gbx_bar.setLayout(llay_gbx)
+        lgbx_bar.setLayout(llay_gbx)
+
+        # return
+        return lgbx_bar
 
     # ---------------------------------------------------------------------------------------------
-    def __create_gbx_gps(self):
+    def __create_gbx_gps(self, f_control, f_monitor):
         """
         create GPS groupBox
         """
         # create GPS feed
-        self.__gps_feed = gpsfd.CGPSFeed(self.__control, self.__monitor)
-        assert self.__gps_feed
+        lfeed_gps = gpsfd.CGPSFeed(f_control, f_monitor)
+        assert lfeed_gps
 
         # create GPS widget
-        lwid_gps = wgps.CWidgetGPS(self.__gps_feed, self)
+        lwid_gps = wgps.CWidgetGPS(lfeed_gps, self)
         assert lwid_gps
 
         # setup
-        lwid_gps.setFixedHeight(280)
+        lwid_gps.setMaximumHeight(300)
 
         # create horizontal layout
         llay_gbx = QtGui.QHBoxLayout()
@@ -190,30 +200,33 @@ class CWidgetSensors(QtGui.QWidget):
         llay_gbx.addWidget(lwid_gps)
 
         # create groupBox GPS
-        self.__gbx_gps = QtGui.QGroupBox(u"GPS", self)
-        assert self.__gbx_gps
+        lgbx_gps = QtGui.QGroupBox(u"GPS", self)
+        assert lgbx_gps
 
         # setup
-        self.__gbx_gps.setStyleSheet(gdefs.D_GBX_STYLE)
+        lgbx_gps.setStyleSheet(gdefs.D_GBX_STYLE)
 
         # set groupBox layout 
-        self.__gbx_gps.setLayout(llay_gbx)
+        lgbx_gps.setLayout(llay_gbx)
+
+        # return
+        return lgbx_gps
 
     # ---------------------------------------------------------------------------------------------
-    def __create_gbx_thr(self):
+    def __create_gbx_thr(self, f_control, f_monitor):
         """
         create thermometer groupBox
         """
         # create thermometer feed
-        self.__thr_feed = thrfd.CThermometerFeed(self.__control, self.__monitor)
-        assert self.__thr_feed
+        lfeed_thr = thrfd.CThermometerFeed(f_control, f_monitor)
+        assert lfeed_thr
 
         # create thermometer widget
-        lwid_thermometer = wthr.CWidgetThermometer(self.__thr_feed, self)
+        lwid_thermometer = wthr.CWidgetThermometer(lfeed_thr, self)
         assert lwid_thermometer
 
         # setup
-        lwid_thermometer.setFixedHeight(280)
+        lwid_thermometer.setMaximumHeight(300)
 
         # create horizontal layout
         llay_gbx = QtGui.QHBoxLayout()
@@ -223,14 +236,34 @@ class CWidgetSensors(QtGui.QWidget):
         llay_gbx.addWidget(lwid_thermometer)
 
         # create groupBox thermometer
-        self.__gbx_thr = QtGui.QGroupBox(u"Termômetro", self)
-        assert self.__gbx_thr
+        lgbx_thr = QtGui.QGroupBox(u"Termômetro", self)
+        assert lgbx_thr
 
         # setup
-        self.__gbx_thr.setStyleSheet(gdefs.D_GBX_STYLE)
+        lgbx_thr.setStyleSheet(gdefs.D_GBX_STYLE)
 
         # set groupBox layout 
-        self.__gbx_thr.setLayout(llay_gbx)
+        lgbx_thr.setLayout(llay_gbx)
+
+        # return
+        return lgbx_thr
+
+    # ---------------------------------------------------------------------------------------------
+    @QtCore.pyqtSlot(list)
+    def __on_data_alt(self, flst_data):
+        """
+        altimeter new data
+        """
+        # emit data_alt signal
+        self.C_SGN_DATA_ALT.emit(flst_data)
+
+    # ---------------------------------------------------------------------------------------------
+    @QtCore.pyqtSlot(bool)
+    def __on_page_on(self, fv_on):
+        """
+        page activated
+        """
+        return
 
 # < the end >--------------------------------------------------------------------------------------
         

@@ -15,5 +15,6 @@
 *.zip
 *~
 bkp
-tst
+build
 images
+tst
