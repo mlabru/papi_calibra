@@ -43,7 +43,7 @@ M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
 # degug mode
-M_DEBUG = True
+M_DEBUG = False
 
 # -------------------------------------------------------------------------------------------------
 def main():
