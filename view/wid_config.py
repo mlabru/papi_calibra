@@ -30,6 +30,7 @@ from PyQt4 import QtGui
 
 # control
 import control.pc_defs as gdefs
+import control.events.events_basic as events
 
 # < module data >----------------------------------------------------------------------------------
 
@@ -48,20 +49,24 @@ class CConfigWidget(QtGui.QWidget):
     C_SGN_PAGE_ON = QtCore.pyqtSignal(bool)
 
     # ---------------------------------------------------------------------------------------------
-    def __init__(self, f_parent=None):
+    def __init__(self, f_parent):
         """
         constructor
 
         @param f_parent: parent widget
         """
         # check input
-        # assert f_camera_feed
+        assert f_parent
 
         # init super class
         super(CConfigWidget, self).__init__(f_parent)
 
+        # events
+        #self.__event = f_parent.event
+        #assert self.__event
+
         # distância em metros
-        self.__f_dst = 60.
+        self.__f_dst = gdefs.D_DFL_DIST
         
         # altura atual em metros
         self.__f_alt = 0.
@@ -172,8 +177,30 @@ class CConfigWidget(QtGui.QWidget):
         #self.__lbl_status.setText("Monitor idle")
 
     # ---------------------------------------------------------------------------------------------
+    @QtCore.pyqtSlot(bool)
+    def __on_btn_reset_clicked(self, fv_val):
+        """
+        pushButton reset clicked
+        """
+        # distância em metros
+        self.__f_dst = gdefs.D_DFL_DIST
+        
+        # altura atual em metros
+        self.__f_alt = 0.
+
+        # emit signal
+        self.C_SGN_NEW_DIST.emit(self.__f_dst)
+
+        # create CReset event
+        #l_evt = events.CReset()
+        #assert l_evt
+
+        # dispatch event
+        #self.__event.post(l_evt)
+
+    # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(float)
-    def on_dsb_dst_valueChanged(self, ff_val):
+    def __on_dsb_dst_valueChanged(self, ff_val):
         """
         spinBox distância valueChanged
         """
@@ -219,7 +246,7 @@ class CConfigWidget(QtGui.QWidget):
         self.__dsb_dst.setValue(self.__f_dst)
         
         # connect spinBox
-        self.__dsb_dst.valueChanged.connect(self.on_dsb_dst_valueChanged)
+        self.__dsb_dst.valueChanged.connect(self.__on_dsb_dst_valueChanged)
 
         # create gbx layout
         llay_dst = QtGui.QVBoxLayout(lgbx_dst)
@@ -271,7 +298,7 @@ class CConfigWidget(QtGui.QWidget):
         lbtn_reset.setIcon(QtGui.QIcon(QtGui.QPixmap(":/images/clear.png")))
 
         # connect reset plot button        
-        # lbtn_reset.clicked.connect(self.__on_act_reset)
+        lbtn_reset.clicked.connect(self.__on_btn_reset_clicked)
 
         # create buttons layout
         llay_btn = QtGui.QVBoxLayout(lwid_btn)
@@ -286,7 +313,6 @@ class CConfigWidget(QtGui.QWidget):
         assert l_frm
         
         # setup
-        # l_frm.setMaximumHeight(150)
         l_frm.setFrameShape(QtGui.QFrame.StyledPanel)
         l_frm.setFrameShadow(QtGui.QFrame.Raised)
 

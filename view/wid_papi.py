@@ -52,7 +52,7 @@ class CPAPIWidget(QtGui.QWidget):
     C_SGN_PAGE_ON = QtCore.pyqtSignal(bool)
 
     # ---------------------------------------------------------------------------------------------
-    def __init__(self, f_control, f_monitor, f_parent=None):
+    def __init__(self, f_control, f_monitor, f_parent):
         """
         constructor
 
@@ -63,6 +63,7 @@ class CPAPIWidget(QtGui.QWidget):
         # check input
         assert f_control
         assert f_monitor
+        assert f_parent
         
         # init super class
         super(CPAPIWidget, self).__init__(f_parent)
@@ -70,6 +71,10 @@ class CPAPIWidget(QtGui.QWidget):
         # parent
         self.__parent = f_parent
         
+        # events
+        #self.__event = f_parent.event
+        #assert self.__event
+
         # create camera groupBox
         lgbx_cam = self.__create_gbx_cam(f_control, f_monitor)
 
@@ -300,6 +305,15 @@ class CPAPIWidget(QtGui.QWidget):
         if self.__wid_plp:
             # emit plot on signal
             self.__wid_plp.C_SGN_PLOT_P2W.emit(fi_box, ff_alt)
+
+    # =============================================================================================
+    # data
+    # =============================================================================================
+            
+    # ---------------------------------------------------------------------------------------------
+    #@property
+    #def event(self):
+        #return self.__event
 
 # < the end >--------------------------------------------------------------------------------------
         

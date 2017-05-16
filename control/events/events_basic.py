@@ -126,6 +126,26 @@ class CQuit(model.CEventsModel):
         # event name
         self.s_name = "Program Quit event"
 
+# < class CReset >---------------------------------------------------------------------------------
+
+class CReset(model.CEventsModel):
+    """
+    program reset event class
+    """
+    # ---------------------------------------------------------------------------------------------
+    def __init__(self):
+        """
+        constructor
+        """
+        # init super class
+        super(CReset, self).__init__()
+
+        # herdados de CEventsModel
+        # self.s_name    # event name
+
+        # event name
+        self.s_name = "Program Reset event"
+
 # < class CSave2Disk >-----------------------------------------------------------------------------
 
 class CSave2Disk(model.CEventsModel):
@@ -157,7 +177,7 @@ class CSave2Disk(model.CEventsModel):
         """
         return self.__s_table
 
-# < class CStart >--------------------------------------------------------------------------------
+# < class CStart >---------------------------------------------------------------------------------
 
 class CStart(model.CEventsModel):
     """
@@ -175,6 +195,25 @@ class CStart(model.CEventsModel):
         # self.s_name    # event name
 
         self.s_name = "Process Start event"
+
+# < class CStop >----------------------------------------------------------------------------------
+
+class CStop(model.CEventsModel):
+    """
+    process stop event class
+    """
+    # ---------------------------------------------------------------------------------------------
+    def __init__(self):
+        """
+        constructor
+        """
+        # init super class
+        super(CStop, self).__init__()
+
+        # herdados de CEventsModel
+        # self.s_name    # event name
+
+        self.s_name = "Process Stop event"
 
 # < class CTick >----------------------------------------------------------------------------------
 

@@ -32,6 +32,7 @@ import wid_light_box as wlbx
 
 # control
 import control.pc_defs as gdefs
+import control.events.events_basic as events
 
 # < module data >----------------------------------------------------------------------------------
 
@@ -53,7 +54,7 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
     C_SGN_PLOT_P2W = QtCore.pyqtSignal(int, float)
 
     # ---------------------------------------------------------------------------------------------
-    def __init__(self, f_title, fi_box, f_parent=None):
+    def __init__(self, f_title, fi_box, f_parent):
         """
         constructor
 
@@ -61,8 +62,18 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         @param fi_box: box no.
         @param f_parent: parent widget
         """
+        # check input
+        assert f_parent
+        
         # init super class
         super(CPAPILightBoxWidget, self).__init__(f_title, f_parent)
+
+        # events
+        #self.__event = f_parent.event
+        #assert self.__event
+
+        # register as event listener
+        #self.__event.register_listener(self)
 
         # save box no.
         self.__i_box = fi_box
@@ -71,7 +82,7 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         self.__f_alt = 0.
 
         # distância atual
-        self.__f_dist = 0.
+        self.__f_dist = gdefs.D_DFL_DIST
 
         # timestamp
         self.__f_time = 0
@@ -131,17 +142,40 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         l_machine.start()
 
     # ---------------------------------------------------------------------------------------------
+    # @staticmethod
+    def notify(self, f_evt):
+        """
+        event handling callback
+
+        @param f_event: received event
+        """
+        # check input
+        assert f_evt
+
+        # received reset event ?
+        #if isinstance(f_evt, events.CReset):
+            # reset texts
+            #self.__lbl_alt_r2p.setText("")
+            #self.__lbl_dgr_r2p.setText("")
+
+            #self.__lbl_alt_p2w.setText("")
+            #self.__lbl_dgr_p2w.setText("")
+
+            # save distance
+            #self.__f_dist = gdefs.D_DFL_DIST
+
+    # ---------------------------------------------------------------------------------------------
     def __on_btn_r2p(self):
         """
         transição de vermelho -> rosa
         """
         # altitude setup
         self.__lbl_alt_r2p.setText(u"Alt.:\t{:4.3f}m".format(self.__f_alt))
-        self.__lbl_alt_r2p.setStyleSheet("QLabel { background-color: lightgray; color: green; }");
+        self.__lbl_alt_r2p.setStyleSheet("QLabel { background-color: lightgray; color: green; }")
 
         # degrees setup
         self.__lbl_dgr_r2p.setText(u"Deg.:\t{:4.3f}°".format(math.degrees(math.atan2(self.__f_alt, self.__f_dist))))
-        self.__lbl_dgr_r2p.setStyleSheet("QLabel { background-color: lightgray; color: green; }");
+        self.__lbl_dgr_r2p.setStyleSheet("QLabel { background-color: lightgray; color: green; }")
                 
         # emit plot signal
         self.C_SGN_PLOT_R2P.emit(self.__i_box, self.__f_alt)
@@ -153,11 +187,11 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         """
         # altitude setup
         self.__lbl_alt_p2w.setText(u"Alt.:\t{:4.3f}m".format(self.__f_alt))
-        self.__lbl_alt_p2w.setStyleSheet("QLabel { background-color: lightgray; color: green; }");
+        self.__lbl_alt_p2w.setStyleSheet("QLabel { background-color: lightgray; color: green; }")
 
         # degrees setup
         self.__lbl_dgr_p2w.setText(u"Deg.:\t{:4.3f}°".format(math.degrees(math.atan2(self.__f_alt, self.__f_dist))))
-        self.__lbl_dgr_p2w.setStyleSheet("QLabel { background-color: lightgray; color: green; }");
+        self.__lbl_dgr_p2w.setStyleSheet("QLabel { background-color: lightgray; color: green; }")
                 
         # emit plot signal
         self.C_SGN_PLOT_P2W.emit(self.__i_box, self.__f_alt)
@@ -197,11 +231,11 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         l_light_box.show()
 
         # create label altura V2P
-        self.__lbl_alt_r2p = QtGui.QLabel("Alt.:")
+        self.__lbl_alt_r2p = QtGui.QLabel()
         assert self.__lbl_alt_r2p
 
         # create label graus V2P
-        self.__lbl_dgr_r2p = QtGui.QLabel("Deg.:")
+        self.__lbl_dgr_r2p = QtGui.QLabel()
         assert self.__lbl_dgr_r2p
 
         # create button V2P
@@ -212,11 +246,11 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         self.__btn_r2p.clicked.connect(self.__on_btn_r2p)
 
         # create label altura P2W
-        self.__lbl_alt_p2w = QtGui.QLabel("Alt.:")
+        self.__lbl_alt_p2w = QtGui.QLabel()
         assert self.__lbl_alt_p2w
 
         # create label graus V2P
-        self.__lbl_dgr_p2w = QtGui.QLabel("Deg.:")
+        self.__lbl_dgr_p2w = QtGui.QLabel()
         assert self.__lbl_dgr_p2w
 
         # create button V2P

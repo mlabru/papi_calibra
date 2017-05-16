@@ -60,7 +60,7 @@ def main():
     # debug mode ?
     if M_DEBUG:
         # fake client address 
-        gdefs.D_NET_CLI = "192.168.11.151"
+        gdefs.D_NET_CLI = "192.168.11.101"
 
         # create serial read thread
         lthr_ser = threading.Thread(target=ser_fake, args=(l_queue,))

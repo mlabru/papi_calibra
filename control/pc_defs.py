@@ -58,29 +58,27 @@ SET_MSG_VALIDAS = [D_MSG_ALT, D_MSG_BAR, D_MSG_GPS, D_MSG_THR, D_MSG_IMG, D_MSG_
 
 # < PAPI >-----------------------------------------------------------------------------------------
 
-# linhas de transição
-M_LINES = ['A', 'B', 'D', 'E']
-
 # ângulo de transição baixo (caixa 1)
-M_ANG_A = 2.50
-
+D_ANG_A = 2.50
 # ângulo de transição médio-baixo (caixa 2)
-M_ANG_B = 2.83
-
+D_ANG_B = 2.83
 # ângulo de transição médio-alto (caixa 3)
-M_ANG_D = 3.17
-
+D_ANG_D = 3.17
 # ângulo de transição alto (caixa 4)
-M_ANG_E = 3.50
+D_ANG_E = 3.50
 
 # ângulo normal da rampa
-M_ANG_C = (M_ANG_B + M_ANG_D) / 2.
-
+D_ANG_C = (D_ANG_B + D_ANG_D) / 2.
 # ângulo de altura mínima do olho do piloto
-M_ANG_M = M_ANG_B - 0.033
-
+D_ANG_M = D_ANG_B - 0.033
 # superfície de proteção de obtáculo
-M_ANG_OPS = M_ANG_A - 0.57
+D_ANG_OPS = D_ANG_A - 0.57
+
+# linhas de transição
+D_LINES = ['A', 'B', 'D', 'E']
+
+# distância default (mínima)
+D_DFL_DIST = 60.
 
 # < rede >-----------------------------------------------------------------------------------------
 
@@ -102,7 +100,6 @@ D_NET_PORT_THR = 1940
 
 # imagens
 D_NET_PORT_IMG = 1961
-
 # comnado/controle/configuração
 D_NET_PORT_CCC = 1970
 

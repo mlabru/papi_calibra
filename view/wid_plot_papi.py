@@ -43,6 +43,7 @@ import mpl_plot_line as mpl
 
 # control
 import control.pc_defs as gdefs
+import control.events.events_basic as events
 
 # < module data >----------------------------------------------------------------------------------
 
@@ -64,14 +65,14 @@ class CPlotPAPIWidget(QtGui.QWidget):
     C_SGN_PLOT_P2W = QtCore.pyqtSignal(int, float)
 
     # ---------------------------------------------------------------------------------------------
-    def __init__(self, f_parent=None):
+    def __init__(self, f_parent):
         """
         constructor
 
         @param f_parent: parent widget
         """
         # check input
-        # assert f_camera_feed
+        assert f_parent
 
         # init super class
         super(CPlotPAPIWidget, self).__init__(f_parent)
@@ -79,14 +80,21 @@ class CPlotPAPIWidget(QtGui.QWidget):
         # distância em metros
         self.__parent = f_parent
         
+        # events
+        #self.__event = f_parent.event
+        #assert self.__event
+
+        # register as event listener
+        #self.__event.register_listener(self)
+
         # distância em metros
-        self.__f_dst = 60.
+        self.__f_dst = gdefs.D_DFL_DIST
         
         # altura atual em metros
         self.__f_alt = 0.
 
         # altura máxima em metros
-        self.__f_alt_max = self.__f_dst * math.sin(math.radians(gdefs.M_ANG_E + 1.0))
+        self.__f_alt_max = self.__f_dst * math.sin(math.radians(gdefs.D_ANG_E + 1.0))
 
         # setup user interface
         self.__setup_ui(self)
@@ -94,8 +102,10 @@ class CPlotPAPIWidget(QtGui.QWidget):
         # create toolBar
         self.__create_toolbar(f_parent)
 
-        # setup PAPI lines
-        self.__line_s = [None for _ in xrange(4)]
+        # PAPI line angles (A, B, D, E)
+        self.__f_ang = [None for _ in xrange(4)]
+
+        # setup PAPI lines (A, B, D, E)
         self.__line_m = [None for _ in xrange(4)]
         self.__line_i = [None for _ in xrange(4)]
 
@@ -120,6 +130,24 @@ class CPlotPAPIWidget(QtGui.QWidget):
             f_icon="clear.png", f_slot=self.__on_act_clear, f_tip=self.tr("Clear plot")))
 
     # ---------------------------------------------------------------------------------------------
+    # @staticmethod
+    def notify(self, f_evt):
+        """
+        event handling callback
+            
+        @param f_event: received event
+        """
+        # check input
+        assert f_evt
+
+        # received reset event ?
+        #if isinstance(f_evt, events.CReset):
+            # reset distance
+            #self.__on_new_dist(gdefs.D_DFL_DIST)
+            # clear plot
+            #self.__on_act_clear()
+
+    # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot()
     def __on_act_clear(self):
         """
@@ -127,6 +155,14 @@ class CPlotPAPIWidget(QtGui.QWidget):
         """
         # desenha o canvas
         self.__drawing.clear()
+
+        # axes rescale
+        self.__drawing.set_xlim(0, self.__f_dst)
+        self.__drawing.set_ylim(0, self.__f_alt_max)
+
+        # label dos eixos
+        self.__drawing.set_ylabel(u"Elevação")
+        self.__drawing.set_xlabel(u"Distância")
 
         # desenha o canvas
         self.__canvas.draw()
@@ -139,10 +175,11 @@ class CPlotPAPIWidget(QtGui.QWidget):
         """
         # distância em metros
         self.__f_dst = ff_dist
+        self.__f_alt_max = ff_dist * math.sin(math.radians(gdefs.D_ANG_E + 1.0))
 
         # axes rescale
-        self.__drawing.set_xlim(0, ff_dist)
-        self.__drawing.set_ylim(0, ff_dist * math.sin(math.radians(gdefs.M_ANG_E + 0.5)))
+        self.__drawing.set_xlim(0, self.__f_dst)
+        self.__drawing.set_ylim(0, self.__f_alt_max)
 
         # redraw canvas
         self.__canvas.draw()
@@ -174,12 +211,12 @@ class CPlotPAPIWidget(QtGui.QWidget):
             l_y = [0., ff_alt] 
 
             # limite inferior ângulo de transição baixo
-            self.__line_i[fi_box] = mpl.CPlotLine(l_x, l_y, mfc="red", ms=12, label=llbl_gr)
+            self.__line_i[fi_box] = mpl.CPlotLine(l_x, l_y, c="red", ls="--", lw=1, label=llbl_gr)
             assert self.__line_i[fi_box]
             
             # setup
             self.__line_i[fi_box].text.set_color("red")
-            self.__line_i[fi_box].text.set_fontsize(8)
+            self.__line_i[fi_box].text.set_fontsize(7)
 
             # draw line
             self.__drawing.add_line(self.__line_i[fi_box])
@@ -193,7 +230,7 @@ class CPlotPAPIWidget(QtGui.QWidget):
             l_log = logging.getLogger("CPlotPAPIWidget::__on_plot_r2p")
             l_log.setLevel(logging.CRITICAL)
             l_log.critical(u"<E01: box {} doesn't exist".format(fi_box))
-            
+
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(int, float)
     def __on_plot_p2w(self, fi_box, ff_alt):
@@ -202,42 +239,98 @@ class CPlotPAPIWidget(QtGui.QWidget):
         """
         # valid box no. ?
         if -1 < fi_box < 4:
-            # label
-            llbl_gr = u"{:4.3f}°".format(math.degrees(math.atan2(ff_alt, self.__f_dst)))
-
-            l_x = [0., self.__f_dst]  
-            l_y = [0., ff_alt] 
-
-            # limite inferior ângulo de transição baixo
-            self.__line_s[fi_box] = mpl.CPlotLine(l_x, l_y, mfc="blue", ms=12, label=llbl_gr)
-            assert self.__line_s[fi_box]
-            
-            # setup
-            self.__line_s[fi_box].text.set_color("blue")
-            self.__line_s[fi_box].text.set_fontsize(8)
-
-            # draw line
-            self.__drawing.add_line(self.__line_s[fi_box])
-
             # obtém os dados da linha inferior
             (_, l_y) = self.__line_i[fi_box].get_data()
 
             l_x = [0., self.__f_dst]  
             l_y = [0., (ff_alt + l_y[1]) / 2.] 
 
-            # label
-            llbl_gr = u"{} - {:4.3f}°".format(gdefs.M_LINES[fi_box], math.degrees(math.atan2(l_y[1], self.__f_dst)))
+            # hide inferior line
+            self.__line_i[fi_box].text.set_text("")
+            self.__line_i[fi_box].set_visible(False)
+
+            # determina o ângulo da caixa
+            self.__f_ang[fi_box] = math.degrees(math.atan2(l_y[1], self.__f_dst))
+
+            # label da linha
+            llbl_gr = u"{} - {:4.3f}°".format(gdefs.D_LINES[fi_box], self.__f_ang[fi_box])
 
             # limite inferior ângulo de transição baixo
-            self.__line_m[fi_box] = mpl.CPlotLine(l_x, l_y, mfc="green", ms=12, label=llbl_gr)
+            self.__line_m[fi_box] = mpl.CPlotLine(l_x, l_y, c="green", ls="-", lw=2, label=llbl_gr)
             assert self.__line_m[fi_box]
             
             # setup
             self.__line_m[fi_box].text.set_color("green")
-            self.__line_m[fi_box].text.set_fontsize(10)
+            self.__line_m[fi_box].text.set_fontsize(9)
 
             # draw line
             self.__drawing.add_line(self.__line_m[fi_box])
+
+            # caixa 1 ?
+            if 0 == fi_box:
+                # calcula superfície de proteção de obtáculo (ANG_OPS = ANG_A - 0.57)
+                lf_ops = self.__f_ang[0] - 0.57
+                
+                # label da linha
+                llbl_gr = u"{} - {:4.3f}°".format("OPS", lf_ops)
+
+                l_x = [0., self.__f_dst]  
+                l_y = [0., self.__f_dst * math.sin(math.radians(lf_ops))] 
+
+                # superfície de proteção de obtáculo
+                self.__line_ops = mpl.CPlotLine(l_x, l_y, c="blue", ls="-", lw=1, label=llbl_gr)
+                assert self.__line_ops
+                
+                # setup
+                self.__line_ops.text.set_color("blue")
+                self.__line_ops.text.set_fontsize(7)
+
+                # draw line
+                self.__drawing.add_line(self.__line_ops)
+
+            # caixa 2 ?
+            elif 1 == fi_box:
+                # calcula ângulo de altura mínima do olho do piloto (ANG_M = ANG_B - 0.033)
+                lf_pe = self.__f_ang[1] - 0.033
+                
+                # label da linha
+                llbl_gr = u"{} - {:4.3f}°".format("M", lf_pe)
+
+                l_x = [0., self.__f_dst]  
+                l_y = [0., self.__f_dst * math.sin(math.radians(lf_pe))] 
+
+                # altura mínima do olho do piloto
+                self.__line_pe = mpl.CPlotLine(l_x, l_y, c="blue", ls="-", lw=1, label=llbl_gr)
+                assert self.__line_pe
+                
+                # setup
+                self.__line_pe.text.set_color("blue")
+                self.__line_pe.text.set_fontsize(7)
+
+                # draw line
+                self.__drawing.add_line(self.__line_pe)
+
+            # caixa 4 ?
+            elif 3 == fi_box:
+                # calcula ângulo normal da rampa (ANG_B + ANG_D) / 2.
+                lf_c = (self.__f_ang[1] + self.__f_ang[fi_box]) / 2.
+                
+                # label da linha
+                llbl_gr = u"{} - {:4.3f}°".format("M", lf_c)
+
+                l_x = [0., self.__f_dst]  
+                l_y = [0., self.__f_dst * math.sin(math.radians(lf_c))] 
+
+                # altura mínima do olho do piloto
+                self.__line_c = mpl.CPlotLine(l_x, l_y, c="black", ls="-", lw=1, label=llbl_gr)
+                assert self.__line_c
+                
+                # setup
+                self.__line_c.text.set_color("black")
+                self.__line_c.text.set_fontsize(7)
+
+                # draw line
+                self.__drawing.add_line(self.__line_c)
 
             # desenha o canvas
             self.__canvas.draw()

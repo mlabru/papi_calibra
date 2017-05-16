@@ -71,6 +71,9 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
         """
         constructor
         """
+        # check input
+        assert f_control
+        
         # init super class
         super(CPAPICalWndMainCli, self).__init__()
 
@@ -114,7 +117,7 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
     @QtCore.pyqtSlot(QtGui.QCloseEvent)
     def closeEvent(self, f_evt):
         """
-        callback clove event
+        callback close event
         """
         # really quit ?
         if self.__really_quit():
@@ -130,11 +133,11 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
             f_evt.accept()
 
             # create CQuit event
-            l_evt = events.CQuit()
-            assert l_evt
+            #l_evt = events.CQuit()
+            #assert l_evt
 
             # dispatch event
-            self.__event.post(l_evt)
+            #self.__event.post(l_evt)
 
         # otherwise, continua...
         else:
@@ -233,8 +236,8 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
         assert f_evt
 
         # received quit event ?
-        if isinstance(f_evt, events.CQuit):
-            pass
+        #if isinstance(f_evt, events.CQuit):
+            #pass
         
     # ---------------------------------------------------------------------------------------------
     def __on_about(self):
@@ -343,5 +346,18 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
 
         # set size 
         self.resize(f_settings.value("size", QtCore.QSize(1024, 768)).toSize())
+
+    # =============================================================================================
+    # data
+    # =============================================================================================
+            
+    # ---------------------------------------------------------------------------------------------
+    @property
+    def event(self):
+        return self.__event
+        
+    @event.setter
+    def event(self, f_val):
+        self.__event = f_val
 
 # < the end >--------------------------------------------------------------------------------------
