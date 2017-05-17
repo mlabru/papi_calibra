@@ -47,9 +47,9 @@ import control.pc_defs as gdefs
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-# < CWidgetSensors >-------------------------------------------------------------------------------
+# < CSensorsWidget >-------------------------------------------------------------------------------
 
-class CWidgetSensors(QtGui.QWidget):
+class CSensorsWidget(QtGui.QWidget):
     """
     a port packet monitor that plots live data using PyQwt
     """
@@ -71,7 +71,7 @@ class CWidgetSensors(QtGui.QWidget):
         assert f_monitor
         
         # init super class
-        super(CWidgetSensors, self).__init__(f_parent)
+        super(CSensorsWidget, self).__init__(f_parent)
 
         # parent
         # self.__parent = f_parent

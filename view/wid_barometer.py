@@ -75,7 +75,7 @@ class CWidgetBarometer(wplt.CWidgetPlotModel):
         # curves checkBoxes
         self.lst_checkboxes = [self._create_checkbox("Barm 1(G)", QtCore.Qt.green,  self._activate_curve, 0),
                                self._create_checkbox("Barm 2(R)", QtCore.Qt.red,    self._activate_curve, 1),
-                               self._create_checkbox("Fusion(Y)", QtCore.Qt.yellow, self._activate_curve, 2)]
+                               self._create_checkbox("Kalman(Y)", QtCore.Qt.yellow, self._activate_curve, 2)]
 
         # clear plot button
         lbtn_clear = QtGui.QPushButton("clear plot")

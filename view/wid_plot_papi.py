@@ -38,8 +38,12 @@ import matplotlib.lines as lines
 import matplotlib.transforms as mtransforms
 import matplotlib.backends.backend_qt4agg as qt4agg
 
+# view
+import mpl_plot_line as mpl
+
 # control
 import control.pc_defs as gdefs
+import control.events.events_basic as events
 
 # < module data >----------------------------------------------------------------------------------
 
@@ -47,61 +51,50 @@ import control.pc_defs as gdefs
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-# ângulo de transição baixo (caixa 1)
-M_ANG_A = 2.50
+# < CPlotPAPIWidget >------------------------------------------------------------------------------
 
-# ângulo de transição médio-baixo (caixa 2)
-M_ANG_B = 2.83
-
-# ângulo de transição médio-alto (caixa 3)
-M_ANG_D = 3.17
-
-# ângulo de transição alto (caixa 4)
-M_ANG_E = 3.50
-
-# ângulo normal da rampa
-M_ANG_C = (M_ANG_B + M_ANG_D) / 2.
-
-# ângulo de altura mínima do olho do piloto
-M_ANG_M = M_ANG_B - 0.033
-
-# superfície de proteção de obtáculo
-M_ANG_OPS = M_ANG_A - 0.57
-
-# < CWidgetPlotPAPI >------------------------------------------------------------------------------
-
-class CWidgetPlotPAPI(QtGui.QWidget):
+class CPlotPAPIWidget(QtGui.QWidget):
     """
     plot PAPI graphics
     """
     # signal
-    C_SGN_NEW_DATA = QtCore.pyqtSignal(float)
+    C_SGN_NEW_DIST = QtCore.pyqtSignal(float)
     C_SGN_PAGE_ON = QtCore.pyqtSignal(bool)
 
+    C_SGN_PLOT_R2P = QtCore.pyqtSignal(int, float)
+    C_SGN_PLOT_P2W = QtCore.pyqtSignal(int, float)
+
     # ---------------------------------------------------------------------------------------------
-    def __init__(self, f_parent=None):
+    def __init__(self, f_parent):
         """
         constructor
 
         @param f_parent: parent widget
         """
         # check input
-        # assert f_camera_feed
+        assert f_parent
 
         # init super class
-        super(CWidgetPlotPAPI, self).__init__(f_parent)
+        super(CPlotPAPIWidget, self).__init__(f_parent)
 
         # distância em metros
         self.__parent = f_parent
         
+        # events
+        self.__event = f_parent.evtmgr
+        assert self.__event
+
+        # register as event listener
+        self.__event.register_listener(self)
+
         # distância em metros
-        self.__f_dst = 60.
+        self.__f_dst = gdefs.D_DFL_DIST
         
         # altura atual em metros
         self.__f_alt = 0.
 
         # altura máxima em metros
-        self.__f_alt_max = self.__f_dst * math.sin(math.radians(M_ANG_E + 0.5))
+        self.__f_alt_max = self.__f_dst * math.sin(math.radians(gdefs.D_ANG_MAX))
 
         # setup user interface
         self.__setup_ui(self)
@@ -109,12 +102,19 @@ class CWidgetPlotPAPI(QtGui.QWidget):
         # create toolBar
         self.__create_toolbar(f_parent)
 
-        # setup PAPI lines
-        self.__setup_lines()
+        # PAPI line angles (A, B, D, E)
+        self.__f_ang = [None for _ in xrange(4)]
+
+        # setup PAPI lines (A, B, D, E)
+        self.__line_m = [None for _ in xrange(4)]
+        self.__line_i = [None for _ in xrange(4)]
 
         # connect new data signal
-        self.C_SGN_NEW_DATA.connect(self.__on_new_data)
+        self.C_SGN_NEW_DIST.connect(self.__on_new_dist)
         self.C_SGN_PAGE_ON.connect(self.__on_page_on)
+
+        self.C_SGN_PLOT_R2P.connect(self.__on_plot_r2p)
+        self.C_SGN_PLOT_P2W.connect(self.__on_plot_p2w)
 
     # ---------------------------------------------------------------------------------------------
     def __create_toolbar(self, f_parent):
@@ -125,141 +125,67 @@ class CWidgetPlotPAPI(QtGui.QWidget):
         self.__tbr_plot = f_parent.addToolBar(self.tr("plotPAPI"))
         assert self.__tbr_plot is not None
 
-        # start
-        self.__tbr_plot.addAction(f_parent.create_action(self.tr("S&tart"), f_shortcut="Ctrl+T",
-            f_icon="start.png", f_slot=self.on_act_start, f_tip=self.tr("Start calibration")))
-
-        # stop
-        self.__tbr_plot.addAction(f_parent.create_action(self.tr("St&op"), f_shortcut="Ctrl+O",
-            f_icon="stop.png", f_slot=self.on_act_stop, f_tip=self.tr("Stop calibration")))
-
-        # separator
-        self.__tbr_plot.addSeparator()
-
         # clear
         self.__tbr_plot.addAction(f_parent.create_action(self.tr("&Clear"), f_shortcut="Ctrl+C",
-            f_icon="clear.png", f_slot=self.on_act_clear, f_tip=self.tr("Clear plot")))
+            f_icon="clear.png", f_slot=self.__on_act_clear, f_tip=self.tr("Clear plot")))
+
+    # ---------------------------------------------------------------------------------------------
+    # @staticmethod
+    def notify(self, f_evt):
+        """
+        event handling callback
+            
+        @param f_event: received event
+        """
+        # check input
+        assert f_evt
+
+        # received reset event ?
+        if isinstance(f_evt, events.CReset):
+            # reset distance
+            self.__on_new_dist(gdefs.D_DFL_DIST)
+            # clear plot
+            self.__on_act_clear()
 
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot()
-    def on_act_clear(self):
+    def __on_act_clear(self):
         """
         button clear clicked
         """
         # desenha o canvas
         self.__drawing.clear()
 
+        # axes rescale
+        self.__drawing.set_xlim(0, self.__f_dst)
+        self.__drawing.set_ylim(0, self.__f_alt_max)
+
+        # label dos eixos
+        self.__drawing.set_ylabel(u"Elevação")
+        self.__drawing.set_xlabel(u"Distância")
+
         # desenha o canvas
         self.__canvas.draw()
 
     # ---------------------------------------------------------------------------------------------
-    @QtCore.pyqtSlot()
-    def on_act_start(self):
-        """ 
-        start PAPI Calibra : com_monitor thread and the update timer
-        """
-        # get port comboBox current index
-        #li_ndx = self.cbx_port.currentIndex()
-        # get current selected port
-        #ls_port = self.__lst_available_tty[li_ndx]
-
-        # get baud comboBox current index
-        #li_ndx = self.cbx_baud.currentIndex()
-        # get current selected baud
-        #li_baud = self.__lst_available_baud[li_ndx]
-
-        # disable start button
-        #self.btn_start.setEnabled(False)
-        # enable stop button 
-        #self.btn_stop.setEnabled(True)
-        # disable port comboBox
-        #self.cbx_port.setEnabled(False)
-        # disable baud comboBox
-        #self.cbx_baud.setEnabled(False)
-
-        # create TTYMonitorStart event
-        #l_evt = evttty.CTTYMonitorStart(ls_port, li_baud)
-        #assert l_evt
-
-        # send event
-        #self.__event.post(l_evt)
-
-        # config timer update method
-        #self.__timer_update.timeout.connect(self.__on_timer)
-
-        # get update frequency
-        #lf_update_freq = self.__knb_update_freq.value()
-
-        #if lf_update_freq > 0:
-            # start timer update
-            #self.__timer_update.start(1000. / lf_update_freq)
-
-        # update statusBar
-        #self.__lbl_status.setText("Monitor running")
-
-    # ---------------------------------------------------------------------------------------------
-    @QtCore.pyqtSlot()
-    def on_act_stop(self):
-        """ 
-        stop PAPI Calibra
-        """
-        #if self.com_monitor is not None:
-            #self.com_monitor.join(1000)
-            #self.com_monitor = None
-
-        # reset flag
-        #self.monitor_active = False
-
-        # enable start button
-        #self.btn_start.setEnabled(True)
-        # disable stop button
-        #self.btn_stop.setEnabled(False)
-        # enable tty port comboBox
-        #self.cbx_port.setEnabled(True)
-
-        # stops update timer
-        #self.__timer_update.stop()
-
-        # update status bar
-        #self.__lbl_status.setText("Monitor idle")
-
-    # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(float)
-    def on_dsb_dst_valueChanged(self, ff_val):
+    def __on_new_dist(self, ff_dist):
         """
-        spinBox distância valueChanged
+        received new distance callback
         """
-        # save new distance
-        self.__f_dst = ff_val
+        # distância em metros
+        self.__f_dst = ff_dist
+        self.__f_alt_max = ff_dist * math.sin(math.radians(gdefs.D_ANG_MAX))
 
         # axes rescale
-        self.__drawing.set_xlim(0, ff_val)
-        self.__drawing.set_ylim(0, ff_val * math.sin(math.radians(M_ANG_E + 0.5)))
-
-        self.__on_new_data(ff_val / 15.)
+        self.__drawing.set_xlim(0, self.__f_dst)
+        self.__drawing.set_ylim(0, self.__f_alt_max)
 
         # redraw canvas
         self.__canvas.draw()
 
-    # ---------------------------------------------------------------------------------------------
-    @QtCore.pyqtSlot(float)
-    def __on_new_data(self, ff_alt):
-        """
-        received new elevation callback
-        """
-        # salva nova altura
-        self.__f_alt = ff_alt
-
-        l_x = [0., self.__f_dst]  
-        l_y = [0., self.__f_alt] 
-
-        llbl_gr = u"{:4.3f}°".format(math.degrees(math.atan2(self.__f_alt, self.__f_dst)))
-
-        self.__line_A.set_data(l_x, l_y)
-        self.__line_A.set_label(llbl_gr)
-        
-        # desenha o canvas
-        self.__canvas.draw()
+        # self.__line_A.set_data(l_x, l_y)
+        # self.__line_A.set_label(llbl_gr)
 
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(bool)
@@ -271,58 +197,151 @@ class CWidgetPlotPAPI(QtGui.QWidget):
         self.__tbr_plot.setVisible(fv_on)
         
     # ---------------------------------------------------------------------------------------------
-    def __setup_lines(self):
+    @QtCore.pyqtSlot(int, float)
+    def __on_plot_r2p(self, fi_box, ff_alt):
         """
-        create PAPI lines
+        plot r2p activated
         """
-        # initial data
-        l_x = [0., self.__f_dst]  
-        l_y = [0., self.__f_alt] 
+        # valid box no. ?
+        if -1 < fi_box < 4:
+            # label
+            llbl_gr = u"{:4.3f}°".format(math.degrees(math.atan2(ff_alt, self.__f_dst)))
 
-        # label
-        llbl_gr = u"{:4.3f}°".format(math.degrees(math.atan2(self.__f_alt, self.__f_dst)))
+            l_x = [0., self.__f_dst]  
+            l_y = [0., ff_alt] 
 
-        l_y = [0., 2.] 
+            # limite inferior ângulo de transição baixo
+            self.__line_i[fi_box] = mpl.CPlotLine(l_x, l_y, c="red", ls="--", lw=1, label=llbl_gr)
+            assert self.__line_i[fi_box]
+            
+            # setup
+            self.__line_i[fi_box].text.set_color("red")
+            self.__line_i[fi_box].text.set_fontsize(7)
 
-        # limite inferior ângulo de transição baixo (caixa 1)
-        self.__line_A_I = CPlotLine(l_x, l_y, mfc='red', ms=12, label=llbl_gr)
-        assert self.__line_A_I
-        
-        # setup
-        self.__line_A_I.text.set_color('red')
-        self.__line_A_I.text.set_fontsize(8)
+            # draw line
+            self.__drawing.add_line(self.__line_i[fi_box])
 
-        # draw line
-        self.__drawing.add_line(self.__line_A_I)
-        
+            # desenha o canvas
+            self.__canvas.draw()
 
-        l_y = [0., 4.] 
+        # senão,...
+        else:
+            # logger
+            l_log = logging.getLogger("CPlotPAPIWidget::__on_plot_r2p")
+            l_log.setLevel(logging.CRITICAL)
+            l_log.critical(u"<E01: box {} doesn't exist".format(fi_box))
 
-        # ângulo de transição baixo (caixa 1)
-        self.__line_A = CPlotLine(l_x, l_y, mfc='red', ms=12, label=llbl_gr)
-        assert self.__line_A
-        
-        # setup
-        self.__line_A.text.set_color('red')
-        self.__line_A.text.set_fontsize(8)
+    # ---------------------------------------------------------------------------------------------
+    @QtCore.pyqtSlot(int, float)
+    def __on_plot_p2w(self, fi_box, ff_alt):
+        """
+        plot p2w activated
+        """
+        # valid box no. ?
+        if -1 < fi_box < 4:
+            # obtém os dados da linha inferior
+            (_, l_y) = self.__line_i[fi_box].get_data()
 
-        # draw line
-        self.__drawing.add_line(self.__line_A)
-        
+            l_x = [0., self.__f_dst]  
+            l_y = [0., (ff_alt + l_y[1]) / 2.] 
 
-        l_y = [0., 6.] 
+            # hide inferior line
+            self.__line_i[fi_box].text.set_text("")
+            self.__line_i[fi_box].set_visible(False)
 
-        # limite superior ângulo de transição baixo (caixa 1)
-        self.__line_A_S = CPlotLine(l_x, l_y, mfc='red', ms=12, label=llbl_gr)
-        assert self.__line_A_S
-        
-        # setup
-        self.__line_A_S.text.set_color('red')
-        self.__line_A_S.text.set_fontsize(8)
+            # determina o ângulo da caixa
+            self.__f_ang[fi_box] = math.degrees(math.atan2(l_y[1], self.__f_dst))
 
-        # draw line
-        self.__drawing.add_line(self.__line_A_S)
+            # label da linha
+            llbl_gr = u"{} - {:4.3f}°".format(gdefs.D_LINES[fi_box], self.__f_ang[fi_box])
 
+            # limite inferior ângulo de transição baixo
+            self.__line_m[fi_box] = mpl.CPlotLine(l_x, l_y, c="green", ls="-", lw=2, label=llbl_gr)
+            assert self.__line_m[fi_box]
+            
+            # setup
+            self.__line_m[fi_box].text.set_color("green")
+            self.__line_m[fi_box].text.set_fontsize(9)
+
+            # draw line
+            self.__drawing.add_line(self.__line_m[fi_box])
+
+            # caixa 1 ?
+            if 0 == fi_box:
+                # calcula superfície de proteção de obtáculo (ANG_OPS = ANG_A - 0.57)
+                lf_ops = self.__f_ang[0] - 0.57
+                
+                # label da linha
+                llbl_gr = u"{} - {:4.3f}°".format("OPS", lf_ops)
+
+                l_x = [0., self.__f_dst]  
+                l_y = [0., self.__f_dst * math.sin(math.radians(lf_ops))] 
+
+                # superfície de proteção de obtáculo
+                self.__line_ops = mpl.CPlotLine(l_x, l_y, c="blue", ls="-", lw=1, label=llbl_gr)
+                assert self.__line_ops
+                
+                # setup
+                self.__line_ops.text.set_color("blue")
+                self.__line_ops.text.set_fontsize(7)
+
+                # draw line
+                self.__drawing.add_line(self.__line_ops)
+
+            # caixa 2 ?
+            elif 1 == fi_box:
+                # calcula ângulo de altura mínima do olho do piloto (ANG_M = ANG_B - 0.033)
+                lf_pe = self.__f_ang[1] - 0.033
+                
+                # label da linha
+                llbl_gr = u"{} - {:4.3f}°".format("M", lf_pe)
+
+                l_x = [0., self.__f_dst]  
+                l_y = [0., self.__f_dst * math.sin(math.radians(lf_pe))] 
+
+                # altura mínima do olho do piloto
+                self.__line_pe = mpl.CPlotLine(l_x, l_y, c="blue", ls="-", lw=1, label=llbl_gr)
+                assert self.__line_pe
+                
+                # setup
+                self.__line_pe.text.set_color("blue")
+                self.__line_pe.text.set_fontsize(7)
+
+                # draw line
+                self.__drawing.add_line(self.__line_pe)
+
+            # caixa 4 ?
+            elif 3 == fi_box:
+                # calcula ângulo normal da rampa (ANG_B + ANG_D) / 2.
+                lf_c = (self.__f_ang[1] + self.__f_ang[fi_box]) / 2.
+                
+                # label da linha
+                llbl_gr = u"{} - {:4.3f}°".format("M", lf_c)
+
+                l_x = [0., self.__f_dst]  
+                l_y = [0., self.__f_dst * math.sin(math.radians(lf_c))] 
+
+                # altura mínima do olho do piloto
+                self.__line_c = mpl.CPlotLine(l_x, l_y, c="black", ls="-", lw=1, label=llbl_gr)
+                assert self.__line_c
+                
+                # setup
+                self.__line_c.text.set_color("black")
+                self.__line_c.text.set_fontsize(7)
+
+                # draw line
+                self.__drawing.add_line(self.__line_c)
+
+            # desenha o canvas
+            self.__canvas.draw()
+
+        # senão,...
+        else:
+            # logger
+            l_log = logging.getLogger("CPlotPAPIWidget::__on_plot_p2w")
+            l_log.setLevel(logging.CRITICAL)
+            l_log.critical(u"<E01: box {} doesn't exist".format(fi_box))
+            
     # ---------------------------------------------------------------------------------------------
     def __setup_plot(self):
         """
@@ -356,106 +375,15 @@ class CWidgetPlotPAPI(QtGui.QWidget):
         # create plot 
         self.__setup_plot()
 
-        # create font
-        l_font = QtGui.QFont()
-        assert l_font
-
-        # setup
-        l_font.setBold(True)
-        l_font.setWeight(75)
-
-        # groupBox distância
-        lgbx_dst = QtGui.QGroupBox(u"Distância")
-        assert lgbx_dst
-        
-        # spinBox distância
-        self.__dsb_dst = QtGui.QDoubleSpinBox()
-        assert self.__dsb_dst
-
-        # setup
-        self.__dsb_dst.setMaximum(500.)
-        self.__dsb_dst.setMinimum(60.)
-        self.__dsb_dst.setValue(self.__f_dst)
-        
-        # connect spinBox
-        self.__dsb_dst.valueChanged.connect(self.on_dsb_dst_valueChanged)
-
-        # create gbx layout
-        llay_dst = QtGui.QVBoxLayout(lgbx_dst)
-        assert llay_dst is not None
-
-        # setup
-        llay_dst.addWidget(self.__dsb_dst)
-
-        # groupBox pto zero 
-        lgbx_zero = QtGui.QGroupBox(u"Pto.Zero")
-        assert lgbx_zero
-
-        # labels lat/lng/alt
-        self.__lbl_lat = QtGui.QLabel("Lat:\t{}".format(-23.2463))
-        assert self.__lbl_lat
-
-        self.__lbl_lng = QtGui.QLabel("Lng:\t{}".format(-45.8542))
-        assert self.__lbl_lng
-
-        self.__lbl_alt = QtGui.QLabel("Alt:\t{}".format(self.__f_alt))
-        assert self.__lbl_alt
-
-        # create gbx layout
-        llay_ptz = QtGui.QVBoxLayout(lgbx_zero)
-        assert llay_ptz is not None
-
-        # setup
-        llay_ptz.addWidget(self.__lbl_lat)
-        llay_ptz.addWidget(self.__lbl_lng)
-        llay_ptz.addWidget(self.__lbl_alt)
-
-        # widget buttons
-        lwid_btn = QtGui.QWidget()
-        assert lwid_btn
-
-        # start button
-        lbtn_start = QtGui.QPushButton("start")
-        assert lbtn_start
-
-        # setup
-        lbtn_start.setIcon(QtGui.QIcon(QtGui.QPixmap(":/images/start.png")))
-
         # clear screen button
-        lbtn_clear = QtGui.QPushButton("clear plot")
+        lbtn_clear = QtGui.QPushButton("&Clear")
         assert lbtn_clear
 
         # setup
         lbtn_clear.setIcon(QtGui.QIcon(QtGui.QPixmap(":/images/clear.png")))
 
         # connect clear plot button        
-        lbtn_clear.clicked.connect(self.on_act_clear)
-
-        # create buttons layout
-        llay_btn = QtGui.QVBoxLayout(lwid_btn)
-        assert llay_btn is not None
-
-        # setup
-        llay_btn.addWidget(lbtn_start)
-        llay_btn.addWidget(lbtn_clear)
-
-        # frame
-        l_frm = QtGui.QFrame()
-        assert l_frm
-        
-        # setup
-        l_frm.setMaximumHeight(150)
-        l_frm.setFrameShape(QtGui.QFrame.StyledPanel)
-        l_frm.setFrameShadow(QtGui.QFrame.Raised)
-
-        # frame layout
-        llay_frm = QtGui.QHBoxLayout(l_frm)
-        assert llay_frm is not None
-
-        # setup
-        llay_frm.addWidget(lgbx_dst)
-        llay_frm.addWidget(lgbx_zero)
-        llay_frm.addWidget(lwid_btn)
+        lbtn_clear.clicked.connect(self.__on_act_clear)
 
         # create plot layout
         llay_plt = QtGui.QVBoxLayout(f_parent)
@@ -463,52 +391,6 @@ class CWidgetPlotPAPI(QtGui.QWidget):
 
         # setup
         llay_plt.addWidget(self.__canvas)
-        llay_plt.addWidget(l_frm)
-
-# < CPlotLine >------------------------------------------------------------------------------------
-
-class CPlotLine(lines.Line2D):
-    """
-    DOCUMENT ME!
-    """
-    # ---------------------------------------------------------------------------------------------
-    def __init__(self, *args, **kwargs):
-        # we'll update the position when the line data is set
-        self.text = mtext.Text(0, 0, '')
-        lines.Line2D.__init__(self, *args, **kwargs)
-
-        # we can't access the label attr until *after* the line is
-        # inited
-        self.text.set_text(self.get_label())
-
-    # ---------------------------------------------------------------------------------------------
-    def draw(self, renderer):
-        # draw my label at the end of the line with 2 pixel offset
-        lines.Line2D.draw(self, renderer)
-        self.text.draw(renderer)
-
-    # ---------------------------------------------------------------------------------------------
-    def set_axes(self, axes):
-        self.text.set_axes(axes)
-        lines.Line2D.set_axes(self, axes)
-
-    # ---------------------------------------------------------------------------------------------
-    def set_data(self, x, y):
-        if len(x):
-            self.text.set_position((x[-1], y[-1]))
-
-        lines.Line2D.set_data(self, x, y)
-
-    # ---------------------------------------------------------------------------------------------
-    def set_figure(self, figure):
-        self.text.set_figure(figure)
-        lines.Line2D.set_figure(self, figure)
-
-    # ---------------------------------------------------------------------------------------------
-    def set_transform(self, transform):
-        # 2 pixel offset
-        texttrans = transform + mtransforms.Affine2D().translate(2, 2)
-        self.text.set_transform(texttrans)
-        lines.Line2D.set_transform(self, transform)
+        llay_plt.addWidget(lbtn_clear)
 
 # < the end >--------------------------------------------------------------------------------------

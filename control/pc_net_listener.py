@@ -25,12 +25,6 @@ import struct
 import sys
 import time
 
-# numPy
-import numpy
-
-# openCV
-import cv2
-
 # model 
 import model.pc_data as gdata
 
@@ -119,7 +113,7 @@ class CNetListener(multiprocessing.Process):
             # logger
             l_log = logging.getLogger("CNetListener::__init__")
             l_log.setLevel(logging.WARNING)
-            l_log.warning("<E03: bind failed: {} - {}".format(l_err[0], l_err[1]))
+            l_log.warning("<E03: bind failed on address {}/{}: {}: {}".format(fs_addr, fi_port, l_err[0], l_err[1]))
 
             # termina
             sys.exit()
