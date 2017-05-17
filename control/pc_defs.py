@@ -83,13 +83,16 @@ D_LINES = ['A', 'B', 'D', 'E']
 # distância default (mínima)
 D_DFL_DIST = 60.
 
+# tamanho da amostra de calibração
+D_SMP_CALIBRA = 120
+
 # < rede >-----------------------------------------------------------------------------------------
 
 # interface de rede
 D_NET_IFC = (None, None)  # ("wlan0", "wlan0")
 
 # endereço do cliente
-D_NET_CLI = "192.168.12.1"
+D_NET_GCS = "192.168.12.1"
 # endereço do servidor
 D_NET_SRV = "192.168.12.2"
 

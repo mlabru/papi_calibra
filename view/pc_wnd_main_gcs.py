@@ -36,10 +36,9 @@ import model.pc_data as gdata
 import model.pc_utils as util
 
 # view
-import view.wid_calibra as cwid
-import view.wid_sensors as swid
-import view.wid_monitor_net as mwid
-import view.wid_papi as spap
+import view.pag_sensors as swid
+import view.pag_monitor_net as mwid
+import view.pag_papi as spap
 
 # control
 import control.events.events_basic as events
@@ -53,9 +52,9 @@ import view.resources_qrc
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-# < CPAPICalWndMainCli >---------------------------------------------------------------------------
+# < CPAPICalWndMainGCS >---------------------------------------------------------------------------
 
-class CPAPICalWndMainCli(QtGui.QMainWindow):
+class CPAPICalWndMainGCS(QtGui.QMainWindow):
     """
     a port packet monitor that plots live data using PyQwt
 
@@ -74,7 +73,7 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
         assert f_control
         
         # init super class
-        super(CPAPICalWndMainCli, self).__init__()
+        super(CPAPICalWndMainGCS, self).__init__()
 
         # control
         # self.__control = f_control
@@ -132,11 +131,11 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
             f_evt.accept()
 
             # create CQuit event
-            #l_evt = events.CQuit()
-            #assert l_evt
+            l_evt = events.CQuit()
+            assert l_evt
 
             # dispatch event
-            #self.__event.post(l_evt)
+            self.__event.post(l_evt)
 
         # otherwise, continua...
         else:
@@ -259,7 +258,7 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
         self.__pag_pap.C_SGN_DATA_ALT.emit(flst_data)        
         
     # ---------------------------------------------------------------------------------------------
-    def __on_qtw_sensors_currentChanged(self, fi_ndx):
+    def __on_qtw_papi_currentChanged(self, fi_ndx):
         """
         tabWidget page change callback
         """
@@ -311,17 +310,17 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
         assert self.__pag_pap
 
         # create tabWidget
-        self.qtw_sensors = QtGui.QTabWidget(self)
-        assert self.qtw_sensors is not None
+        self.qtw_papi = QtGui.QTabWidget(self)
+        assert self.qtw_papi is not None
         
         # setup
-        self.qtw_sensors.setStyleSheet("background-color: rgb(180, 180, 180);")
-        self.qtw_sensors.currentChanged[int].connect(self.__on_qtw_sensors_currentChanged)
+        self.qtw_papi.setStyleSheet("background-color: rgb(180, 180, 180);")
+        self.qtw_papi.currentChanged[int].connect(self.__on_qtw_papi_currentChanged)
         
         # put pages on tabWidget
-        self.qtw_sensors.addTab(self.__pag_pap, "PAPI")
-        self.qtw_sensors.addTab(self.__pag_sns, "Sensores")
-        self.qtw_sensors.addTab(self.__pag_mon, "Monitor")
+        self.qtw_papi.addTab(self.__pag_pap, "PAPI")
+        self.qtw_papi.addTab(self.__pag_sns, "Sensores")
+        self.qtw_papi.addTab(self.__pag_mon, "Monitor")
 
         # create tab widget
         self.centralwidget = QtGui.QWidget()
@@ -332,13 +331,13 @@ class CPAPICalWndMainCli(QtGui.QMainWindow):
         assert l_vl is not None
         
         # put tabWidget on layout
-        l_vl.addWidget(self.qtw_sensors)
+        l_vl.addWidget(self.qtw_papi)
         
         # set tabWidget as centralWidget
         self.setCentralWidget(self.centralwidget)
 
         # config main window
-        self.setWindowTitle("PAPI Calibra [Client] v0.1")
+        self.setWindowTitle("PAPI Calibra [GCS] v0.1")
 
         # set position
         self.move(f_settings.value("pos", QtCore.QPoint(200, 200)).toPoint())
