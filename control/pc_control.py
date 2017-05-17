@@ -24,11 +24,11 @@ from PyQt4 import QtGui
 
 # model
 import model.pc_data as gdata
-import model.pc_model_cli as mdcli
+import model.pc_model_gcs as mdgcs
 import model.pc_model_srv as mdsrv
 
 # view
-import view.pc_view_cli as vcli
+import view.pc_view_gcs as vgcs
 import view.pc_view_srv as vsrv
 
 # control
@@ -83,14 +83,14 @@ class CPAPICalControl(object):
         li_ccc = int(self.__config.dct_config["net.ccc"])
 
         # create connections
-        self.create_connections_client(lt_ifc, ls_adr, li_ccc)        
+        self.create_connections_gcs(lt_ifc, ls_adr, li_ccc)        
     
         # instancia o modelo
-        self.__model = mdcli.CPAPICalModelCli(self)
+        self.__model = mdgcs.CPAPICalModelGCS(self)
         assert self.__model
 
         # create view
-        self.__view = vcli.CPAPICalViewCli(self, self.__model)
+        self.__view = vgcs.CPAPICalViewGCS(self, self.__model)
         assert self.__view
 
         # inicia
@@ -127,7 +127,7 @@ class CPAPICalControl(object):
         self.__app.processEvents()
 
     # ---------------------------------------------------------------------------------------------
-    def create_connections_client(self, ft_ifc, fs_adr, fi_ccc):
+    def create_connections_gcs(self, ft_ifc, fs_adr, fi_ccc):
         """
         create connections
         """

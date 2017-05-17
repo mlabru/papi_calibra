@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------------------------------------
-wid_plot_papi
+gbx_plot_papi
 
 papi calibrate
 
@@ -53,7 +53,7 @@ M_LOG.setLevel(logging.DEBUG)
 
 # < CPlotPAPIWidget >------------------------------------------------------------------------------
 
-class CPlotPAPIWidget(QtGui.QWidget):
+class CPlotPAPIWidget(QtGui.QGroupBox):
     """
     plot PAPI graphics
     """
@@ -65,17 +65,18 @@ class CPlotPAPIWidget(QtGui.QWidget):
     C_SGN_PLOT_P2W = QtCore.pyqtSignal(int, float)
 
     # ---------------------------------------------------------------------------------------------
-    def __init__(self, f_parent):
+    def __init__(self, fs_title, f_parent):
         """
         constructor
 
+        @param fs_title: groupBox title
         @param f_parent: parent widget
         """
         # check input
         assert f_parent
 
         # init super class
-        super(CPlotPAPIWidget, self).__init__(f_parent)
+        super(CPlotPAPIWidget, self).__init__(fs_title, f_parent)
 
         # distância em metros
         self.__parent = f_parent

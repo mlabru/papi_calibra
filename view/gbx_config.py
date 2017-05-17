@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------------------------------------
-wid_config
+gbx_config
 
 papi calibrate
 
@@ -40,7 +40,7 @@ M_LOG.setLevel(logging.DEBUG)
 
 # < CConfigWidget >--------------------------------------------------------------------------------
 
-class CConfigWidget(QtGui.QWidget):
+class CConfigWidget(QtGui.QGroupBox):
     """
     plot PAPI graphics
     """
@@ -49,17 +49,18 @@ class CConfigWidget(QtGui.QWidget):
     C_SGN_PAGE_ON = QtCore.pyqtSignal(bool)
 
     # ---------------------------------------------------------------------------------------------
-    def __init__(self, f_parent):
+    def __init__(self, fs_title, f_parent):
         """
         constructor
 
+        @param fs_title: groupBox title
         @param f_parent: parent widget
         """
         # check input
         assert f_parent
 
         # init super class
-        super(CConfigWidget, self).__init__(f_parent)
+        super(CConfigWidget, self).__init__(fs_title, f_parent)
 
         # events
         self.__event = f_parent.evtmgr
@@ -72,7 +73,7 @@ class CConfigWidget(QtGui.QWidget):
         self.__f_alt = 0.
 
         # setup user interface
-        self.__setup_ui(self)
+        self.__setup_ui()
 
         # create toolBar
         self.__create_toolbar(f_parent)
@@ -223,7 +224,7 @@ class CConfigWidget(QtGui.QWidget):
         self.__tbr_plot.setVisible(fv_on)
         
     # ---------------------------------------------------------------------------------------------
-    def __setup_ui(self, f_parent=None):
+    def __setup_ui(self):
         """
         setup user interface
         """
@@ -329,7 +330,7 @@ class CConfigWidget(QtGui.QWidget):
         llay_frm.addWidget(lwid_btn)
 
         # create plot layout
-        llay_plt = QtGui.QVBoxLayout(f_parent)
+        llay_plt = QtGui.QVBoxLayout(self)
         assert llay_plt is not None
 
         # setup

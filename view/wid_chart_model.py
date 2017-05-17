@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------------------------------------
-wid_plot_model
+wid_chart_model
 
 papi calibrate
 
@@ -33,17 +33,17 @@ import model.pc_utils as util
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-# max curves per plot
+# max curves per chart
 M_CURVES = 3
 
 # max number of samples
 M_SAMPLE_SIZE = 100
 
-# < CWidgetPlotModel >-----------------------------------------------------------------------------
+# < CChartModelWidget >-----------------------------------------------------------------------------
 
-class CWidgetPlotModel(QtGui.QWidget):
+class CChartModelWidget(QtGui.QWidget):
     """
-    plot chart widget
+    chart chart widget
     """
     # signals
     # C_SIG_NEW_FRAME = QtCore.pyqtSignal(cv.iplimage)
@@ -60,7 +60,7 @@ class CWidgetPlotModel(QtGui.QWidget):
         assert f_source_feed
 
         # init super class
-        super(CWidgetPlotModel, self).__init__(f_parent)
+        super(CChartModelWidget, self).__init__(f_parent)
 
         # list of timestamps
         self.__lst_timestamps = []
@@ -68,13 +68,13 @@ class CWidgetPlotModel(QtGui.QWidget):
         # samples
         self.__lst_samples = [[] for _ in xrange(M_CURVES)]
 
-        # plot
-        self.__plot = None
+        # chart
+        self.__chart = None
 
         # curve
         self.__lst_curves = [None] * M_CURVES
 
-        # flag on/off to curve (by default all curve are plotted)
+        # flag on/off to curve (by default all curve are chartted)
         self.__v_curve_on = [True] * M_CURVES
 
         # list of checkBoxes
@@ -96,7 +96,7 @@ class CWidgetPlotModel(QtGui.QWidget):
         self.__v_curve_on[fi_axe] = self.__lst_checkboxes[fi_axe].isChecked()
 
     # ---------------------------------------------------------------------------------------------
-    def _clear_plot(self):
+    def _clear_chart(self):
         """
         clear screen
         """
@@ -145,35 +145,35 @@ class CWidgetPlotModel(QtGui.QWidget):
         return l_check_box
 
     # ---------------------------------------------------------------------------------------------
-    def _create_plot(self, fs_title, fi_ymin, fi_ymax):
+    def _create_chart(self, fs_title, fi_ymin, fi_ymax):
         """
-        create the pyqwt plot
+        create the pyqwt chart
 
-        @param fs_title: plot title
+        @param fs_title: chart title
         @param fi_ymin: minimum
         @param fi_ymax: maximum
 
-        @return a list containing the plot and the list of the curves
+        @return a list containing the chart and the list of the curves
         """
-        # create plot
-        self.__plot = Qwt5.QwtPlot(self)
-        assert self.__plot
+        # create chart
+        self.__chart = Qwt5.QwtPlot(self)
+        assert self.__chart
 
         # background colour
-        self.__plot.setCanvasBackground(QtCore.Qt.black)
+        self.__chart.setCanvasBackground(QtCore.Qt.black)
 
         # config bottom axis
-        self.__plot.setAxisTitle(Qwt5.QwtPlot.xBottom, "Time (s)")
-        self.__plot.setAxisScale(Qwt5.QwtPlot.xBottom, 0, 10, 1)
+        self.__chart.setAxisTitle(Qwt5.QwtPlot.xBottom, "Time (s)")
+        self.__chart.setAxisScale(Qwt5.QwtPlot.xBottom, 0, 10, 1)
 
         # config left axis
-        self.__plot.setAxisTitle(Qwt5.QwtPlot.yLeft, fs_title)
-        self.__plot.setAxisScale(Qwt5.QwtPlot.yLeft, fi_ymin, fi_ymax, (fi_ymax - fi_ymin) / 10.)
-        self.__plot.setAxisAutoScale(Qwt5.QwtPlot.yLeft)
-        # self.__plot.axisScaleEngine(Qwt5.QwtPlot.yLeft).setAttribute(Qwt5.QwtScaleEngine.Floating, True)
+        self.__chart.setAxisTitle(Qwt5.QwtPlot.yLeft, fs_title)
+        self.__chart.setAxisScale(Qwt5.QwtPlot.yLeft, fi_ymin, fi_ymax, (fi_ymax - fi_ymin) / 10.)
+        self.__chart.setAxisAutoScale(Qwt5.QwtPlot.yLeft)
+        # self.__chart.axisScaleEngine(Qwt5.QwtPlot.yLeft).setAttribute(Qwt5.QwtScaleEngine.Floating, True)
 
         # redraw
-        self.__plot.replot()
+        self.__chart.replot()
 
         # define 3 curves
         self.__lst_curves = [None] * M_CURVES
@@ -198,16 +198,16 @@ class CWidgetPlotModel(QtGui.QWidget):
             # set pen
             self.__lst_curves[li_ndx].setPen(llst_pen[li_ndx])
 
-            # attach curve to plot
-            self.__lst_curves[li_ndx].attach(self.__plot)
+            # attach curve to chart
+            self.__lst_curves[li_ndx].attach(self.__chart)
 
         # return
-        return self.__plot, self.__lst_curves
+        return self.__chart, self.__lst_curves
 
     # ---------------------------------------------------------------------------------------------
-    def _update_plot(self, flst_data):
+    def _update_chart(self, flst_data):
         """
-        updates the state of the plot widget with new data
+        updates the state of the chart widget with new data
 
         @param flst_data: data list
         """
@@ -235,10 +235,10 @@ class CWidgetPlotModel(QtGui.QWidget):
                 self.__lst_curves[li_ndx].setData(self.__lst_timestamps, self.__lst_samples[li_ndx])
 
             # axis scale (xBottom, xdata[0], max(20, xdata[-1]))
-            self.__plot.setAxisScale(Qwt5.QwtPlot.xBottom, self.__lst_timestamps[0], max(9, self.__lst_timestamps[-1]))
+            self.__chart.setAxisScale(Qwt5.QwtPlot.xBottom, self.__lst_timestamps[0], max(9, self.__lst_timestamps[-1]))
 
-            # update plot
-            self.__plot.replot()
+            # update chart
+            self.__chart.replot()
         
     # =============================================================================================
     # data
@@ -255,7 +255,7 @@ class CWidgetPlotModel(QtGui.QWidget):
 
     # ---------------------------------------------------------------------------------------------
     @property
-    def plot(self):
-        return self.__plot
+    def chart(self):
+        return self.__chart
 
 # < the end >--------------------------------------------------------------------------------------
