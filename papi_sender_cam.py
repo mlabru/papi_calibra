@@ -43,7 +43,7 @@ while True:
     l_ret, l_frame = l_capture.read()
 
     # encode em jpeg
-    l_encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
+    l_encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 100]
 
     # faz o encode
     l_result, l_img_encode = cv2.imencode(".jpg", l_frame, l_encode_param)
