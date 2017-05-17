@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------------------------------------
-wid_papi_light_box
+gbx_papi_light_box
 
 papi calibrate
 
@@ -54,14 +54,12 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
     C_SGN_PLOT_R2P = QtCore.pyqtSignal(int, float)
     C_SGN_PLOT_P2W = QtCore.pyqtSignal(int, float)
 
-    reset = QtCore.pyqtSignal(name="reset")
-
     # ---------------------------------------------------------------------------------------------
     def __init__(self, f_title, fi_box, f_parent):
         """
         constructor
 
-        @param f_title: widget title
+        @param f_title: groupBox title
         @param fi_box: box no.
         @param f_parent: parent widget
         """
@@ -90,15 +88,11 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         # timestamp
         self.__f_time = 0
 
-        self.__wid_lbox = self.__setup_ui()
-        assert self.__wid_lbox
-
-        # connect
-        # self.connect(self, QtCore.SIGNAL("reset"), self.__on_reset)
-        # self.reset.connect(self.__on_reset)
+        # setup UI
+        self.__setup_ui()
 
         # create states
-        self.__lst_states = self.create_states(self.__wid_lbox)
+        self.__lst_states = self.create_states(self.__wid_light_box)
         assert self.__lst_states
 
         # create state machine
@@ -172,9 +166,6 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         lstt_red.addTransition(self.__btn_r2p, QtCore.SIGNAL("clicked()"), lstt_pink)
         lstt_pink.addTransition(self.__btn_p2w, QtCore.SIGNAL("clicked()"), lstt_white)
 
-        #lstt_pink.addTransition(self, QtCore.SIGNAL("reset"), lstt_red)
-        #lstt_white.addTransition(self, QtCore.SIGNAL("reset"), lstt_red)
-
         lstt_pink.addTransition(self.C_SGN_RESET, lstt_red)
         lstt_white.addTransition(self.C_SGN_RESET, lstt_red)
 
@@ -247,34 +238,7 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         """
         event CReset
         """
-        ''' 
-        # stop state machine
-        self.__state_machine.stop() 
-
-        # for all states... 
-        for l_stt in self.__lst_states:
-            # free state
-            del l_stt
-
-        # free state list
-        del self.__lst_states
-        # free state machine
-        del self.__state_machine
-
-        # recreate states
-        self.__lst_states = self.create_states(self.__wid_lbox)
-        assert self.__lst_states
-
-        # recreate state machine
-        self.__state_machine = self.create_state_machine(self.__lst_states)
-        assert self.__state_machine
-
-        # start new state machine
-        self.__state_machine.start()
-        '''
         # reset state machine
-        #self.emit(QtCore.SIGNAL("reset"))
-        #self.reset.emit()
         self.C_SGN_RESET.emit()
         
         # reset texts
@@ -302,12 +266,12 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         setup ui
         """
         # create light box
-        l_light_box = wlbx.CLightBoxWidget()
-        assert l_light_box
+        self.__wid_light_box = wlbx.CLightBoxWidget()
+        assert self.__wid_light_box
 
         # setup
-        l_light_box.resize(55, 100)
-        l_light_box.show()
+        self.__wid_light_box.resize(55, 100)
+        self.__wid_light_box.show()
 
         # create label altura V2P
         self.__lbl_alt_r2p = QtGui.QLabel()
@@ -349,7 +313,7 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         llo_gbx = QtGui.QGridLayout()
         assert llo_gbx is not None
 
-        llo_gbx.addWidget(l_light_box, 0, 0, -1, 1)
+        llo_gbx.addWidget(self.__wid_light_box, 0, 0, -1, 1)
 
         llo_gbx.addWidget(self.__lbl_alt_p2w, 0, 1, 1, 2)
         llo_gbx.addWidget(self.__lbl_dgr_p2w, 1, 1, 1, 2)
@@ -371,8 +335,5 @@ class CPAPILightBoxWidget(QtGui.QGroupBox):
         # setup
         self.setMaximumHeight(143)
         self.setMaximumWidth(275)
-
-        # return
-        return l_light_box
 
 # < the end >--------------------------------------------------------------------------------------

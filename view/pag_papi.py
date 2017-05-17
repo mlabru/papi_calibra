@@ -27,11 +27,11 @@ from PyQt4 import QtGui
 import model.pc_camera_feed as camfd
 
 # view
-import view.wid_camera as wcam
-import view.wid_config as wcfg
-import view.wid_lateral_box as wlbx
-import view.wid_papi_light_box as wplb
-import view.wid_plot_papi as wplp
+import view.gbx_camera as wcam
+import view.gbx_config as wcfg
+import view.gbx_lateral_box as wlbx
+import view.gbx_papi_light_box as wplb
+import view.gbx_plot_papi as wplp
 
 # control
 import control.pc_defs as gdefs
@@ -78,13 +78,10 @@ class CPAPIWidget(QtGui.QWidget):
 
         # create camera groupBox
         lgbx_cam = self.__create_gbx_cam(f_control, f_monitor)
-
         # create plot groupBox
         lgbx_plp = self.__create_gbx_plot()
-
         # create config groupBox
         lgbx_cfg = self.__create_gbx_config()
-
         # create lightBox groupBox
         lgbx_lbx = self.__create_gbx_light_box()
 
@@ -130,25 +127,11 @@ class CPAPIWidget(QtGui.QWidget):
         assert lcam_feed
 
         # create camera widget
-        lwid_camera = wcam.CWidgetCamera(lcam_feed, self)
-        assert lwid_camera
-
-        # create horizontal layout
-        llay_gbx = QtGui.QHBoxLayout()
-        assert llay_gbx is not None
-        
-        # put camera on layout 
-        llay_gbx.addWidget(lwid_camera)
-
-        # create groupBox camera
-        lgbx_cam = QtGui.QGroupBox(u"Camera", self)
+        lgbx_cam = wcam.CCameraWidget(u"Camera", lcam_feed, self)
         assert lgbx_cam
 
         # setup
         lgbx_cam.setStyleSheet(gdefs.D_GBX_STYLE)
-
-        # set groupBox layout 
-        lgbx_cam.setLayout(llay_gbx)
 
         # return
         return lgbx_cam
@@ -159,28 +142,14 @@ class CPAPIWidget(QtGui.QWidget):
         create config groupBox
         """
         # create the config and curves
-        self.__wid_cfg = wcfg.CConfigWidget(self) 
-        assert self.__wid_cfg 
-
-        # make connections
-        self.__wid_cfg.C_SGN_NEW_DIST.connect(self.__on_new_dist)
-
-        # place the horizontal panel widget
-        llay_gbx = QtGui.QHBoxLayout()
-        assert llay_gbx is not None
-        
-        # put config on layout
-        llay_gbx.addWidget(self.__wid_cfg)
-
-        # create groupBox config
-        lgbx_config = QtGui.QGroupBox("Config", self)
-        assert lgbx_config
+        lgbx_config = wcfg.CConfigWidget("Config", self) 
+        assert lgbx_config 
 
         # setup
         lgbx_config.setStyleSheet(gdefs.D_GBX_STYLE)
 
-        # set groupBox layout 
-        lgbx_config.setLayout(llay_gbx)
+        # make connections
+        lgbx_config.C_SGN_NEW_DIST.connect(self.__on_new_dist)
 
         # return
         return lgbx_config
@@ -240,28 +209,14 @@ class CPAPIWidget(QtGui.QWidget):
         create plot groupBox
         """
         # create the plot and curves
-        self.__wid_plp = wplp.CPlotPAPIWidget(self) 
-        assert self.__wid_plp 
-
-        # place the horizontal panel widget
-        llay_gbx = QtGui.QHBoxLayout()
-        assert llay_gbx is not None
-        
-        # put plot on layout
-        llay_gbx.addWidget(self.__wid_plp)
-
-        # create groupBox plot
-        lgbx_plot = QtGui.QGroupBox("Plot", self)
-        assert lgbx_plot
+        self.__gbx_plot = wplp.CPlotPAPIWidget("Plot", self) 
+        assert self.__gbx_plot 
 
         # setup
-        lgbx_plot.setStyleSheet(gdefs.D_GBX_STYLE)
-
-        # set groupBox layout 
-        lgbx_plot.setLayout(llay_gbx)
+        self.__gbx_plot.setStyleSheet(gdefs.D_GBX_STYLE)
 
         # return
-        return lgbx_plot
+        return self.__gbx_plot
     
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(list)
@@ -286,7 +241,7 @@ class CPAPIWidget(QtGui.QWidget):
             l_lbx.C_SGN_NEW_DIST.emit(ff_val)
 
         # emit distance data signal
-        self.__wid_plp.C_SGN_NEW_DIST.emit(ff_val)
+        self.__gbx_plot.C_SGN_NEW_DIST.emit(ff_val)
 
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(bool)
@@ -295,9 +250,9 @@ class CPAPIWidget(QtGui.QWidget):
         page activated
         """
         # plot widget exists ?
-        if self.__wid_plp:
+        if self.__gbx_plot:
             # emit page on signal
-            self.__wid_plp.C_SGN_PAGE_ON.emit(fv_on)
+            self.__gbx_plot.C_SGN_PAGE_ON.emit(fv_on)
 
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(int, float)
@@ -306,9 +261,9 @@ class CPAPIWidget(QtGui.QWidget):
         plot r2p activated
         """
         # plot widget exists ?
-        if self.__wid_plp:
+        if self.__gbx_plot:
             # emit plot on signal
-            self.__wid_plp.C_SGN_PLOT_R2P.emit(fi_box, ff_alt)
+            self.__gbx_plot.C_SGN_PLOT_R2P.emit(fi_box, ff_alt)
 
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(int, float)
@@ -317,9 +272,9 @@ class CPAPIWidget(QtGui.QWidget):
         plot p2w activated
         """
         # plot widget exists ?
-        if self.__wid_plp:
+        if self.__gbx_plot:
             # emit plot on signal
-            self.__wid_plp.C_SGN_PLOT_P2W.emit(fi_box, ff_alt)
+            self.__gbx_plot.C_SGN_PLOT_P2W.emit(fi_box, ff_alt)
 
     # =============================================================================================
     # data

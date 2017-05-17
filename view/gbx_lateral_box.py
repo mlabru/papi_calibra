@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------------------------------------
-wid_lateral_box
+gbx_lateral_box
 
 a serial port packet monitor that plots live data using PyQwt
 
@@ -47,7 +47,7 @@ class CLateralBoxWidget(QtGui.QGroupBox):
         """
         constructor
 
-        @param fs_title: box title
+        @param fs_title: groupBox title
         @param f_parent: parent widget
         """
         # check input
