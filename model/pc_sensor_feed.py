@@ -120,7 +120,9 @@ class CSensorFeed(QtCore.QObject):
                 # senão,...
                 else:
                     # logger
-                    M_LOG.critical ("<E01: pc_sensor_feed: {}".format(l_err))
+                    l_log = logging.getLogger("CSensorFeed::query_data")
+                    l_log.setLevel(logging.CRITICAL)
+                    l_log.critical("<E01: pc_sensor_feed: {}".format(l_err))
 
                     # a "real" error occurred
                     sys.exit(1)
@@ -128,7 +130,9 @@ class CSensorFeed(QtCore.QObject):
             # zero len message ?
             if 0 == len(l_msg):
                 # logger
-                M_LOG.warning("<E02: pc_sensor_feed: zero len message.")
+                l_log = logging.getLogger("CSensorFeed::query_data")
+                l_log.setLevel(logging.WARNING)
+                l_log.warning("<E02: pc_sensor_feed: zero len message.")
 
                 # continue
                 continue

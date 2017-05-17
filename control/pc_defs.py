@@ -83,6 +83,9 @@ D_LINES = ['A', 'B', 'D', 'E']
 # distância default (mínima)
 D_DFL_DIST = 60.
 
+# tamanho da amostra de calibração
+D_SMP_CALIBRA = 120
+
 # < rede >-----------------------------------------------------------------------------------------
 
 # interface de rede

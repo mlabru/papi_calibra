@@ -128,9 +128,6 @@ def net_sender(f_queue):
                     # send altimeter message (alt1, alt2, ts)
                     l_altimeter.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
 
-                # send gps message (lat, lng, alt, sats, hdop, ts) (SJC: 23.2237° S, 45.9009° W)
-                l_gps.send_data(-23.22 - random.random(), -45.90 - random.random(), 540 + random.random(), 0, 0, float(llst_msg[3]))
-
             # mensagem de GPS ?
             elif "!@GPS" == llst_msg[0]:
                 if len(llst_msg) > 5:
