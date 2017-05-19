@@ -60,7 +60,7 @@ def main():
     # debug mode ?
     if M_DEBUG:
         # fake client address 
-        gdefs.D_NET_CLI = "192.168.11.101"
+        gdefs.D_NET_GCS = "192.168.11.101"
 
         # create serial read thread
         lthr_ser = threading.Thread(target=ser_fake, args=(l_queue,))
@@ -92,19 +92,19 @@ def net_sender(f_queue):
     net sender thread
     """
     # create altimeter
-    l_altimeter = salt.CAltimeter(None, gdefs.D_NET_CLI, gdefs.D_NET_PORT_ALT)
+    l_altimeter = salt.CAltimeter(None, gdefs.D_NET_GCS, gdefs.D_NET_PORT_ALT)
     assert l_altimeter
 
     # create barometer
-    l_barometer = sbar.CBarometer(None, gdefs.D_NET_CLI, gdefs.D_NET_PORT_BAR)
+    l_barometer = sbar.CBarometer(None, gdefs.D_NET_GCS, gdefs.D_NET_PORT_BAR)
     assert l_barometer
 
     # create gps
-    l_gps = sgps.CGPS(None, gdefs.D_NET_CLI, gdefs.D_NET_PORT_GPS)
+    l_gps = sgps.CGPS(None, gdefs.D_NET_GCS, gdefs.D_NET_PORT_GPS)
     assert l_gps
 
     # create thermometer
-    l_termometer = sthr.CThermometer(None, gdefs.D_NET_CLI, gdefs.D_NET_PORT_THR)
+    l_termometer = sthr.CThermometer(None, gdefs.D_NET_GCS, gdefs.D_NET_PORT_THR)
     assert l_termometer
 
     # while keep running...
