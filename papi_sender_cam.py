@@ -24,7 +24,7 @@ M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
 # tupla
-M_UDP_ADDR = (gdefs.D_NET_CLI, gdefs.D_NET_PORT_IMG)
+M_UDP_ADDR = (gdefs.D_NET_GCS, gdefs.D_NET_PORT_IMG)
 
 # -------------------------------------------------------------------------------------------------
 
