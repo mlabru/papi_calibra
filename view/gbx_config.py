@@ -245,7 +245,7 @@ class CConfigWidget(QtGui.QGroupBox):
         assert self.__dsb_dst
 
         # setup
-        self.__dsb_dst.setMaximum(500.)
+        self.__dsb_dst.setMaximum(50000.)
         self.__dsb_dst.setMinimum(60.)
         self.__dsb_dst.setValue(self.__f_dst)
         
