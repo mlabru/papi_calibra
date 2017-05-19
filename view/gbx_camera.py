@@ -26,11 +26,15 @@ import logging
 import numpy as np
 
 # openCV
+import cv2
 import cv2.cv as cv
 
-# pyQT4
+# PyQt4
 from PyQt4 import QtCore
 from PyQt4 import QtGui
+
+# model
+import model.pc_detect as dtct
 
 # view
 import view.img_opencv as imocv
@@ -52,7 +56,7 @@ class CCameraWidget(QtGui.QGroupBox):
     QImage for openCV
     """
     # signals
-    # C_SGN_DATA_FRAME = QtCore.pyqtSignal(cv.iplimage)
+    C_SGN_DTCT_FRAME = QtCore.pyqtSignal(cv.iplimage)
 
     # ---------------------------------------------------------------------------------------------
     def __init__(self, fs_title, f_camera_feed, f_parent=None):
@@ -69,28 +73,77 @@ class CCameraWidget(QtGui.QGroupBox):
         # init super class
         super(CCameraWidget, self).__init__(fs_title, f_parent)
 
+        # image source
+        self.__camera_feed = f_camera_feed
+        self.__camera_feed.C_SGN_DATA_FRAME.connect(self.__on_new_frame)
+
+        # frame number
+        self.__i_frame_no = 0
+
+        # recording flag
+        self.__v_recording = False
+
         # camera image
         lwid_cam = wimc.CImageCameraWidget(f_camera_feed, self)
         assert lwid_cam
 
-        # rec chart button
-        lbtn_rec = QtGui.QPushButton("REC")
-        assert lbtn_rec
+        # image source
+        # lwid_cam.C_SGN_DATA_FRAME.connect(self.__on_new_frame)
 
-        # connect rec chart button
-        # lbtn_rec.clicked.connect(self.__rec_cam)
+        # record image button
+        self.__btn_rec = QtGui.QPushButton("REC")
+        assert self.__btn_rec
+
+        # connect record image button
+        self.__btn_rec.clicked.connect(self.__on_btn_rec_clicked)
+
+        # stop record image button
+        self.__btn_stp = QtGui.QPushButton("STOP")
+        assert self.__btn_stp
+
+        # setup
+        self.__btn_stp.setEnabled(False)
+
+        # connect stop record image button
+        self.__btn_stp.clicked.connect(self.__on_btn_stp_clicked)
 
         # create grid layout
-        llay_wid = QtGui.QVBoxLayout()
-        assert llay_wid is not None
+        llay_gbx = QtGui.QVBoxLayout()
+        assert llay_gbx is not None
 
-        llay_wid.addWidget(lwid_cam)
-        llay_wid.addWidget(lbtn_rec)
+        # put on layout
+        llay_gbx.addWidget(lwid_cam)
+        llay_gbx.addWidget(self.__btn_rec)
+        llay_gbx.addWidget(self.__btn_stp)
 
-        self.setLayout(llay_wid)
+        # set groupBox layout 
+        self.setLayout(llay_gbx)
 
-        # make connections
-        # self.C_SGN_DATA_FRAME.connect(self.__on_new_frame)
+    # ---------------------------------------------------------------------------------------------
+    @QtCore.pyqtSlot()
+    def __on_btn_rec_clicked(self):
+        """
+        callback new frame arrived
+        """
+        # setup buttons
+        self.__btn_rec.setEnabled(False)
+        self.__btn_stp.setEnabled(True)
+
+        # recording
+        self.__v_recording = True
+        
+    # ---------------------------------------------------------------------------------------------
+    @QtCore.pyqtSlot()
+    def __on_btn_stp_clicked(self):
+        """
+        callback new frame arrived
+        """
+        # stop recording
+        self.__v_recording = False
+
+        # setup buttons
+        self.__btn_rec.setEnabled(True)
+        self.__btn_stp.setEnabled(False)
 
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(cv.iplimage)
@@ -98,9 +151,22 @@ class CCameraWidget(QtGui.QGroupBox):
         """
         callback new frame arrived
         """
-        # it emits a signal with the saved frame
-        # (to process the frame is not responsibility of the widget)
-        # self.C_SGN_DATA_FRAME.emit(self.__frame)
+        # recording ?
+        if self.__v_recording:
+            # convert iplimage to cvMat to np.array
+            l_frame = np.asarray(f_frame[:])
+
+            # save image
+            cv2.imwrite("data/records/{0:05d}.jpg".format(self.__i_frame_no), l_frame)
+
+            # increment frame number
+            self.__i_frame_no += 1
+
+        # detect papi lights on frame
+        self.__frame = dtct.detect(f_frame)
+
+        # it emits a signal with the detected frame
+        self.C_SGN_DTCT_FRAME.emit(self.__frame)
 
 # < the end >--------------------------------------------------------------------------------------
         
