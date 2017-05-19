@@ -71,12 +71,31 @@ class CImageCameraWidget(QtGui.QWidget):
         self.__frame = None
 
         # image source
-        self.__camera_feed = f_camera_feed
-        self.__camera_feed.C_SGN_DATA_FRAME.connect(self.__on_new_frame)
+        f_parent.C_SGN_DTCT_FRAME.connect(self.__on_dtct_frame) 
+
+        # image source
+        # self.__camera_feed = f_camera_feed
+        # self.__camera_feed.C_SGN_DATA_FRAME.connect(self.__on_new_frame)
 
         # setup widget size
         self.setMinimumSize(gdefs.D_CAM_WIDTH, gdefs.D_CAM_HEIGHT)
         self.setMaximumSize(gdefs.D_CAM_WIDTH, gdefs.D_CAM_HEIGHT)
+
+    # ---------------------------------------------------------------------------------------------
+    @QtCore.pyqtSlot(cv.iplimage)
+    def __on_dtct_frame(self, f_frame):
+        """
+        callback new frame arrived
+        """
+        # saves its own version of the frame
+        self.__frame = f_frame
+
+        # it emits a signal with the saved frame
+        # (to process the frame is not responsibility of the widget)
+        # self.C_SGN_DATA_FRAME.emit(self.__frame)
+
+        # forces a schedule of a paint event
+        self.update()
 
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(cv.iplimage)
@@ -89,7 +108,7 @@ class CImageCameraWidget(QtGui.QWidget):
 
         # it emits a signal with the saved frame
         # (to process the frame is not responsibility of the widget)
-        self.C_SGN_DATA_FRAME.emit(self.__frame)
+        # self.C_SGN_DATA_FRAME.emit(self.__frame)
 
         # forces a schedule of a paint event
         self.update()
