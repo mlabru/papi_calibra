@@ -28,6 +28,8 @@ G_SERVER = False
 # keep things running
 G_KEEP_RUN = False
 
+# configuration dictionary
+G_DCT_CONFIG = {}
 
 # ADXL345 constants
 #EARTH_GRAVITY_MS2 = 9.80665
