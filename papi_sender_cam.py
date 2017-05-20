@@ -28,6 +28,9 @@ M_UDP_ADDR = (gdefs.D_NET_GCS, gdefs.D_NET_PORT_IMG)
 
 # -------------------------------------------------------------------------------------------------
 
+# logger
+logging.basicConfig()
+        
 # cria o soket
 l_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 assert l_sock
@@ -43,7 +46,7 @@ while True:
     l_ret, l_frame = l_capture.read()
 
     # encode em jpeg
-    l_encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 100]
+    l_encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
 
     # faz o encode
     l_result, l_img_encode = cv2.imencode(".jpg", l_frame, l_encode_param)
@@ -53,10 +56,14 @@ while True:
 
     # converte em string
     l_stringData = l_data.tostring()
-    # print len(l_stringData)
 
     # tamanho da imagem excede o tamanho máximo de UDP ?
     if len(l_stringData) > 65507:
+        # logger
+        l_log = logging.getLogger("papi_sender_cam::main")
+        l_log.setLevel(logging.WARNING)
+        l_log.warning(u"<E01: image too long: {}. Droping.".format(len(l_stringData)))
+                                                        
         # descarta a mensagem 
         continue
     

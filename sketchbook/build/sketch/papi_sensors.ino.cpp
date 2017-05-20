@@ -19,7 +19,7 @@
 
 #define D_BMP280
 #define D_MPL3115
-#define D_GPS
+// #define D_GPS
 // #define D_DEBUG
 
 // wait time (1000/D_TIM_WAIT) = Hz
@@ -92,7 +92,7 @@ void setup()
     #endif
 
     // calibração
-    calibra();
+    // calibra();
 
 } // setup
 
