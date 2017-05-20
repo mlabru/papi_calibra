@@ -245,8 +245,8 @@ class CConfigWidget(QtGui.QGroupBox):
         assert self.__dsb_dst
 
         # setup
-        self.__dsb_dst.setMaximum(500.)
-        self.__dsb_dst.setMinimum(60.)
+        self.__dsb_dst.setMaximum(gdefs.D_MAX_DIST)
+        self.__dsb_dst.setMinimum(gdefs.D_DFL_DIST)
         self.__dsb_dst.setValue(self.__f_dst)
         
         # connect spinBox
@@ -264,23 +264,51 @@ class CConfigWidget(QtGui.QGroupBox):
         assert lgbx_zero
 
         # labels lat/lng/alt
-        self.__lbl_lat = QtGui.QLabel("Lat.:\t{}".format(-23.2463))
+        llbl_lat = QtGui.QLabel("Lat.:")
+        assert llbl_lat
+
+        llbl_lng = QtGui.QLabel("Lng.:")
+        assert llbl_lng
+
+        llbl_alt = QtGui.QLabel("Alt.:")
+        assert llbl_alt
+
+        # QLineEdit lat/lng/alt
+        self.__qle_lat = QtGui.QLineEdit()
+        assert self.__qle_lat
+
+        self.__qle_lng = QtGui.QLineEdit()
+        assert self.__qle_lng
+
+        self.__qle_alt = QtGui.QLineEdit()
+        assert self.__qle_alt
+
+        # labels lat/lng/alt
+        self.__lbl_lat = QtGui.QLabel("{:5.3}".format(-23.2463))
         assert self.__lbl_lat
 
-        self.__lbl_lng = QtGui.QLabel("Lng.:\t{}".format(-45.8542))
+        self.__lbl_lng = QtGui.QLabel("{:5.3}".format(-45.8542))
         assert self.__lbl_lng
 
-        self.__lbl_alt = QtGui.QLabel("Alt.:\t{}".format(self.__f_alt))
+        self.__lbl_alt = QtGui.QLabel("{:5.3}".format(self.__f_alt))
         assert self.__lbl_alt
 
         # create gbx layout
-        llay_ptz = QtGui.QVBoxLayout(lgbx_zero)
+        llay_ptz = QtGui.QGridLayout(lgbx_zero)
         assert llay_ptz is not None
 
         # setup
-        llay_ptz.addWidget(self.__lbl_lat)
-        llay_ptz.addWidget(self.__lbl_lng)
-        llay_ptz.addWidget(self.__lbl_alt)
+        llay_ptz.addWidget(llbl_lat, 0, 0)
+        llay_ptz.addWidget(llbl_lng, 1, 0)
+        llay_ptz.addWidget(llbl_alt, 2, 0)
+
+        llay_ptz.addWidget(self.__qle_lat, 0, 1)
+        llay_ptz.addWidget(self.__qle_lng, 1, 1)
+        llay_ptz.addWidget(self.__qle_alt, 2, 1)
+
+        llay_ptz.addWidget(self.__lbl_lat, 0, 2)
+        llay_ptz.addWidget(self.__lbl_lng, 1, 2)
+        llay_ptz.addWidget(self.__lbl_alt, 2, 2)
 
         # widget buttons
         lwid_btn = QtGui.QWidget()

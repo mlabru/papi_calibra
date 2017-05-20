@@ -82,6 +82,7 @@ D_LINES = ['A', 'B', 'D', 'E']
 
 # distância default (mínima)
 D_DFL_DIST = 60.
+D_MAX_DIST = 5000.
 
 # tamanho da amostra de calibração
 D_SMP_CALIBRA = 120
@@ -91,9 +92,9 @@ D_SMP_CALIBRA = 120
 # interface de rede
 D_NET_IFC = (None, None)  # ("wlan0", "wlan0")
 
-# endereço do cliente
+# endereço da ground station
 D_NET_GCS = "192.168.12.2"
-# endereço do servidor
+# endereço do servidor (raspi)
 D_NET_SRV = "192.168.12.5"
 
 # arbitrary non-privileged ports
