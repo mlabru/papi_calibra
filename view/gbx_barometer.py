@@ -70,7 +70,7 @@ class CBarometerWidget(wplt.CChartModelWidget):
         self.__sensor_feed.C_SGN_DATA_BAR.connect(self.__on_new_data)
 
         # create the chart and curves
-        self._create_chart(u"Pressão (mBar)", M_BAR_YMIN, M_BAR_YMAX)
+        self._create_chart(u"Pressão (hPa)", M_BAR_YMIN, M_BAR_YMAX)
 
         # curves checkBoxes
         self.lst_checkboxes = [self._create_checkbox("Barm 1(G)", QtCore.Qt.green,  self._activate_curve, 0),

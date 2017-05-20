@@ -16,8 +16,11 @@
 
 #define D_BMP280
 #define D_MPL3115
-// #define D_GPS
+#define D_GPS
 // #define D_DEBUG
+
+#define D_SER_BAUD 57600
+#define D_CAL_SAMPLES 120.
 
 // wait time (1000/D_TIM_WAIT) = Hz
 #define D_TIM_WAIT 500    // 2 Hz
@@ -57,7 +60,7 @@ void setup()
     Wire.begin();
 
     // start serial for output
-    Serial.begin(57600);
+    Serial.begin(D_SER_BAUD);
 
     #ifdef D_BMP280
     // BMP 280 init ok ?
@@ -80,7 +83,7 @@ void setup()
     #endif
 
     // calibração
-    // calibra();
+    calibra();
 
 } // setup
 
@@ -250,7 +253,8 @@ void calibra()
     // elapsed time
     unsigned long lul_elp;
 
-    for (int li_i = 0; li_i < 120; li_i++)
+    # for all calibration samples...
+    for (int li_i = 0; li_i < D_CAL_SAMPLES; li_i++)
     {
         // get initial time (ms)
         lul_ini = millis();
@@ -283,12 +287,12 @@ void calibra()
 
     #ifdef D_BMP280
     // calcula a média
-    gf_alt_bmp /= 120.;
+    gf_alt_bmp /= D_CAL_SAMPLES;
     #endif
 
     #ifdef D_MPL3115
     // calcula a média
-    gf_alt_mpl /= 120.;
+    gf_alt_mpl /= D_CAL_SAMPLES;
     #endif
 
 } // calibra
