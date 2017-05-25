@@ -22,6 +22,9 @@
 // #define D_GPS
 // #define D_DEBUG
 
+#define D_SER_BAUD 57600
+#define D_CAL_SAMPLES 120.
+
 // wait time (1000/D_TIM_WAIT) = Hz
 #define D_TIM_WAIT 500    // 2 Hz
 
@@ -54,22 +57,13 @@ SoftwareSerial g_ss(2, 3);
 #endif
 
 // ------------------------------------------------------------------------------------------------
-#line 54 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
-void setup();
-#line 88 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
-void loop();
-#line 218 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
-void setup_MPL3115();
-#line 240 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
-void calibra();
-#line 54 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
 void setup() 
 {
     // join i2c bus
     Wire.begin();
 
     // start serial for output
-    Serial.begin(57600);
+    Serial.begin(D_SER_BAUD);
 
     #ifdef D_BMP280
     // BMP 280 init ok ?
@@ -262,7 +256,8 @@ void calibra()
     // elapsed time
     unsigned long lul_elp;
 
-    for (int li_i = 0; li_i < 120; li_i++)
+    # for all calibration samples...
+    for (int li_i = 0; li_i < D_CAL_SAMPLES; li_i++)
     {
         // get initial time (ms)
         lul_ini = millis();
@@ -295,12 +290,12 @@ void calibra()
 
     #ifdef D_BMP280
     // calcula a média
-    gf_alt_bmp /= 120.;
+    gf_alt_bmp /= D_CAL_SAMPLES;
     #endif
 
     #ifdef D_MPL3115
     // calcula a média
-    gf_alt_mpl /= 120.;
+    gf_alt_mpl /= D_CAL_SAMPLES;
     #endif
 
 } // calibra
