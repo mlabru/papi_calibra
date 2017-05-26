@@ -147,7 +147,7 @@ def send_cam(f_queue):
             # logger
             l_log = logging.getLogger("papi_sender::send_cam")
             l_log.setLevel(logging.WARNING)
-            l_log.warning(u"<E01: message too long: {}".format(len(l_stringData))
+            l_log.warning(u"<E01: message too long: {}".format(len(l_stringData)))
 
             # descarta a mensagem 
             continue

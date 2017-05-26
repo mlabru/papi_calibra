@@ -25,6 +25,9 @@ G_CANAL = 4
 # modo de execução (cliente(F)/servidor(T))
 G_SERVER = False
 
+# modo debug
+G_DEBUG = False
+
 # keep things running
 G_KEEP_RUN = False
 

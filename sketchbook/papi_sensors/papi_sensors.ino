@@ -253,7 +253,7 @@ void calibra()
     // elapsed time
     unsigned long lul_elp;
 
-    # for all calibration samples...
+    // for all calibration samples...
     for (int li_i = 0; li_i < D_CAL_SAMPLES; li_i++)
     {
         // get initial time (ms)
