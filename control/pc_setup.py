@@ -26,11 +26,11 @@ import logging
 import os
 
 # model 
-import pc_data as gdata
-import pc_utils as util
+import model.pc_data as gdata
+import model.pc_utils as util
 
 # control
-import pc_defs as gdefs
+import control.pc_defs as gdefs
 
 # < local data >-----------------------------------------------------------------------------------
 

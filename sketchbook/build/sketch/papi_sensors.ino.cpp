@@ -19,7 +19,7 @@
 
 #define D_BMP280
 #define D_MPL3115
-// #define D_GPS
+#define D_GPS
 // #define D_DEBUG
 
 #define D_SER_BAUD 57600
@@ -57,6 +57,15 @@ SoftwareSerial g_ss(2, 3);
 #endif
 
 // ------------------------------------------------------------------------------------------------
+#line 57 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
+void setup();
+#line 91 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
+void loop();
+#line 221 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
+void setup_MPL3115();
+#line 243 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
+void calibra();
+#line 57 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
 void setup() 
 {
     // join i2c bus
@@ -86,7 +95,7 @@ void setup()
     #endif
 
     // calibração
-    // calibra();
+    calibra();
 
 } // setup
 
@@ -256,7 +265,7 @@ void calibra()
     // elapsed time
     unsigned long lul_elp;
 
-    # for all calibration samples...
+    // for all calibration samples...
     for (int li_i = 0; li_i < D_CAL_SAMPLES; li_i++)
     {
         // get initial time (ms)
