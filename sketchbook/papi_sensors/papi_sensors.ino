@@ -16,7 +16,7 @@
 
 #define D_BMP280
 #define D_MPL3115
-// #define D_GPS
+#define D_GPS
 // #define D_DEBUG
 
 #define D_SER_BAUD 57600
@@ -83,7 +83,7 @@ void setup()
     #endif
 
     // calibração
-    // calibra();
+    calibra();
 
 } // setup
 
