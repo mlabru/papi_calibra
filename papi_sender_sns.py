@@ -23,6 +23,7 @@ import random
 import serial
 import socket
 import threading
+import time
 
 # model
 import model.pc_data as gdata
@@ -41,6 +42,9 @@ import control.pc_defs as gdefs
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
+# degug mode
+M_DEBUG = False
+
 # -------------------------------------------------------------------------------------------------
 def main():
     """
@@ -53,9 +57,20 @@ def main():
     # start application
     gdata.G_KEEP_RUN = True
 
-    # create serial read thread
-    lthr_ser = threading.Thread(target=ser_read, args=(l_queue,))
-    assert lthr_ser
+    # debug mode ?
+    if M_DEBUG:
+        # fake client address 
+        gdefs.D_NET_CLI = "192.168.11.101"
+
+        # create serial read thread
+        lthr_ser = threading.Thread(target=ser_fake, args=(l_queue,))
+        assert lthr_ser
+
+    # senão, real mode...
+    else:    
+        # create serial read thread
+        lthr_ser = threading.Thread(target=ser_read, args=(l_queue,))
+        assert lthr_ser
     
     # start serial read thread
     lthr_ser.start()
@@ -106,32 +121,64 @@ def net_sender(f_queue):
         llst_msg = ls_msg.split('#')
         # M_LOG.debug("llst_msg: {}".format(llst_msg))
 
-        # mensagem de altímetro ?
-        if "!@ALT" == llst_msg[0]:
-            if len(llst_msg) > 3:
-                # send altimeter message (alt1, alt2, ts)
-                l_altimeter.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
+        try:
+            # mensagem de altímetro ?
+            if "!@ALT" == llst_msg[0]:
+                if len(llst_msg) > 3:
+                    # send altimeter message (alt1, alt2, ts)
+                    l_altimeter.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
 
-            # send gps message (lat, lng, alt, sats, hdop, ts) (SJC: 23.2237° S, 45.9009° W)
-            l_gps.send_data(-23.22 - random.random(), -45.90 - random.random(), 540 + random.random(), 0, 0, float(llst_msg[3]))
+                # send gps message (lat, lng, alt, sats, hdop, ts) (SJC: 23.2237° S, 45.9009° W)
+                l_gps.send_data(-23.22 - random.random(), -45.90 - random.random(), 540 + random.random(), 0, 0, float(llst_msg[3]))
 
-        # mensagem de GPS ?
-        elif "!@GPS" == llst_msg[0]:
-            if len(llst_msg) > 5:
-                # send gps message (lat, lng, sats, hdop, ts)
-                l_gps.send_data(float(llst_msg[1]), float(llst_msg[2]), int(llst_msg[3]), int(llst_msg[4]), float(llst_msg[5]))
+            # mensagem de GPS ?
+            elif "!@GPS" == llst_msg[0]:
+                if len(llst_msg) > 5:
+                    # send gps message (lat, lng, sats, hdop, ts)
+                    l_gps.send_data(float(llst_msg[1]), float(llst_msg[2]), int(llst_msg[3]), int(llst_msg[4]), float(llst_msg[5]))
 
-        # mensagem de barômetro ?
-        elif "!@BAR" == llst_msg[0]:
-            if len(llst_msg) > 3:
-                # send barometer message (bar1, bar2, ts)
-                l_barometer.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
+            # mensagem de barômetro ?
+            elif "!@BAR" == llst_msg[0]:
+                if len(llst_msg) > 3:
+                    # send barometer message (bar1, bar2, ts)
+                    l_barometer.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
 
-        # mensagem de termômetro ?
-        elif "!@THR" == llst_msg[0]:
-            if len(llst_msg) > 3:
-                # send thermometer message (tmp1, tmp2, ts)
-                l_termometer.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
+            # mensagem de termômetro ?
+            elif "!@THR" == llst_msg[0]:
+                if len(llst_msg) > 3:
+                    # send thermometer message (tmp1, tmp2, ts)
+                    l_termometer.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
+
+        # em caso de erro...
+        except Exception as l_err:
+            # logger
+            M_LOG.warning("<E01: net_sender error: {}".format(l_err))
+             
+# -------------------------------------------------------------------------------------------------
+def ser_fake(f_queue):
+    """
+    serial reader thread
+    """
+    # tempo ini
+    ll_init = time.time()
+
+    # altitude
+    lf_alt = 0.
+
+    # while keep running...
+    while gdata.G_KEEP_RUN:
+        # altitude
+        lf_alt += 0.05
+
+        # read serial line        
+        ls_line = "!@ALT#{}#{}#{}".format(lf_alt + random.random(), lf_alt - random.random(), time.time() - ll_init)
+        # M_LOG.debug("ls_line: {}".format(ls_line))
+
+        # queue message
+        f_queue.put(ls_line)
+
+        # sleep
+        time.sleep(0.5)
 
 # -------------------------------------------------------------------------------------------------
 def ser_read(f_queue):
@@ -150,7 +197,7 @@ def ser_read(f_queue):
         ls_line = l_ser.readline()
         # M_LOG.debug("ls_line: {}".format(ls_line))
 
-        # read serial line and queue message
+        # queue message
         f_queue.put(ls_line[:-2])
 
 # -------------------------------------------------------------------------------------------------
