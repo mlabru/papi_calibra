@@ -19,11 +19,11 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 
 # view
-import view.pc_wnd_main_cli as wmain
+import view.pc_wnd_main_gcs as wmain
 
-# < CPAPICalViewCli >------------------------------------------------------------------------------
+# < CPAPICalViewGCS >------------------------------------------------------------------------------
 
-class CPAPICalViewCli(object):
+class CPAPICalViewGCS(object):
     """
     PAPI Calibra view
     """
@@ -33,7 +33,7 @@ class CPAPICalViewCli(object):
         constructor
         """
         # init super class
-        super(CPAPICalViewCli, self).__init__()
+        super(CPAPICalViewGCS, self).__init__()
 
         # control
         self.__control = f_control
@@ -44,7 +44,7 @@ class CPAPICalViewCli(object):
         assert self.__model
 
         # show message
-        self.__control.splash.showMessage("loading view...", QtCore.Qt.AlignHCenter | QtCore.Qt.AlignBottom, QtCore.Qt.white)
+        f_control.splash.showMessage("loading view...", QtCore.Qt.AlignHCenter | QtCore.Qt.AlignBottom, QtCore.Qt.white)
 
     # ---------------------------------------------------------------------------------------------
     def run(self):
@@ -56,7 +56,7 @@ class CPAPICalViewCli(object):
         assert self.__control.app
 
         # create main window
-        l_wmain = wmain.CPAPICalWndMainCli(self.__control)
+        l_wmain = wmain.CPAPICalWndMainGCS(self.__control)
         assert l_wmain
 
         # show main window

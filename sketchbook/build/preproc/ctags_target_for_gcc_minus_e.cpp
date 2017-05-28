@@ -21,6 +21,9 @@
 
 // #define D_DEBUG
 
+
+
+
 // wait time (1000/D_TIM_WAIT) = Hz
 
 
@@ -33,10 +36,16 @@ Adafruit_BMP280 g_bmp280;
 // pressão nível do mar (QNH) (this should be adjusted to your local forcase)
 float g_QNH = 1015;
 
+// bias de altitude
+float gf_alt_bmp = 0;
+
 
 
 // create an instance of the object
 MPL3115A2 g_mpl3115;
+
+// bias de altitude
+float gf_alt_mpl = 0;
 
 
 
@@ -66,29 +75,17 @@ void setup()
 
 
 
-    // get sensor online
-    g_mpl3115.begin();
-
-    // configure the sensor
-
-    // measure altitude above sea level in meters
-    // g_mpl3115.setModeAltimeter();
-
-    // measure pressure in Pascals from 20 to 110 kPa
-    g_mpl3115.setModeBarometer();
-
-    // set oversample to the recommended 128
-    g_mpl3115.setOversampleRate(7);
-
-
-    // enable all three pressure and temp event flags
-    g_mpl3115.enableEventFlags();
+    // init MPL3115
+    setup_MPL3115();
 
 
 
     // init GPS connection
     g_ss.begin(4800);
 
+
+    // calibração
+    calibra();
 
 } // setup
 
@@ -100,6 +97,8 @@ void loop()
     float lf_Px;
     float lf_off_h;
 
+
+
     // GPS new data
     bool lv_new_data = false;
 
@@ -108,6 +107,7 @@ void loop()
     float lf_lon;
 
     unsigned long lul_age;
+
 
     // tempo inicial
     unsigned long lul_ini;
@@ -120,16 +120,18 @@ void loop()
     // send altitude
     Serial.print("!@ALT#");
 
-    Serial.print(g_bmp280.readAltitude(g_QNH));
+    Serial.print(g_bmp280.readAltitude(g_QNH) - gf_alt_bmp);
     Serial.print("#");
+
 
 
     // measure altitude above sea level in meters
     lf_Px = 1. - pow(g_mpl3115.readPressure() / 101325, 0.1902632);
     lf_off_h = 60.;
 
-    Serial.print((44330.77 * lf_Px) + lf_off_h);
+    Serial.print(((44330.77 * lf_Px) + lf_off_h) - gf_alt_mpl);
     Serial.print("#");
+
 
     Serial.print(millis() / 1000.);
     Serial.println();
@@ -142,9 +144,11 @@ void loop()
     Serial.print("#");
 
 
+
     // send millibar pressure
     Serial.print(g_mpl3115.readPressure() / 100.);
     Serial.print("#");
+
 
     Serial.print(millis() / 1000.);
     Serial.println();
@@ -154,6 +158,7 @@ void loop()
 
     Serial.print(g_bmp280.readTemperature());
     Serial.print("#");
+
 
 
     Serial.print(g_mpl3115.readTemp());
@@ -196,15 +201,95 @@ void loop()
         Serial.println();
 
     } // end if
-# 205 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
+# 210 "/home/mlabru/Public/mkr/papi/srce/papi_calibra/sketchbook/papi_sensors/papi_sensors.ino"
     // D_TIM_WAIT - elapsed time
     lul_elp = 500 /* 2 Hz*/ - (millis() - lul_ini);
 
     // adiantado ?
-    if (lul_elp >= 0)
+    if (lul_elp > 0)
         // aguarda completar o tempo
         delay(lul_elp);
 
 } // loop
+
+// ------------------------------------------------------------------------------------------------
+void setup_MPL3115()
+{
+    // get sensor online
+    g_mpl3115.begin();
+
+    // configure the sensor
+
+    // measure altitude above sea level in meters
+    // g_mpl3115.setModeAltimeter();
+
+    // measure pressure in Pascals from 20 to 110 kPa
+    g_mpl3115.setModeBarometer();
+
+    // set oversample to the recommended 128
+    g_mpl3115.setOversampleRate(7);
+
+    // enable all three pressure and temp event flags
+    g_mpl3115.enableEventFlags();
+
+} // setup_MPL3115
+
+// ------------------------------------------------------------------------------------------------
+void calibra()
+{
+
+    // altitude calc
+    float lf_Px;
+    float lf_off_h;
+
+
+    // tempo inicial
+    unsigned long lul_ini;
+    // elapsed time
+    unsigned long lul_elp;
+
+    // for all calibration samples...
+    for (int li_i = 0; li_i < 120.; li_i++)
+    {
+        // get initial time (ms)
+        lul_ini = millis();
+
+
+        // obtém a altitude 
+        gf_alt_bmp += g_bmp280.readAltitude(g_QNH);
+
+
+
+        // measure altitude above sea level in meters
+        lf_Px = 1. - pow(g_mpl3115.readPressure() / 101325, 0.1902632);
+        lf_off_h = 60.;
+
+        gf_alt_mpl += ((44330.77 * lf_Px) + lf_off_h);
+
+
+
+
+
+        // D_TIM_WAIT - elapsed time
+        lul_elp = 500 /* 2 Hz*/ - (millis() - lul_ini);
+
+        // adiantado ?
+        if (lul_elp > 0)
+            // aguarda completar o tempo
+            delay(lul_elp);
+
+    } // end for
+
+
+    // calcula a média
+    gf_alt_bmp /= 120.;
+
+
+
+    // calcula a média
+    gf_alt_mpl /= 120.;
+
+
+} // calibra
 
 // < the end >-------------------------------------------------------------------------------------

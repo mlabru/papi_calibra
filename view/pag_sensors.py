@@ -33,10 +33,10 @@ import model.pc_gps_feed as gpsfd
 import model.pc_thermometer_feed as thrfd
 
 # view
-import view.wid_altimeter as walt
-import view.wid_barometer as wbar
-import view.wid_gps as wgps
-import view.wid_thermometer as wthr
+import view.gbx_altimeter as walt
+import view.gbx_barometer as wbar
+import view.gbx_gps as wgps
+import view.gbx_thermometer as wthr
 
 # control
 import control.pc_defs as gdefs
@@ -47,9 +47,9 @@ import control.pc_defs as gdefs
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-# < CWidgetSensors >-------------------------------------------------------------------------------
+# < CSensorsWidget >-------------------------------------------------------------------------------
 
-class CWidgetSensors(QtGui.QWidget):
+class CSensorsWidget(QtGui.QWidget):
     """
     a port packet monitor that plots live data using PyQwt
     """
@@ -71,7 +71,7 @@ class CWidgetSensors(QtGui.QWidget):
         assert f_monitor
         
         # init super class
-        super(CWidgetSensors, self).__init__(f_parent)
+        super(CSensorsWidget, self).__init__(f_parent)
 
         # parent
         # self.__parent = f_parent
@@ -111,7 +111,7 @@ class CWidgetSensors(QtGui.QWidget):
         assert lfeed_alt
 
         # create altimeter widget
-        lwid_altimeter = walt.CWidgetAltimeter(lfeed_alt, self)
+        lwid_altimeter = walt.CAltimeterWidget(lfeed_alt, self)
         assert lwid_altimeter
 
         # setup
@@ -150,7 +150,7 @@ class CWidgetSensors(QtGui.QWidget):
         assert lfeed_bar
 
         # create barometer widget
-        lwid_barometer = wbar.CWidgetBarometer(lfeed_bar, self)
+        lwid_barometer = wbar.CBarometerWidget(lfeed_bar, self)
         assert lwid_barometer
 
         # setup
@@ -186,7 +186,7 @@ class CWidgetSensors(QtGui.QWidget):
         assert lfeed_gps
 
         # create GPS widget
-        lwid_gps = wgps.CWidgetGPS(lfeed_gps, self)
+        lwid_gps = wgps.CGPSWidget(lfeed_gps, self)
         assert lwid_gps
 
         # setup
@@ -222,7 +222,7 @@ class CWidgetSensors(QtGui.QWidget):
         assert lfeed_thr
 
         # create thermometer widget
-        lwid_thermometer = wthr.CWidgetThermometer(lfeed_thr, self)
+        lwid_thermometer = wthr.CThermometerWidget(lfeed_thr, self)
         assert lwid_thermometer
 
         # setup

@@ -56,15 +56,46 @@ D_MSG_SEP = '#'
 # mensagens válidas
 SET_MSG_VALIDAS = [D_MSG_ALT, D_MSG_BAR, D_MSG_GPS, D_MSG_THR, D_MSG_IMG, D_MSG_SIZ, D_MSG_FIM]
 
+# < PAPI >-----------------------------------------------------------------------------------------
+
+# ângulo de transição baixo (caixa 1)
+D_ANG_A = 2.50
+# ângulo de transição médio-baixo (caixa 2)
+D_ANG_B = 2.83
+# ângulo de transição médio-alto (caixa 3)
+D_ANG_D = 3.17
+# ângulo de transição alto (caixa 4)
+D_ANG_E = 3.50
+
+# ângulo normal da rampa
+D_ANG_C = (D_ANG_B + D_ANG_D) / 2.
+# ângulo de altura mínima do olho do piloto
+D_ANG_M = D_ANG_B - 0.033
+# superfície de proteção de obtáculo
+D_ANG_OPS = D_ANG_A - 0.57
+
+# ângulo máximo
+D_ANG_MAX = D_ANG_E + 2.
+
+# linhas de transição
+D_LINES = ['A', 'B', 'D', 'E']
+
+# distância default (mínima)
+D_DFL_DIST = 60.
+D_MAX_DIST = 5000.
+
+# tamanho da amostra de calibração
+D_SMP_CALIBRA = 120
+
 # < rede >-----------------------------------------------------------------------------------------
 
 # interface de rede
 D_NET_IFC = (None, None)  # ("wlan0", "wlan0")
 
-# endereço do cliente
-D_NET_CLI = "192.168.12.1"
-# endereço do servidor
-D_NET_SRV = "192.168.12.2"
+# endereço da ground station
+D_NET_GCS = "192.168.12.2"
+# endereço do servidor (raspi)
+D_NET_SRV = "192.168.12.5"
 
 # arbitrary non-privileged ports
 
@@ -76,7 +107,6 @@ D_NET_PORT_THR = 1940
 
 # imagens
 D_NET_PORT_IMG = 1961
-
 # comnado/controle/configuração
 D_NET_PORT_CCC = 1970
 
@@ -142,5 +172,11 @@ D_TIM_EVNT = .1
 D_TIM_RRBN = .1
 # espera de eventos (2Hz) (float)
 D_TIM_WAIT = .5
+
+# < vídeo >----------------------------------------------------------------------------------------
+
+# resolução do vídeo
+D_VID_HORZ = 640
+D_VID_VERT = 480
 
 # < the end >--------------------------------------------------------------------------------------

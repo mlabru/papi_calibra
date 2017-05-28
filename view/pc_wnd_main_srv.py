@@ -40,7 +40,7 @@ import model.tty_monitor as tmon
 
 # view
 import view.wid_calibra as cwid
-import view.wid_sensors as swid
+import view.pag_sensors as swid
 import view.wid_tty_monitor as twid
 
 # control

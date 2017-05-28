@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------------------------------------
-pc_model_cli
+pc_model_gcs
 
 papi calibrate
 
@@ -40,9 +40,9 @@ import control.events.events_tty as evttty
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-# < CPAPICalModelCli >-----------------------------------------------------------------------------
+# < CPAPICalModelGCS >-----------------------------------------------------------------------------
 
-class CPAPICalModelCli(object):
+class CPAPICalModelGCS(object):
     """
     PAPI Calibra model
     """
@@ -96,7 +96,10 @@ class CPAPICalModelCli(object):
             self.__thr_monitor = None
 
             # logger
-            M_LOG.critical("CPAPICalModelCli::__init__: {}".format(ls_tty_error))
+            l_log = logging.getLogger("CPAPICalModelGCS::__init__")
+            l_log.setLevel(logging.CRITICAL)
+            l_log.critical(u"<E01: TTY error: {}".format(ls_tty_error))
+
 
     # ---------------------------------------------------------------------------------------------
     def get_all_from_queue(self, fq_queue):

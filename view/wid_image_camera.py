@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------------------------------------
-wid_camera
+wid_image_camera
 
 papi calibrate
 
@@ -44,9 +44,9 @@ import control.pc_defs as gdefs
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-# < CWidgetCamera >--------------------------------------------------------------------------------
+# < CImageCameraWidget >---------------------------------------------------------------------------
 
-class CWidgetCamera(QtGui.QWidget):
+class CImageCameraWidget(QtGui.QWidget):
     """
     QImage for openCV
     """
@@ -65,14 +65,17 @@ class CWidgetCamera(QtGui.QWidget):
         assert f_camera_feed
 
         # init super class
-        super(CWidgetCamera, self).__init__(f_parent)
+        super(CImageCameraWidget, self).__init__(f_parent)
 
         # actual frame
         self.__frame = None
 
         # image source
-        self.__camera_feed = f_camera_feed
-        self.__camera_feed.C_SGN_DATA_FRAME.connect(self.on_new_frame)
+        f_parent.C_SGN_DTCT_FRAME.connect(self.__on_dtct_frame) 
+
+        # image source
+        # self.__camera_feed = f_camera_feed
+        # self.__camera_feed.C_SGN_DATA_FRAME.connect(self.__on_new_frame)
 
         # setup widget size
         self.setMinimumSize(gdefs.D_CAM_WIDTH, gdefs.D_CAM_HEIGHT)
@@ -80,7 +83,7 @@ class CWidgetCamera(QtGui.QWidget):
 
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(cv.iplimage)
-    def on_new_frame(self, f_frame):
+    def __on_dtct_frame(self, f_frame):
         """
         callback new frame arrived
         """
@@ -89,7 +92,23 @@ class CWidgetCamera(QtGui.QWidget):
 
         # it emits a signal with the saved frame
         # (to process the frame is not responsibility of the widget)
-        self.C_SGN_DATA_FRAME.emit(self.__frame)
+        # self.C_SGN_DATA_FRAME.emit(self.__frame)
+
+        # forces a schedule of a paint event
+        self.update()
+
+    # ---------------------------------------------------------------------------------------------
+    @QtCore.pyqtSlot(cv.iplimage)
+    def __on_new_frame(self, f_frame):
+        """
+        callback new frame arrived
+        """
+        # saves its own version of the frame
+        self.__frame = f_frame
+
+        # it emits a signal with the saved frame
+        # (to process the frame is not responsibility of the widget)
+        # self.C_SGN_DATA_FRAME.emit(self.__frame)
 
         # forces a schedule of a paint event
         self.update()

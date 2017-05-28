@@ -1,8 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------------------------------------
-wid_light
+mpl_plot_line
 
 papi calibrate
 
@@ -21,10 +21,21 @@ __date__ = "2017/04"
 
 # python library
 import logging
+import math
+import sys
 
 # PyQt4
 from PyQt4 import QtCore
 from PyQt4 import QtGui
+
+# matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.text as mtext
+import matplotlib.lines as lines
+import matplotlib.transforms as mtransforms
+
+# control
+import control.pc_defs as gdefs
 
 # < module data >----------------------------------------------------------------------------------
 
@@ -32,76 +43,70 @@ from PyQt4 import QtGui
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-# < CLightWidget >---------------------------------------------------------------------------------
+# < CPlotLine >------------------------------------------------------------------------------------
 
-class CLightWidget(QtGui.QWidget):
+class CPlotLine(lines.Line2D):
     """
-    light widget
+    plot line
     """
     # ---------------------------------------------------------------------------------------------
-    def __init__(self, f_colour):
+    def __init__(self, *args, **kwargs):
         """
         constructor
         """
+        # we'll update the position when the line data is set
+        self.text = mtext.Text(0, 0, '')
+
         # init super class
-        super(CLightWidget, self).__init__()
+        lines.Line2D.__init__(self, *args, **kwargs)
 
-        # light colour
-        self.__colour = f_colour
-
-        # flag on
-        self.__v_on = False
+        # we can't access the label attr until *after* the line is inited
+        self.text.set_text(self.get_label())
 
     # ---------------------------------------------------------------------------------------------
-    def isOn(self):
+    def draw(self, f_renderer):
         """
-        return if light is on
+        draw
         """
-        return self.__v_on
+        # draw my label at the end of the line with 2 pixel offset
+        lines.Line2D.draw(self, f_renderer)
+        self.text.draw(f_renderer)
 
     # ---------------------------------------------------------------------------------------------
-    @QtCore.pyqtSlot(QtGui.QPaintEvent)
-    def paintEvent(self, f_evt):
+    def set_axes(self, f_axes):
         """
-        paint event callback
+        set axes
         """
-        # create painter
-        painter = QtGui.QPainter(self)
-        assert painter
-        
-        # setup
-        painter.setRenderHint(QtGui.QPainter.Antialiasing)
-        painter.setBrush(self.__colour if self.__v_on else QtCore.Qt.black)
-        painter.drawEllipse(0, 0, self.width(), self.height())
+        self.text.set_axes(f_axes)
+        lines.Line2D.set_axes(self, f_axes)
 
     # ---------------------------------------------------------------------------------------------
-    def __set_on(self, fv_on):
+    def set_data(self, f_x, f_y):
         """
-        set widget on/off
+        set data
         """
-        # unchange state ?
-        if self.__v_on == fv_on:
-            # return
-            return
+        if len(f_x):
+            self.text.set_position((f_x[-1], f_y[-1]))
 
-        # save new state
-        self.__v_on = fv_on
-
-        # update widget
-        self.update()
+        lines.Line2D.set_data(self, f_x, f_y)
 
     # ---------------------------------------------------------------------------------------------
-    def turnOff(self):
+    def set_figure(self, f_figure):
         """
-        turns light off
+        set figure
         """
-        self.__set_on(False)
+        self.text.set_figure(f_figure)
+        lines.Line2D.set_figure(self, f_figure)
 
     # ---------------------------------------------------------------------------------------------
-    def turnOn(self):
+    def set_transform(self, f_transform):
         """
-        turns light on
+        set transform
         """
-        self.__set_on(True)
+        # 2 pixel offset
+        l_texttrans = f_transform + mtransforms.Affine2D().translate(2, 2)
+
+        self.text.set_transform(l_texttrans)
+        lines.Line2D.set_transform(self, f_transform)
 
 # < the end >--------------------------------------------------------------------------------------

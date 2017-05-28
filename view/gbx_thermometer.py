@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------------------------------------
-wid_altimeter
+gbx_thermometer
 
 papi calibrate
 
@@ -27,7 +27,7 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 
 # view
-import wid_plot_model as wplt
+import wid_chart_model as wplt
 
 # control
 import control.pc_defs as gdefs
@@ -38,18 +38,18 @@ import control.pc_defs as gdefs
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-# altimeter plot widget
-M_ALT_YMAX = 620
-M_ALT_YMIN = 580
+# thermometer chart widget
+M_THR_YMAX = 50
+M_THR_YMIN = 10
 
-# < CWidgetAltimeter >-----------------------------------------------------------------------------
+# < CThermometerWidget >---------------------------------------------------------------------------
 
-class CWidgetAltimeter(wplt.CWidgetPlotModel):
+class CThermometerWidget(wplt.CChartModelWidget):
     """
-    widget for altimeter
+    widget for thermometer
     """
     # signals
-    C_SGN_DATA_ALT = QtCore.pyqtSignal(list)
+    C_SGN_DATA_THR = QtCore.pyqtSignal(list)
 
     # ---------------------------------------------------------------------------------------------
     def __init__(self, f_sensor_feed, f_parent=None):
@@ -63,32 +63,32 @@ class CWidgetAltimeter(wplt.CWidgetPlotModel):
         assert f_sensor_feed
 
         # init super class
-        super(CWidgetAltimeter, self).__init__(f_sensor_feed, f_parent)
+        super(CThermometerWidget, self).__init__(f_sensor_feed, f_parent)
 
         # image source
         self.__sensor_feed = f_sensor_feed
-        self.__sensor_feed.C_SGN_DATA_ALT.connect(self.__on_new_data)
+        self.__sensor_feed.C_SGN_DATA_THR.connect(self.__on_new_data)
 
-        # create the plot and curves
-        self._create_plot("Altitude (m)", M_ALT_YMIN, M_ALT_YMAX)
+        # create the chart and curves
+        self._create_chart(u"Temperatura (°C)", M_THR_YMIN, M_THR_YMAX)
 
         # curves checkBoxes
-        self.lst_checkboxes = [self._create_checkbox("Altm 1(G)", QtCore.Qt.green,  self._activate_curve, 0),
-                               self._create_checkbox("Altm 2(R)", QtCore.Qt.red,    self._activate_curve, 1),
-                               self._create_checkbox("Fusion(Y)", QtCore.Qt.yellow, self._activate_curve, 2)]
+        self.lst_checkboxes = [self._create_checkbox("Thrm 1(G)", QtCore.Qt.green,  self._activate_curve, 0),
+                               self._create_checkbox("Thrm 2(R)", QtCore.Qt.red,    self._activate_curve, 1),
+                               self._create_checkbox("Kalman(Y)", QtCore.Qt.yellow, self._activate_curve, 2)]
 
-        # clear plot button
-        lbtn_clear = QtGui.QPushButton("clear plot")
+        # clear chart button
+        lbtn_clear = QtGui.QPushButton("clear chart")
         assert lbtn_clear
 
-        # connect clear plot button
-        lbtn_clear.clicked.connect(self._clear_plot)
+        # connect clear chart button
+        lbtn_clear.clicked.connect(self._clear_chart)
 
         # create grid layout
         llay_wid = QtGui.QGridLayout()
         assert llay_wid is not None
 
-        llay_wid.addWidget(self.plot, 0, 0, 8, 7)
+        llay_wid.addWidget(self.chart, 0, 0, 8, 7)
         llay_wid.addWidget(self.lst_checkboxes[0], 0, 8)
         llay_wid.addWidget(self.lst_checkboxes[1], 1, 8)
         llay_wid.addWidget(self.lst_checkboxes[2], 2, 8)
@@ -100,16 +100,14 @@ class CWidgetAltimeter(wplt.CWidgetPlotModel):
     @QtCore.pyqtSlot(list)
     def __on_new_data(self, flst_data):
         """
-        new altimeter data arrived callback
-
-        @patam flst_data: data list (timestamp#alt_1#alt_2#fusion)
+        callback new data arrived
         """
-        # update plot
-        self._update_plot(flst_data)
+        # update chart
+        self._update_chart(flst_data)
 
         # it emits a signal with the data
         # (to process the data is not responsibility of the widget)
-        self.C_SGN_DATA_ALT.emit(flst_data)
+        self.C_SGN_DATA_THR.emit(flst_data)
 
 # < the end >--------------------------------------------------------------------------------------
         

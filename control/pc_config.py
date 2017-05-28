@@ -43,13 +43,13 @@ class CPAPICalConfig(object):
                      "dir.tab": gdefs.D_DIR_TAB,          # diretório de tabelas
  
                      "glb.canal": gdata.G_CANAL,          # canal de comunicação
-                     "glb.server": gdata.G_SERVER,        # modo de execução (cliente(F)/servidor(T))
+                     "glb.server": gdata.G_SERVER,        # modo de execução (gcs(F)/servidor(T))
 
                      "msg.vrs": gdefs.D_MSG_VRS,          # versão do protocolo
 
                      "net.adr": "",                       # symbolic name meaning all available interfaces
                      "net.ifc": gdefs.D_NET_IFC,          # interface de rede
-                     "net.cli": gdefs.D_NET_CLI,          # endereço cliente
+                     "net.gcs": gdefs.D_NET_GCS,          # endereço ground control station
                      "net.srv": gdefs.D_NET_SRV,          # endereço server
 
                      "net.ccc": gdefs.D_NET_PORT_CCC,     # porta de comando/controle/comunicação
@@ -126,7 +126,7 @@ class CPAPICalConfig(object):
         self.__dct_config["glb.server"] = l_args.server
 
         # endereço da contra-parte
-        self.__dct_config["net.adr"] = self.__dct_config["net.srv"] if l_args.server else self.__dct_config["net.cli"] 
+        self.__dct_config["net.adr"] = self.__dct_config["net.srv"] if l_args.server else self.__dct_config["net.gcs"] 
 
         # load dirs section
         self.__load_dirs()

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------------------------------------
-wid_barometer
+gbx_altimeter
 
 papi calibrate
 
@@ -27,7 +27,7 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 
 # view
-import wid_plot_model as wplt
+import wid_chart_model as wplt
 
 # control
 import control.pc_defs as gdefs
@@ -38,18 +38,18 @@ import control.pc_defs as gdefs
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-# barometer plot widget
-M_BAR_YMAX = 1080
-M_BAR_YMIN =  950
+# altimeter chart widget
+M_ALT_YMAX = 620
+M_ALT_YMIN = 580
 
-# < CWidgetBarometer >-----------------------------------------------------------------------------
+# < CAltimeterWidget >-----------------------------------------------------------------------------
 
-class CWidgetBarometer(wplt.CWidgetPlotModel):
+class CAltimeterWidget(wplt.CChartModelWidget):
     """
-    widget for barometer
+    widget for altimeter
     """
     # signals
-    C_SGN_DATA_BAR = QtCore.pyqtSignal(list)
+    C_SGN_DATA_ALT = QtCore.pyqtSignal(list)
 
     # ---------------------------------------------------------------------------------------------
     def __init__(self, f_sensor_feed, f_parent=None):
@@ -63,32 +63,32 @@ class CWidgetBarometer(wplt.CWidgetPlotModel):
         assert f_sensor_feed
 
         # init super class
-        super(CWidgetBarometer, self).__init__(f_sensor_feed, f_parent)
+        super(CAltimeterWidget, self).__init__(f_sensor_feed, f_parent)
 
         # image source
         self.__sensor_feed = f_sensor_feed
-        self.__sensor_feed.C_SGN_DATA_BAR.connect(self.on_new_data)
+        self.__sensor_feed.C_SGN_DATA_ALT.connect(self.__on_new_data)
 
-        # create the plot and curves
-        self._create_plot(u"Pressão (mBar)", M_BAR_YMIN, M_BAR_YMAX)
+        # create the chart and curves
+        self._create_chart("Altitude (m)", M_ALT_YMIN, M_ALT_YMAX)
 
         # curves checkBoxes
-        self.lst_checkboxes = [self._create_checkbox("Barm 1(G)", QtCore.Qt.green,  self._activate_curve, 0),
-                               self._create_checkbox("Barm 2(R)", QtCore.Qt.red,    self._activate_curve, 1),
-                               self._create_checkbox("Fusion(Y)", QtCore.Qt.yellow, self._activate_curve, 2)]
+        self.lst_checkboxes = [self._create_checkbox("Altm 1(G)", QtCore.Qt.green,  self._activate_curve, 0),
+                               self._create_checkbox("Altm 2(R)", QtCore.Qt.red,    self._activate_curve, 1),
+                               self._create_checkbox("Kalman(Y)", QtCore.Qt.yellow, self._activate_curve, 2)]
 
-        # clear plot button
-        lbtn_clear = QtGui.QPushButton("clear plot")
+        # clear chart button
+        lbtn_clear = QtGui.QPushButton("clear chart")
         assert lbtn_clear
 
-        # connect clear plot button
-        lbtn_clear.clicked.connect(self._clear_plot)
+        # connect clear chart button
+        lbtn_clear.clicked.connect(self._clear_chart)
 
         # create grid layout
         llay_wid = QtGui.QGridLayout()
         assert llay_wid is not None
 
-        llay_wid.addWidget(self.plot, 0, 0, 8, 7)
+        llay_wid.addWidget(self.chart, 0, 0, 8, 7)
         llay_wid.addWidget(self.lst_checkboxes[0], 0, 8)
         llay_wid.addWidget(self.lst_checkboxes[1], 1, 8)
         llay_wid.addWidget(self.lst_checkboxes[2], 2, 8)
@@ -98,16 +98,18 @@ class CWidgetBarometer(wplt.CWidgetPlotModel):
 
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(list)
-    def on_new_data(self, flst_data):
+    def __on_new_data(self, flst_data):
         """
-        callback new data arrived
+        new altimeter data arrived callback
+
+        @patam flst_data: data list (timestamp#alt_1#alt_2#fusion)
         """
-        # update plot
-        self._update_plot(flst_data)
+        # update chart
+        self._update_chart(flst_data)
 
         # it emits a signal with the data
         # (to process the data is not responsibility of the widget)
-        self.C_SGN_DATA_BAR.emit(flst_data)
+        self.C_SGN_DATA_ALT.emit(flst_data)
 
 # < the end >--------------------------------------------------------------------------------------
         

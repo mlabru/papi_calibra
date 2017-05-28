@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------------------------------------
-wid_gps
+gbx_gps
 
 papi calibrate
 
@@ -27,7 +27,7 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 
 # view
-import wid_plot_model as wplt
+import wid_chart_model as wplt
 
 # control
 import control.pc_defs as gdefs
@@ -38,13 +38,13 @@ import control.pc_defs as gdefs
 M_LOG = logging.getLogger(__name__)
 M_LOG.setLevel(logging.DEBUG)
 
-# gps plot widget
+# gps chart widget
 M_ALT_YMAX = -20
 M_ALT_YMIN = -50
 
-# < CWidgetGPS >-----------------------------------------------------------------------------------
+# < CGPSWidget >-----------------------------------------------------------------------------------
 
-class CWidgetGPS(wplt.CWidgetPlotModel):
+class CGPSWidget(wplt.CChartModelWidget):
     """
     widget for gps
     """
@@ -63,7 +63,7 @@ class CWidgetGPS(wplt.CWidgetPlotModel):
         assert f_gps_feed
 
         # init super class
-        super(CWidgetGPS, self).__init__(f_gps_feed, f_parent)
+        super(CGPSWidget, self).__init__(f_gps_feed, f_parent)
 
         # actual frame
         self.__s_data = None
@@ -72,26 +72,26 @@ class CWidgetGPS(wplt.CWidgetPlotModel):
         self.__gps_feed = f_gps_feed
         self.__gps_feed.C_SGN_DATA_GPS.connect(self.on_new_data)
 
-        # create the plot and curves
-        self._create_plot("Position (l/l)", M_ALT_YMIN, M_ALT_YMAX)
+        # create the chart and curves
+        self._create_chart("Position (lat/lng)", M_ALT_YMIN, M_ALT_YMAX)
 
         # curves checkBoxes
         self.lst_checkboxes = [self._create_checkbox("Lat (G)", QtCore.Qt.green,  self._activate_curve, 0),
                                self._create_checkbox("Lng (R)", QtCore.Qt.red,    self._activate_curve, 1),
                                self._create_checkbox("Alt (Y)", QtCore.Qt.yellow, self._activate_curve, 2)]
 
-        # clear plot button
-        lbtn_clear = QtGui.QPushButton("clear plot")
+        # clear chart button
+        lbtn_clear = QtGui.QPushButton("clear chart")
         assert lbtn_clear
 
-        # connect clear plot button
-        lbtn_clear.clicked.connect(self._clear_plot)
+        # connect clear chart button
+        lbtn_clear.clicked.connect(self._clear_chart)
 
         # create grid layout
         llay_wid = QtGui.QGridLayout()
         assert llay_wid is not None
 
-        llay_wid.addWidget(self.plot, 0, 0, 8, 7)
+        llay_wid.addWidget(self.chart, 0, 0, 8, 7)
         llay_wid.addWidget(self.lst_checkboxes[0], 0, 8)
         llay_wid.addWidget(self.lst_checkboxes[1], 1, 8)
         llay_wid.addWidget(self.lst_checkboxes[2], 2, 8)
@@ -100,7 +100,6 @@ class CWidgetGPS(wplt.CWidgetPlotModel):
 
         # set layout
         self.setLayout(llay_wid)
-        self.setFixedHeight(330)
 
     # ---------------------------------------------------------------------------------------------
     @QtCore.pyqtSlot(list)
@@ -108,8 +107,8 @@ class CWidgetGPS(wplt.CWidgetPlotModel):
         """
         callback new frame arrived
         """
-        # update plot
-        self._update_plot(flst_data)
+        # update chart
+        self._update_chart(flst_data)
 
         # it emits a signal with the data
         # (to process the frame is not responsibility of the widget)
