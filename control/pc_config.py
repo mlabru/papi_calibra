@@ -4,7 +4,7 @@
 ---------------------------------------------------------------------------------------------------
 pc_config
 
-configuration manager
+config manager
 
 revision 0.2  2015/nov  mlabru
 pep8 style conventions
@@ -20,8 +20,9 @@ __date__ = "2015/12"
 # < import >---------------------------------------------------------------------------------------
 
 # python library
-import ConfigParser
 import argparse
+import ConfigParser
+import logging
 import os
 
 # model 
@@ -31,145 +32,137 @@ import model.pc_utils as util
 # control
 import control.pc_defs as gdefs
 
-# < class CPAPICalConfig >-------------------------------------------------------------------------
+# < local data >-----------------------------------------------------------------------------------
 
-class CPAPICalConfig(object):
+# informações comuns de configuração
+__CFG_PAPICAL = {"dir.dat": gdefs.D_DIR_DAT,          # diretório de dados
+                 "dir.img": gdefs.D_DIR_IMG,          # diretório de imagens
+                 "dir.tab": gdefs.D_DIR_TAB,          # diretório de tabelas
+
+                 "glb.canal": gdata.G_CANAL,          # canal de comunicação
+                 "glb.debug": gdata.G_DEBUG,          # modo debug
+                 "glb.server": gdata.G_SERVER,        # modo de execução (gcs(F)/servidor(T))
+
+                 "msg.vrs": gdefs.D_MSG_VRS,          # versão do protocolo
+
+                 "net.adr": "",                       # symbolic name meaning all available interfaces
+                 "net.ifc": gdefs.D_NET_IFC,          # interface de rede
+                 "net.gcs": gdefs.D_NET_GCS,          # endereço ground control station
+                 "net.srv": gdefs.D_NET_SRV,          # endereço server
+
+                 "net.ccc": gdefs.D_NET_PORT_CCC,     # porta de comando/controle/comunicação
+                 "net.img": gdefs.D_NET_PORT_IMG,     # porta de imagens
+                 "net.alt": gdefs.D_NET_PORT_ALT,     # porta de altímetro
+                 "net.bar": gdefs.D_NET_PORT_BAR,     # porta de barômetro
+                 "net.gps": gdefs.D_NET_PORT_GPS,     # porta de GPS
+                 "net.thr": gdefs.D_NET_PORT_THR,     # porta de termômetro
+
+                 "ser.baud": gdefs.D_SER_PORT,        # porta serial default
+                 "ser.port": gdefs.D_SER_BAUD,        # baudrate default
+                 
+                 "tab.aer": gdefs.D_TBL_AER,          # tabela de aeródromos
+
+                 "tim.evnt": gdefs.D_TIM_EVNT,        # tratador de eventos (10Hz)
+                 "tim.rrbn": gdefs.D_TIM_RRBN,        # round-robin time (10Hz)
+                 "tim.wait": gdefs.D_TIM_WAIT,        # tempo de espera de eventos (2Hz)
+                }  # __CFG_PAPICAL
+
+# -------------------------------------------------------------------------------------------------
+def load_config(fs_cnfg):
     """
-    mantém as informações de configuração
+    constructor
+
+    @param fs_cnfg: full path do arquivo de configuração
     """
-    # informações comuns de configuração
-    __CFG_PAPICAL = {"dir.dat": gdefs.D_DIR_DAT,          # diretório de dados
-                     "dir.img": gdefs.D_DIR_IMG,          # diretório de imagens
-                     "dir.tab": gdefs.D_DIR_TAB,          # diretório de tabelas
- 
-                     "glb.canal": gdata.G_CANAL,          # canal de comunicação
-                     "glb.server": gdata.G_SERVER,        # modo de execução (gcs(F)/servidor(T))
+    # load default values in dictionary
+    gdata.G_DCT_CONFIG.update(__CFG_PAPICAL)
 
-                     "msg.vrs": gdefs.D_MSG_VRS,          # versão do protocolo
+    # cria o parser para o arquivo de configuração
+    l_cp = ConfigParser.SafeConfigParser()
+    assert l_cp
 
-                     "net.adr": "",                       # symbolic name meaning all available interfaces
-                     "net.ifc": gdefs.D_NET_IFC,          # interface de rede
-                     "net.gcs": gdefs.D_NET_GCS,          # endereço ground control station
-                     "net.srv": gdefs.D_NET_SRV,          # endereço server
+    # arquivo de configuração existe ?
+    if os.path.exists(os.path.expanduser(fs_cnfg)):
+        # abre o arquivo de configuração
+        l_cp.readfp(open(fs_cnfg))
 
-                     "net.ccc": gdefs.D_NET_PORT_CCC,     # porta de comando/controle/comunicação
-                     "net.img": gdefs.D_NET_PORT_IMG,     # porta de imagens
-                     "net.alt": gdefs.D_NET_PORT_ALT,     # porta de altímetro
-                     "net.bar": gdefs.D_NET_PORT_BAR,     # porta de barômetro
-                     "net.gps": gdefs.D_NET_PORT_GPS,     # porta de GPS
-                     "net.thr": gdefs.D_NET_PORT_THR,     # porta de termômetro
+        # load entire config file in dictionary
+        for l_section in l_cp.sections():
+            for l_option in l_cp.options(l_section):
+                gdata.G_DCT_CONFIG[str(l_section.lower() + '.' + l_option.lower())] = l_cp.get(l_section, l_option)
 
-                     "ser.baud": gdefs.D_SER_PORT,        # porta serial default
-                     "ser.port": gdefs.D_SER_BAUD,        # baudrate default
-                     
-                     "tab.aer": gdefs.D_TBL_AER,          # tabela de aeródromos
+    # modo de execução
+    gdata.G_DCT_CONFIG["glb.server"] = __get_server_mode()
 
-                     "tim.evnt": gdefs.D_TIM_EVNT,        # tratador de eventos (10Hz)
-                     "tim.rrbn": gdefs.D_TIM_RRBN,        # round-robin time (10Hz)
-                     "tim.wait": gdefs.D_TIM_WAIT,        # tempo de espera de eventos (2Hz)
-                    }  # __CFG_PAPICAL
+    # cria um parser para os argumentos
+    l_parser = argparse.ArgumentParser(description="PAPI Calibra (C) 2017.")
+    assert l_parser
 
-    # ---------------------------------------------------------------------------------------------
-    def __init__(self, fs_cnfg):
-        """
-        constructor
+    # argumento: canal de comunicação
+    l_parser.add_argument("-c", "--canal", type=int, dest="canal",
+                          default=gdata.G_DCT_CONFIG["glb.canal"],
+                          help=u"Communications channel (default: {})".format(gdata.G_DCT_CONFIG["glb.canal"]))
 
-        @param fs_cnfg: full path do arquivo de configuração
-        """
-        # inicia a super class
-        super(CPAPICalConfig, self).__init__()
+    # argumento: modo debug
+    l_parser.add_argument("-d", "--debug", action="store_true",
+                          default=gdata.G_DCT_CONFIG["glb.debug"], 
+                          help=u"Debug Mode (default: {})".format(gdata.G_DCT_CONFIG["glb.debug"]))
 
-        # load default values in dictionary
-        self.__dct_config = self.__CFG_PAPICAL.copy()
-        assert self.__dct_config is not None
+    # argumento: modo servidor
+    l_parser.add_argument("-s", "--server", action="store_true",
+                          default=gdata.G_DCT_CONFIG["glb.server"], 
+                          help=u"Server Mode (default: {})".format(gdata.G_DCT_CONFIG["glb.server"]))
 
-        # cria o parser para o arquivo de configuração
-        l_cp = ConfigParser.SafeConfigParser()
-        assert l_cp
+    # argumento: version
+    l_parser.add_argument("-v", "--version", action="version", version=__version__)
 
-        # arquivo de configuração existe ?
-        if os.path.exists(os.path.expanduser(fs_cnfg)):
-            # abre o arquivo de configuração
-            l_cp.readfp(open(fs_cnfg))
+    # faz o parser da linha de argumentos
+    l_args = l_parser.parse_args()
+    assert l_args
 
-            # load entire config file in dictionary
-            for l_section in l_cp.sections():
-                for l_option in l_cp.options(l_section):
-                    self.__dct_config[str(l_section.lower() + '.' + l_option.lower())] = l_cp.get(l_section, l_option)
+    # salva os argumentos no dicionário
+    gdata.G_DCT_CONFIG["glb.canal"] = abs(int(l_args.canal))
+    gdata.G_DCT_CONFIG["glb.debug"] = l_args.debug
+    gdata.G_DCT_CONFIG["glb.server"] = l_args.server
 
-        # modo de execução
-        self.__dct_config["glb.server"] = self.__get_server_mode()
+    # endereço da contra-parte
+    gdata.G_DCT_CONFIG["net.adr"] = gdata.G_DCT_CONFIG["net.srv"] if l_args.server else gdata.G_DCT_CONFIG["net.gcs"] 
 
-        # cria um parser para os argumentos
-        l_parser = argparse.ArgumentParser(description="PAPI Calibra (C) 2017.")
-        assert l_parser
+    # load dirs section
+    __load_dirs()
 
-        # argumento: canal de comunicação
-        l_parser.add_argument("-c", "--canal", type=int, dest="canal",
-                              default=self.__dct_config["glb.canal"],
-                              help=u"Communications channel (default: {})".format(self.__dct_config["glb.canal"]))
+# -------------------------------------------------------------------------------------------------
+def __get_server_mode():
+    """
+    modo de execução
+    """
+    # return platform data
+    return os.uname()[4].startswith("arm")
 
-        # argumento: modo servidor
-        l_parser.add_argument("-s", "--server", action="store_true",
-                              default=self.__dct_config["glb.server"], 
-                              help=u"Server Mode (default: {})".format(self.__dct_config["glb.server"]))
+# -------------------------------------------------------------------------------------------------
+def __load_dirs():
+    """
+    carrega as configurações de diretórios
+    """
+    # monta o diretório de imagens
+    gdata.G_DCT_CONFIG["dir.img"] = util.filepath(os.path.join(gdata.G_DCT_CONFIG["dir.dat"],
+                                                               gdata.G_DCT_CONFIG["dir.img"]))
 
-        # argumento: version
-        l_parser.add_argument("-v", "--version", action="version", version=__version__)
+    # monta o diretório de tabelas
+    gdata.G_DCT_CONFIG["dir.tab"] = util.filepath(os.path.join(gdata.G_DCT_CONFIG["dir.dat"],
+                                                               gdata.G_DCT_CONFIG["dir.tab"]))
 
-        # faz o parser da linha de argumentos
-        l_args = l_parser.parse_args()
-        assert l_args
+# -------------------------------------------------------------------------------------------------
+# this is the bootstrap process
 
-        # salva os argumentos no dicionário
-        self.__dct_config["glb.canal"] = abs(int(l_args.canal))
-        self.__dct_config["glb.server"] = l_args.server
+if "__main__" == __name__:
 
-        # endereço da contra-parte
-        self.__dct_config["net.adr"] = self.__dct_config["net.srv"] if l_args.server else self.__dct_config["net.gcs"] 
+    # logger
+    logging.basicConfig()
 
-        # load dirs section
-        self.__load_dirs()
-
-    # ---------------------------------------------------------------------------------------------
-    def __get_server_mode(self):
-        """
-        modo de execução
-        """
-        # return platform data
-        return os.uname()[4].startswith("arm")
-
-    # ---------------------------------------------------------------------------------------------
-    def __load_dirs(self):
-        """
-        carrega as configurações de diretórios
-        """
-        # monta o diretório de imagens
-        self.__dct_config["dir.img"] = util.filepath(os.path.join(self.__dct_config["dir.dat"],
-                                                                  self.__dct_config["dir.img"]))
-
-        # monta o diretório de tabelas
-        self.__dct_config["dir.tab"] = util.filepath(os.path.join(self.__dct_config["dir.dat"],
-                                                                  self.__dct_config["dir.tab"]))
-
-    # =============================================================================================
-    # data
-    # =============================================================================================
-
-    # ---------------------------------------------------------------------------------------------
-    @property
-    def dct_config(self):
-        """
-        config manager data dictionary
-        """
-        return self.__dct_config
-
-    @dct_config.setter
-    def dct_config(self, f_val):
-        """
-        config manager data dictionary
-        """
-        # save a shallow copy
-        self.__dct_config = dict(f_val)
+    # run application
+    load_config("papical.cfg")
+    
+    print gdata.G_DCT_CONFIG        
 
 # < the end >--------------------------------------------------------------------------------------

@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------------------------------------
-papi_sender
+papi_senders
 
-PAPI sender
+PAPI senders
 
 revision 0.1  2017/abr  mlabru
 initial release (Linux/Python)
@@ -26,7 +26,7 @@ import threading
 import time
 
 # numPy
-import numpy
+import numpy as np
 
 # openCV
 import cv2
@@ -42,7 +42,7 @@ import model.pc_sns_thermometer as sthr
 
 # control
 import control.pc_defs as gdefs
-import control.pc_setup as gcfg
+import control.pc_config as gcfg
 
 # < module data >----------------------------------------------------------------------------------
 
@@ -56,7 +56,14 @@ def main():
     REAL PROGRAM MAIN
     """
     # load config
-    gcfg.load_setup("papical.cfg")
+    gcfg.load_config("papical.cfg")
+
+    # cria o soket
+    lsck_ccc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    assert lsck_ccc
+
+    # tupla network address
+    lt_ccc_addr = (gdata.G_DCT_CONFIG["net.gcs"], gdata.G_DCT_CONFIG["net.ccc"])
 
     # create read queue
     l_queue = Queue.Queue()
@@ -66,7 +73,7 @@ def main():
     gdata.G_KEEP_RUN = True
 
     # create sender camera thread
-    lthr_cam = threading.Thread(target=send_cam, args=(l_queue,))
+    lthr_cam = threading.Thread(target=send_cam, args=(l_queue, lsck_ccc, lt_ccc_addr))
     assert lthr_cam
 
     # start sender camera thread
@@ -94,7 +101,7 @@ def main():
     lthr_ser.start()
 
     # create sender sensors thread
-    lthr_sns = threading.Thread(target=send_sensors, args=(l_queue,))
+    lthr_sns = threading.Thread(target=send_sensors, args=(l_queue, lsck_ccc, lt_ccc_addr))
     assert lthr_sns
 
     # start sender sensors thread
@@ -106,16 +113,16 @@ def main():
     lthr_sns.join()
 
 # -------------------------------------------------------------------------------------------------
-def send_cam(f_queue):
+def send_cam(f_queue, fsck_ccc, ft_ccc_addr):
     """
     sender camera thread
     """
     # tupla network address
-    lt_udp_addr = (gdata.G_DCT_CONFIG["net.gcs"], gdata.G_DCT_CONFIG["net.img"])
+    lt_img_addr = (gdata.G_DCT_CONFIG["net.gcs"], gdata.G_DCT_CONFIG["net.img"])
 
     # cria o soket
-    l_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    assert l_sock
+    lsck_cam = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    assert lsck_cam
 
     # inicia a captura do vídeo
     l_capture = cv2.VideoCapture(0)
@@ -123,6 +130,9 @@ def send_cam(f_queue):
 
     l_capture.set(cv.CV_CAP_PROP_FRAME_WIDTH, gdefs.D_VID_HORZ)
     l_capture.set(cv.CV_CAP_PROP_FRAME_HEIGHT, gdefs.D_VID_VERT)
+
+    # start time
+    ll_start = time.time()
 
     # para todo o sempre...
     while gdata.G_KEEP_RUN:
@@ -136,18 +146,18 @@ def send_cam(f_queue):
         l_result, l_img_encode = cv2.imencode(".jpg", l_frame, l_encode_param)
 
         # converte em um array
-        l_data = numpy.array(l_img_encode)
+        l_data = np.array(l_img_encode)
 
         # converte em string
-        l_stringData = l_data.tostring()
-        # print len(l_stringData)
+        ls_str_data = l_data.tostring()
+        # print len(ls_str_data)
 
         # tamanho da imagem excede o tamanho máximo de UDP ?
-        if len(l_stringData) > 65507:
+        if len(ls_str_data) > 65507:
             # logger
             l_log = logging.getLogger("papi_sender::send_cam")
             l_log.setLevel(logging.WARNING)
-            l_log.warning(u"<E01: message too long: {}".format(len(l_stringData)))
+            l_log.warning(u"<E01: message too long: {}".format(len(ls_str_data)))
 
             # descarta a mensagem 
             continue
@@ -156,15 +166,35 @@ def send_cam(f_queue):
         ls_header = "{}#{}#".format(gdefs.D_MSG_VRS, gdefs.D_MSG_IMG)
 
         # envia o tamanho da string 
-        l_sock.sendto("{}#{}#{}".format(gdefs.D_MSG_VRS, gdefs.D_MSG_SIZ, len(ls_header) + len(l_stringData)), lt_udp_addr)
+        lsck_cam.sendto("{}#{}#{}".format(gdefs.D_MSG_VRS, gdefs.D_MSG_SIZ, len(ls_header) + len(ls_str_data)), lt_img_addr)
         # envia a string
-        l_sock.sendto("{}{}".format(ls_header, l_stringData), lt_udp_addr)
+        lsck_cam.sendto("{}{}".format(ls_header, ls_str_data), lt_img_addr)
+
+        # increment number of frames captured/sended
+        li_num_frames += 1
+
+        # time for stats ?
+        if li_num_frames >= gdefs.D_CAM_NFRAMES:
+            # elapsed time
+            ll_elapsed = time.time() - ll_start
+
+            # calculate frames per second
+            lf_fps = float(li_num_frames) / float(ll_elapsed)
+
+            # envia fps 
+            fsck_ccc.sendto("{}#{}#{:3.1f}".format(gdefs.D_MSG_VRS, gdefs.D_MSG_FPS, lf_fps), ft_ccc_addr)
+
+            # reset start time
+            ll_start = time.time()
 
     # fecha o socket
-    l_sock.close()
+    lsck_cam.close()
+
+    # release video
+    l_capture.release()
 
 # -------------------------------------------------------------------------------------------------
-def send_sensors(f_queue):
+def send_sensors(f_queue, fsck_ccc, ft_ccc_addr):
     """
     sender sensors thread
     """
@@ -204,8 +234,14 @@ def send_sensors(f_queue):
         # M_LOG.debug("llst_msg: {}".format(llst_msg))
 
         try:
+            # mensagem de ccc ?
+            if "!@CCC" == llst_msg[0]:
+                if len(llst_msg) > 3:
+                    # send ccc message (<vrs>#<tipo>#<[conteúdo,...]>#<ts>)
+                    fsck_ccc.sendto("{}#{}#{}#{}".format(gdefs.D_MSG_VRS, int(llst_msg[1]), llst_msg[2], float(llst_msg[3])), ft_ccc_addr)
+
             # mensagem de altímetro ?
-            if "!@ALT" == llst_msg[0]:
+            elif "!@ALT" == llst_msg[0]:
                 if len(llst_msg) > 3:
                     # send altimeter message (alt1, alt2, ts)
                     l_alt.send_data(float(llst_msg[1]), float(llst_msg[2]), float(llst_msg[3]))
