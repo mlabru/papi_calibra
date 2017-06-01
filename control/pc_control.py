@@ -32,7 +32,7 @@ import view.pc_view_gcs as vgcs
 import view.pc_view_srv as vsrv
 
 # control
-import control.pc_config as config
+import control.pc_config as gcfg
 import control.pc_net_sender as sender
 import control.pc_net_listener as listener
 import control.pc_net_sock_in as sockin
@@ -68,19 +68,18 @@ class CPAPICalControl(object):
         # registra a sí próprio como recebedor de eventos
         self.__event.register_listener(self)
 
-        # carrega o arquivo com as opções de configuração
-        self.__config = config.CPAPICalConfig("papical.cfg")
-        assert self.__config
+        # load config
+        gcfg.load_config("papical.cfg")
 
         # create application
         self.create_app("papi_calibra")
 
         # interface e endereço de rede
-        lt_ifc = self.__config.dct_config["net.ifc"]
-        ls_adr = self.__config.dct_config["net.adr"]
+        lt_ifc = gdata.G_DCT_CONFIG["net.ifc"]
+        ls_adr = gdata.G_DCT_CONFIG["net.adr"]
 
         # portas
-        li_ccc = int(self.__config.dct_config["net.ccc"])
+        li_ccc = int(gdata.G_DCT_CONFIG["net.ccc"])
 
         # create connections
         self.create_connections_gcs(lt_ifc, ls_adr, li_ccc)        
@@ -178,16 +177,6 @@ class CPAPICalControl(object):
     def app(self):
         return self.__app
 
-    # ---------------------------------------------------------------------------------------------
-    @property
-    def config(self):
-        return self.__config
-        
-    # ---------------------------------------------------------------------------------------------
-    @property
-    def dct_config(self):
-        return self.__config.dct_config
-        
     # ---------------------------------------------------------------------------------------------
     @property
     def event(self):

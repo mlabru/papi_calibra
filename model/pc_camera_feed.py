@@ -57,22 +57,21 @@ class CCameraFeed(snsf.CSensorFeed):
     C_SGN_DATA_FRAME  = QtCore.pyqtSignal(cv.iplimage)
 
     # ---------------------------------------------------------------------------------------------
-    def __init__(self, f_control, f_monitor=None):
+    def __init__(self, f_monitor=None):
         """
         constructor
 
-        @param f_control: control
         @param f_monitor: data monitor
         """ 
         # check input
-        assert f_control
+        # assert f_monitor
 
         # network interface
-        lt_ifc = f_control.config.dct_config["net.ifc"]
+        lt_ifc = gdata.G_DCT_CONFIG["net.ifc"]
         # network address
-        ls_addr = f_control.config.dct_config["net.adr"]
+        ls_addr = gdata.G_DCT_CONFIG["net.adr"]
         # port
-        li_port = int(f_control.config.dct_config["net.img"])
+        li_port = int(gdata.G_DCT_CONFIG["net.img"])
 
         # init super class
         super(CCameraFeed, self).__init__(lt_ifc, ls_addr, li_port, f_monitor)
