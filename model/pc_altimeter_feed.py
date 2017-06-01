@@ -25,6 +25,7 @@ import time
 from PyQt4 import QtCore
 
 # model
+import model.pc_data as gdata
 import model.pc_sensor_feed as snsf
 
 # control
@@ -46,21 +47,21 @@ class CAltimeterFeed(snsf.CSensorFeed):
     C_SGN_DATA_ALT = QtCore.pyqtSignal(list)
 
     # ---------------------------------------------------------------------------------------------
-    def __init__(self, f_control, f_monitor=None):
+    def __init__(self, f_monitor=None):
         """
         constructor
 
-        @param f_control: control
+        @param f_monitor: data monitor
         """ 
         # check input
-        assert f_control
+        # assert f_monitor
 
         # network interface
-        lt_ifc = f_control.config.dct_config["net.ifc"]
+        lt_ifc = gdata.G_DCT_CONFIG["net.ifc"]
         # network address
-        ls_addr = f_control.config.dct_config["net.adr"]
+        ls_addr = gdata.G_DCT_CONFIG["net.adr"]
         # port
-        li_port = int(f_control.config.dct_config["net.alt"])
+        li_port = int(gdata.G_DCT_CONFIG["net.alt"])
 
         # init super class
         super(CAltimeterFeed, self).__init__(lt_ifc, ls_addr, li_port, f_monitor)

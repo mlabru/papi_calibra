@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ---------------------------------------------------------------------------------------------------
-pc_model_cli
+pc_model_gcs
 
 papi calibrate
 
@@ -62,8 +62,8 @@ class CPAPICalModelGCS(object):
         self.__event.register_listener(self)
 
         # tty default settings
-        self.__s_port = f_control.config.dct_config["ser.port"]
-        self.__i_baudrate = f_control.config.dct_config["ser.baud"]
+        self.__s_port = gdata.G_DCT_CONFIG["ser.port"]
+        self.__i_baudrate = gdata.G_DCT_CONFIG["ser.baud"]
 
         # on/off monitor state
         self.__v_monitor_active = False

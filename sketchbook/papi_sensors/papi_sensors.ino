@@ -20,7 +20,7 @@
 // #define D_DEBUG
 
 #define D_SER_BAUD 57600
-#define D_CAL_SAMPLES 120.
+#define D_CLB_SAMPLES 120.
 
 // wait time (1000/D_TIM_WAIT) = Hz
 #define D_TIM_WAIT 500    // 2 Hz
@@ -254,7 +254,7 @@ void calibra()
     unsigned long lul_elp;
 
     // for all calibration samples...
-    for (int li_i = 0; li_i < D_CAL_SAMPLES; li_i++)
+    for (int li_i = 0; li_i < D_CLB_SAMPLES; li_i++)
     {
         // get initial time (ms)
         lul_ini = millis();
@@ -287,12 +287,12 @@ void calibra()
 
     #ifdef D_BMP280
     // calcula a média
-    gf_alt_bmp /= D_CAL_SAMPLES;
+    gf_alt_bmp /= D_CLB_SAMPLES;
     #endif
 
     #ifdef D_MPL3115
     // calcula a média
-    gf_alt_mpl /= D_CAL_SAMPLES;
+    gf_alt_mpl /= D_CLB_SAMPLES;
     #endif
 
 } // calibra

@@ -103,7 +103,7 @@ class CPAPICalWndMainGCS(QtGui.QMainWindow):
         assert l_settings
 
         # create main Ui
-        self.__setup_ui(f_control, l_settings)
+        self.__setup_ui(l_settings)
         self.__create_toolbars()
         self.__create_status_bar()
 
@@ -286,12 +286,11 @@ class CPAPICalWndMainGCS(QtGui.QMainWindow):
         return QtGui.QMessageBox.Yes == l_ret
 
     # ---------------------------------------------------------------------------------------------
-    def __setup_ui(self, f_control, f_settings):
+    def __setup_ui(self, f_settings):
         """
         setup user interface
         """
         # clear to go
-        assert f_control
         assert f_settings
 
         # create widget monitor (network) page
@@ -299,14 +298,14 @@ class CPAPICalWndMainGCS(QtGui.QMainWindow):
         assert self.__pag_mon
 
         # create widget sensors page
-        self.__pag_sns = swid.CSensorsWidget(f_control, self.__pag_mon, self)
+        self.__pag_sns = swid.CSensorsWidget(self.__pag_mon, self)
         assert self.__pag_sns
 
         # make connections
         self.__pag_sns.C_SGN_DATA_ALT.connect(self.__on_data_alt)
 
         # create widget PAPI page
-        self.__pag_pap = spap.CPAPIWidget(f_control, self.__pag_mon, self)
+        self.__pag_pap = spap.CPAPIWidget(self.__pag_mon, self)
         assert self.__pag_pap
 
         # create tabWidget
