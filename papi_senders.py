@@ -117,6 +117,9 @@ def send_cam(f_queue, fsck_ccc, ft_ccc_addr):
     """
     sender camera thread
     """
+    # init number of frames sended
+    li_num_frames = 0
+    
     # tupla network address
     lt_img_addr = (gdata.G_DCT_CONFIG["net.gcs"], gdata.G_DCT_CONFIG["net.img"])
 
@@ -186,6 +189,9 @@ def send_cam(f_queue, fsck_ccc, ft_ccc_addr):
 
             # reset start time
             ll_start = time.time()
+
+            # reset num frames
+            li_num_frames = 0
 
     # fecha o socket
     lsck_cam.close()
