@@ -20,6 +20,9 @@ __date__ = "2017/05"
 D_CAM_WIDTH = 320
 D_CAM_HEIGHT = 240
 
+# número de frames para estatística
+D_CAM_NFRAMES = 120
+
 # < config >---------------------------------------------------------------------------------------
 
 # arquivo de configuração
@@ -47,6 +50,7 @@ D_MSG_THR = 1940    # mensagens de termômetro
 
 D_MSG_IMG = 1961    # mensagens de imagens (frame)
 D_MSG_SIZ = 1962    # mensagens de imagens (tamanho)
+D_MSG_FPS = 1963    # mensagens de fps
 
 D_MSG_FIM = 1970    # mensagem de fim de execução
 
@@ -54,7 +58,8 @@ D_MSG_FIM = 1970    # mensagem de fim de execução
 D_MSG_SEP = '#'
 
 # mensagens válidas
-SET_MSG_VALIDAS = [D_MSG_ALT, D_MSG_BAR, D_MSG_GPS, D_MSG_THR, D_MSG_IMG, D_MSG_SIZ, D_MSG_FIM]
+SET_MSG_VALIDAS = [D_MSG_ALT, D_MSG_BAR, D_MSG_GPS, D_MSG_THR, \
+                   D_MSG_IMG, D_MSG_SIZ, D_MSG_FPS, D_MSG_FIM]
 
 # < PAPI >-----------------------------------------------------------------------------------------
 

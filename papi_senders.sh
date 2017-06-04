@@ -7,4 +7,4 @@ HOST=`hostname`
 cd ~/Public/mkr/papi/srce/papi_calibra
 
 # envia dados
-/usr/bin/env python ./papi_sender.py 2> ./papi_sender.$HOST.log &
+/usr/bin/env python ./papi_senders.py 2> ./papi_senders.$HOST.log &

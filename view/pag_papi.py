@@ -53,16 +53,14 @@ class CPAPIWidget(QtGui.QWidget):
     C_SGN_PAGE_ON = QtCore.pyqtSignal(bool)
 
     # ---------------------------------------------------------------------------------------------
-    def __init__(self, f_control, f_monitor, f_parent):
+    def __init__(self, f_monitor, f_parent):
         """
         constructor
 
-        @param f_control: control
         @param f_monitor: data monitor
         @param f_parent: parent widget
         """
         # check input
-        assert f_control
         assert f_monitor
         assert f_parent
         
@@ -77,7 +75,7 @@ class CPAPIWidget(QtGui.QWidget):
         assert self.__event
 
         # create camera groupBox
-        lgbx_cam = self.__create_gbx_cam(f_control, f_monitor)
+        lgbx_cam = self.__create_gbx_cam(f_monitor)
         # create plot groupBox
         lgbx_plp = self.__create_gbx_plot()
         # create config groupBox
@@ -114,16 +112,15 @@ class CPAPIWidget(QtGui.QWidget):
         return self.__parent.create_action(fs_title, **kwargs)
 
     # ---------------------------------------------------------------------------------------------
-    def __create_gbx_cam(self, f_control, f_monitor):
+    def __create_gbx_cam(self, f_monitor):
         """
         create camera groupBox
         """
         # check input
-        assert f_control
         assert f_monitor
 
         # create camera feed
-        lcam_feed = camfd.CCameraFeed(f_control, f_monitor)
+        lcam_feed = camfd.CCameraFeed(f_monitor)
         assert lcam_feed
 
         # create camera widget
