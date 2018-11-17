@@ -98,9 +98,9 @@ D_SMP_CALIBRA = 120
 D_NET_IFC = (None, None)  # ("wlan0", "wlan0")
 
 # endereço da ground station
-D_NET_GCS = "192.168.12.2"
+D_NET_GCS = "192.168.0.2"
 # endereço do servidor (raspi)
-D_NET_SRV = "192.168.12.5"
+D_NET_SRV = "192.168.0.5"
 
 # arbitrary non-privileged ports
 
