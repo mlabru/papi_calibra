@@ -10,6 +10,7 @@
 *.docx
 *.doc
 *.bkp
+*.o
 *.x
 *.tgz
 *.zip
