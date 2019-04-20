@@ -1,20 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
----------------------------------------------------------------------------------------------------
 pc_defs
 
 defines e constantes válidas globalmente
 
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 revision 0.1  2017/may  mlabru
 initial release (Linux/Python)
----------------------------------------------------------------------------------------------------
 """
 __version__ = "$revision: 0.1$"
 __author__ = "Milton Abrunhosa"
 __date__ = "2017/05"
 
 # < camera >---------------------------------------------------------------------------------------
+
+# canal de vídeo
+D_CAM_VIDEO = 0
 
 # configuração da camera
 D_CAM_WIDTH = 320
@@ -40,7 +44,7 @@ D_DIR_TAB = "tabs"
 # < mensagens >------------------------------------------------------------------------------------
 
 # versão do conjunto de mensagens
-D_MSG_VRS = 1202
+D_MSG_VRS = 1202 + 1
 
 # códigos das mensagens
 D_MSG_ALT = 1923    # mensagens de altímetro
@@ -48,9 +52,10 @@ D_MSG_BAR = 1926    # mensagens de barômetro
 D_MSG_GPS = 1929    # mensagens de GPS
 D_MSG_THR = 1940    # mensagens de termômetro
 
-D_MSG_IMG = 1961    # mensagens de imagens (frame)
-D_MSG_SIZ = 1962    # mensagens de imagens (tamanho)
-D_MSG_FPS = 1963    # mensagens de fps
+D_MSG_SIZ = 1961    # mensagens de imagens (tamanho)
+D_MSG_I00 = 1962    # mensagens de imagens (frame parcial)
+D_MSG_I99 = 1963    # mensagens de imagens (frame final)
+D_MSG_FPS = 1964    # mensagens de fps
 
 D_MSG_FIM = 1970    # mensagem de fim de execução
 
@@ -59,7 +64,13 @@ D_MSG_SEP = '#'
 
 # mensagens válidas
 SET_MSG_VALIDAS = [D_MSG_ALT, D_MSG_BAR, D_MSG_GPS, D_MSG_THR, \
-                   D_MSG_IMG, D_MSG_SIZ, D_MSG_FPS, D_MSG_FIM]
+                   D_MSG_I00, D_MSG_I99, D_MSG_SIZ, D_MSG_FPS, D_MSG_FIM]
+
+# encoder B64 ?
+D_B64 = False
+
+# message header size
+D_HDR_SIZ = 10
 
 # < PAPI >-----------------------------------------------------------------------------------------
 
@@ -97,7 +108,7 @@ D_SMP_CALIBRA = 120
 # interface de rede
 D_NET_IFC = (None, None)  # ("wlan0", "wlan0")
 
-# endereço da ground station
+# endereço da ground station (note)
 D_NET_GCS = "192.168.0.2"
 # endereço do servidor (raspi)
 D_NET_SRV = "192.168.0.5"

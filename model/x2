@@ -1,0 +1,45 @@
+    # pata todo o sempre...
+    while True:
+        # recebe o tamanho do buffer
+        l_msg, l_addr = l_sock.recvfrom(16)
+        logging.debug("l_msg len: {}".format(len(l_msg)))
+        logging.debug("l_msg: {}".format(l_msg))
+
+        # split message
+        llst_msg = l_msg.split('#')
+        logging.debug("llst_msg: {}".format(llst_msg))
+        
+        # mensagem inválida ?
+        if "101" != llst_msg[0]:
+            # próxima mensagem
+            continue
+
+        # tamanho da mensagem
+        li_length = int(llst_msg[1])
+        logging.debug("ilen: {}".format(li_length))
+            
+        # receive message
+        ls_str_data = receive_all(l_sock, li_length + 4)
+            
+        # converte de string para imagem
+        l_img_encode = numpy.fromstring(base64.b64decode(ls_str_data), dtype="uint8")
+
+        # decode image
+        l_frame = cv2.imdecode(l_img_encode, 1)
+
+        # decodifica e exibe a imagem
+        cv2.imshow("Receiving...", l_frame)
+
+        endt = time.time()
+        elapsed = endt - start
+        fps = counter / elapsed
+        print "fps:", fps
+
+        # start = endt    
+        counter += 1
+
+        # press 'q' to quit ?
+        if (cv2.waitKey(1) & 0xff) == ord('q'):
+            # cai fora...
+            break
+            

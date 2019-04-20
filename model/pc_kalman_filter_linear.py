@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
----------------------------------------------------------------------------------------------------
 kalman_filter_linear
 
 implements a multi-variable linear discrete Kalman filter
 
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 revision 0.1  2017/abr  mlabru
 initial release (Linux/Python)
----------------------------------------------------------------------------------------------------
 """
 __version__ = "$revision: 0.1$"
 __author__ = "Milton Abrunhosa"

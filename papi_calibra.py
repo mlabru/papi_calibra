@@ -1,12 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
----------------------------------------------------------------------------------------------------
-papi calibrate
+papi calibra
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 revision 0.1  2017/abr  mlabru
 initial version (Linux/Python)
----------------------------------------------------------------------------------------------------
 """
 __version__ = "$revision: 0.1$"
 __author__ = "Milton Abrunhosa"

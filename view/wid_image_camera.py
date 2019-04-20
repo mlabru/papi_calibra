@@ -1,17 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
----------------------------------------------------------------------------------------------------
 wid_image_camera
 
-papi calibrate
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 revision 0.1  2017/abr  mlabru
 initial release (Linux/Python)
----------------------------------------------------------------------------------------------------
 """
 __version__ = "$revision: 0.1$"
 __author__ = "Milton Abrunhosa"
@@ -26,7 +22,7 @@ import logging
 import numpy as np
 
 # openCV
-import cv2.cv as cv
+import cv2
 
 # pyQT4
 from PyQt4 import QtCore
@@ -51,7 +47,7 @@ class CImageCameraWidget(QtGui.QWidget):
     QImage for openCV
     """
     # signals
-    C_SGN_DATA_FRAME = QtCore.pyqtSignal(cv.iplimage)
+    C_SGN_DATA_FRAME = QtCore.pyqtSignal(np.ndarray)  #cv.iplimage)
 
     # ---------------------------------------------------------------------------------------------
     def __init__(self, f_camera_feed, f_parent=None):
@@ -82,7 +78,7 @@ class CImageCameraWidget(QtGui.QWidget):
         self.setMaximumSize(gdefs.D_CAM_WIDTH, gdefs.D_CAM_HEIGHT)
 
     # ---------------------------------------------------------------------------------------------
-    @QtCore.pyqtSlot(cv.iplimage)
+    @QtCore.pyqtSlot(np.ndarray)  #cv.iplimage)
     def __on_dtct_frame(self, f_frame):
         """
         callback new frame arrived
@@ -98,7 +94,7 @@ class CImageCameraWidget(QtGui.QWidget):
         self.update()
 
     # ---------------------------------------------------------------------------------------------
-    @QtCore.pyqtSlot(cv.iplimage)
+    @QtCore.pyqtSlot()  #cv.iplimage)
     def __on_new_frame(self, f_frame):
         """
         callback new frame arrived

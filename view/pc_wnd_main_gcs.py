@@ -1,14 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
----------------------------------------------------------------------------------------------------
-pc_wnd_main_cli
+pc_wnd_main_gcs
 
-papi calibrate
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 revision 0.1  2017/abr  mlabru
 initial release (Linux/Python)
----------------------------------------------------------------------------------------------------
 """
 __version__ = "$revision: 0.1$"
 __author__ = "Milton Abrunhosa"
@@ -74,18 +73,6 @@ class CPAPICalWndMainGCS(QtGui.QMainWindow):
         
         # init super class
         super(CPAPICalWndMainGCS, self).__init__()
-
-        # control
-        # self.__control = f_control
-        # assert self.__control
-
-        # dicionário de configuração
-        # self.__dct_config = f_control.dct_config
-        # assert self.__dct_config
-
-        # model
-        # self.__model = f_control.model
-        # assert self.__model
 
         # event manager
         self.__event = f_control.event
@@ -252,7 +239,7 @@ class CPAPICalWndMainGCS(QtGui.QMainWindow):
     @QtCore.pyqtSlot(list)
     def __on_data_alt(self, flst_data):
         """
-        new altimeter data arrived
+        altimeter data arrived
         """
         # generate PAPI Cal widget signal
         self.__pag_pap.C_SGN_DATA_ALT.emit(flst_data)        

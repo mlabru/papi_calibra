@@ -1,14 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
----------------------------------------------------------------------------------------------------
 pc_camera_feed
 
 camera feed
 
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 revision 0.1  2017/abr  mlabru
 initial release (Linux/Python)
----------------------------------------------------------------------------------------------------
 """
 __version__ = "$revision: 0.1$"
 __author__ = "Milton Abrunhosa"
@@ -17,6 +18,7 @@ __date__ = "2017/05"
 # < imports >--------------------------------------------------------------------------------------
 
 # python library
+import base64
 import errno
 import logging
 import socket
@@ -28,7 +30,6 @@ import numpy as np
 
 # openCV
 import cv2
-import cv2.cv as cv
 
 # pyQt4
 from PyQt4 import QtCore
@@ -43,8 +44,8 @@ import control.pc_defs as gdefs
 # < module data >----------------------------------------------------------------------------------
 
 # logger
-M_LOG = logging.getLogger(__name__)
-M_LOG.setLevel(logging.DEBUG)
+# M_LOG = logging.getLogger(__name__)
+# M_LOG.setLevel(logging.DEBUG)
 
 # < CCameraFeed >----------------------------------------------------------------------------------
 
@@ -54,7 +55,7 @@ class CCameraFeed(snsf.CSensorFeed):
     """
     # signal
     C_SGN_NEW_MSG_CAM = QtCore.pyqtSignal(str)
-    C_SGN_DATA_FRAME  = QtCore.pyqtSignal(cv.iplimage)
+    C_SGN_DATA_FRAME  = QtCore.pyqtSignal(np.ndarray)  # cv.iplimage)
 
     # ---------------------------------------------------------------------------------------------
     def __init__(self, f_monitor=None):
@@ -63,6 +64,9 @@ class CCameraFeed(snsf.CSensorFeed):
 
         @param f_monitor: data monitor
         """ 
+        # logger
+        # M_LOG.info("CCameraFeed constructor >>")
+
         # check input
         # assert f_monitor
 
@@ -97,16 +101,70 @@ class CCameraFeed(snsf.CSensorFeed):
         """
         dispatch de imagens
         """
+        # logger
+        # M_LOG.info("dispatch_msg >>")
+
         # existe monitor ?
         if self.monitor:
             # envia mensagem ao monitor
             self.monitor.C_SGN_NEW_MSG_CAM.emit(fs_msg)
 
     # ---------------------------------------------------------------------------------------------
-    def __receive_msg(self, f_sock, fi_size, fi_type):
+    def __receive_all(self, f_sock, fi_len):
+        """
+        receive a message in packets
+        
+        @param f_sock:
+        @param fi_
+        """
+        # logger
+        # M_LOG.info(">> receive all")
+
+        # data
+        ls_str_data = ""
+
+        # para todos os packets...
+        while 1:
+            # recebe a imagem
+            lv_ok, llst_msg, l_msg = self.__receive_msg(f_sock, fi_len)
+            # M_LOG.debug("l_msg len: {}".format(len(l_msg)))
+
+            # split message
+            llst_msg = l_msg.split('#')
+            # M_LOG.debug("llst_msg: {}".format(llst_msg))
+
+            # mensagem ?
+            if gdefs.D_MSG_I00 == int(llst_msg[1]):
+                # próxima mensagem
+                ls_str_data += l_msg[gdefs.D_HDR_SIZ:]
+
+            # fim de mensagem ?
+            elif gdefs.D_MSG_I99 == int(llst_msg[1]):
+                # próxima mensagem
+                ls_str_data += l_msg[gdefs.D_HDR_SIZ:]
+
+                # quit
+                break
+
+            # senão,...
+            else:
+                # quit
+                break
+
+        # log 
+        # M_LOG.debug("msg len: {}".format(len(ls_str_data)))
+
+        # return
+        return True, ls_str_data    
+
+    # ---------------------------------------------------------------------------------------------
+    def __receive_msg(self, f_sock, fi_size, fi_type=None):
         """
         receive a message
         """
+        # logger
+        # M_LOG.info("__receive_msg >>")
+
         try:
             # receive image size
             l_msg, l_addr = f_sock.recvfrom(fi_size)
@@ -136,7 +194,7 @@ class CCameraFeed(snsf.CSensorFeed):
             # logger
             l_log = logging.getLogger("CCameraFeed::__receive_msg")
             l_log.setLevel(logging.CRITICAL)
-            l_log.critical(u"<E02: error: zero len message.")
+            l_log.critical(u"<E02: error: zero length message.")
 
             # continue
             return False, None, None
@@ -147,8 +205,8 @@ class CCameraFeed(snsf.CSensorFeed):
         # split message
         llst_msg = l_msg.split('#')
         
-        # mensagem inválida ?
-        if (gdefs.D_MSG_VRS != int(llst_msg[0])) or (fi_type != int(llst_msg[1])):
+        # versão ou tipo inválidos ?
+        if (gdefs.D_MSG_VRS != int(llst_msg[0])) or ((fi_type is not None) and (fi_type != int(llst_msg[1]))):
             # return error
             return False, None, None
 
@@ -161,6 +219,9 @@ class CCameraFeed(snsf.CSensorFeed):
         """
         processo de recebimento de imagens
         """
+        # logger
+        # M_LOG.info("query_frame >>")
+
         # clear to go
         assert self.sck_rcv
 
@@ -189,6 +250,9 @@ class CCameraFeed(snsf.CSensorFeed):
             if not lv_ok:
                 # next message 
                 continue
+
+            # log 
+            # M_LOG.debug("llst_msg(1): {}/{}/len: {}".format(llst_msg[0], llst_msg[1], llst_msg[2]))
             
             # tamanho da mensagem
             li_len = int(llst_msg[2])
@@ -197,27 +261,25 @@ class CCameraFeed(snsf.CSensorFeed):
             self.sck_rcv.setblocking(1)
 
             # receive image
-            lv_ok, llst_msg, l_msg = self.__receive_msg(self.sck_rcv, li_len, gdefs.D_MSG_IMG)
-            
+            lv_ok, l_msg = self.__receive_all(self.sck_rcv, li_len + gdefs.D_HDR_SIZ)
+
             # invalid message ?
             if not lv_ok:
                 # next message 
                 continue
 
-            # calc offset to image start byte
-            li_offset = len(llst_msg[0]) + len(llst_msg[1]) + 2
+            # encoded ? 
+            if gdefs.D_B64:
+                # converte de string para imagem
+                l_data = np.fromstring(base64.b64decode(l_msg), dtype="uint8")
 
-            # converte de string para imagem
-            l_data = np.fromstring(l_msg[li_offset:], dtype="uint8")
+            # senão,...
+            else:
+                # converte de string para imagem
+                l_data = np.fromstring(l_msg, dtype="uint8")
 
             # decodifica a imagem
-            l_data = cv2.imdecode(l_data, 1)
-
-            # converting from numPy to iplImage
-            l_frame = cv.CreateImageHeader((l_data.shape[1], l_data.shape[0]), cv.IPL_DEPTH_8U, 3)
-            assert l_frame
-            
-            cv.SetData(l_frame, l_data.tostring(), l_data.dtype.itemsize * 3 * l_data.shape[1])
+            l_frame = cv2.imdecode(l_data, 1)
 
             # emit new frame signal
             self.C_SGN_DATA_FRAME.emit(l_frame)

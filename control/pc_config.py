@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
----------------------------------------------------------------------------------------------------
 pc_config
 
 config manager
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 revision 0.2  2015/nov  mlabru
 pep8 style conventions
 
 revision 0.1  2014/nov  mlabru
 initial release (Linux/Python)
----------------------------------------------------------------------------------------------------
 """
 __version__ = "$revision: 0.2$"
 __author__ = "Milton Abrunhosa"
@@ -42,6 +43,7 @@ __CFG_PAPICAL = {"dir.dat": gdefs.D_DIR_DAT,          # diretório de dados
                  "glb.canal": gdata.G_CANAL,          # canal de comunicação
                  "glb.debug": gdata.G_DEBUG,          # modo debug
                  "glb.server": gdata.G_SERVER,        # modo de execução (gcs(F)/servidor(T))
+                 "glb.video": gdefs.D_CAM_VIDEO,      # canal de vídeo
 
                  "msg.vrs": gdefs.D_MSG_VRS,          # versão do protocolo
 
@@ -107,6 +109,11 @@ def load_config(fs_cnfg):
     l_parser.add_argument("-d", "--debug", action="store_true",
                           default=gdata.G_DCT_CONFIG["glb.debug"], 
                           help=u"Debug Mode (default: {})".format(gdata.G_DCT_CONFIG["glb.debug"]))
+
+    # argumento: canal de vídeo
+    l_parser.add_argument("-i", "--video", type=int, dest="video",
+                          default=gdata.G_DCT_CONFIG["glb.video"],
+                          help=u"Video channel (default: {})".format(gdata.G_DCT_CONFIG["glb.video"]))
 
     # argumento: modo servidor
     l_parser.add_argument("-s", "--server", action="store_true",

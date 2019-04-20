@@ -81,9 +81,9 @@ def __search(f_img, ft_size, f_img_mask, f_circles, ff_threshold, fs_label):
 
         h, s, rr = 0., 0., int(l_circle[2])
         # M_LOG.debug("h: {} s: {} r: {} (1):".format(h, s, rr))
-        for m in xrange(-rr, rr):
+        for m in range(-rr, rr):
             #M_LOG.debug("m:", m
-            for n in xrange(-rr, rr):
+            for n in range(-rr, rr):
                 #M_LOG.debug("n:", n
                 # check if circle is outside bounds
                 if (l_circle[1] + m) >= ft_size[0] or (l_circle[0] + n) >= ft_size[1]:
@@ -122,15 +122,11 @@ def detect(fimg_ptr):
 
     @param fimg_ptr: image
     """
-    '''
-    # convert iplimage to cvMat to np.array
-    fimg_ptr = np.asarray(fimg_ptr[:])
-
     # obtém o tamanho da imagem
     lt_size = fimg_ptr.shape
 
     # salva imagem original
-    limg_ptr = fimg_ptr
+    limg_ptr = fimg_ptr.copy()
 
     # reduce the noise so we avoid false circle detection
     # limg_hsv = cv2.GaussianBlur(fimg_ptr, (9, 9), 2, 2)  # era (5, 5), 2
@@ -155,12 +151,7 @@ def detect(fimg_ptr):
     if g_circles is not None:
         l_bitmap, limg_mask_g = __search(limg_ptr, lt_size, limg_mask_g, g_circles[0, :], 0.3, "BRA")
 
-    # convert np.array to iplimage
-    # l_bitmap = cv2.cv.CreateImageHeader((limg_ptr.shape[1], limg_ptr.shape[0]), cv2.cv.IPL_DEPTH_8U, 3)
-
-    # cv2.cv.SetData(l_bitmap, limg_ptr.tostring(), limg_ptr.dtype.itemsize * 3 * limg_ptr.shape[1])
-    '''
     # exibe imagem resultado
-    return fimg_ptr  # l_bitmap
+    return l_bitmap
 
 # <the end>----------------------------------------------------------------------------------------

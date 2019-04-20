@@ -1,17 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
----------------------------------------------------------------------------------------------------
 gbx_camera
 
-papi calibrate
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 revision 0.1  2017/abr  mlabru
 initial release (Linux/Python)
----------------------------------------------------------------------------------------------------
 """
 __version__ = "$revision: 0.1$"
 __author__ = "Milton Abrunhosa"
@@ -20,14 +16,13 @@ __date__ = "2017/04"
 # < imports >--------------------------------------------------------------------------------------
 
 # python library
-import logging
+# import logging
 
 # numPy
 import numpy as np
 
 # openCV
 import cv2
-import cv2.cv as cv
 
 # PyQt4
 from PyQt4 import QtCore
@@ -46,8 +41,8 @@ import control.pc_defs as gdefs
 # < module data >----------------------------------------------------------------------------------
 
 # logger
-M_LOG = logging.getLogger(__name__)
-M_LOG.setLevel(logging.DEBUG)
+# M_LOG = logging.getLogger(__name__)
+# M_LOG.setLevel(logging.DEBUG)
 
 # < CCameraWidget >--------------------------------------------------------------------------------
 
@@ -56,7 +51,7 @@ class CCameraWidget(QtGui.QGroupBox):
     QImage for openCV
     """
     # signals
-    C_SGN_DTCT_FRAME = QtCore.pyqtSignal(cv.iplimage)
+    C_SGN_DTCT_FRAME = QtCore.pyqtSignal(np.ndarray)
 
     # ---------------------------------------------------------------------------------------------
     def __init__(self, fs_title, f_camera_feed, f_parent=None):
@@ -67,6 +62,9 @@ class CCameraWidget(QtGui.QGroupBox):
         @param f_camera_feed: image source
         @param f_parent: parent widget
         """
+        # log
+        # M_LOG.info("CCameraWidget constructor >>")
+        
         # check input
         assert f_camera_feed
 
@@ -123,8 +121,11 @@ class CCameraWidget(QtGui.QGroupBox):
     @QtCore.pyqtSlot()
     def __on_btn_rec_clicked(self):
         """
-        callback new frame arrived
+        callback botton rec clicked
         """
+        # log
+        # M_LOG.info("__on_btn_rec_clicked >>")
+        
         # setup buttons
         self.__btn_rec.setEnabled(False)
         self.__btn_stp.setEnabled(True)
@@ -136,8 +137,11 @@ class CCameraWidget(QtGui.QGroupBox):
     @QtCore.pyqtSlot()
     def __on_btn_stp_clicked(self):
         """
-        callback new frame arrived
+        callback botton stop clicked
         """
+        # log
+        # M_LOG.info("__on_btn_stp_clicked >>")
+        
         # stop recording
         self.__v_recording = False
 
@@ -146,18 +150,21 @@ class CCameraWidget(QtGui.QGroupBox):
         self.__btn_stp.setEnabled(False)
 
     # ---------------------------------------------------------------------------------------------
-    @QtCore.pyqtSlot(cv.iplimage)
+    @QtCore.pyqtSlot(np.ndarray)
     def __on_new_frame(self, f_frame):
         """
         callback new frame arrived
         """
+        # log
+        # M_LOG.info("__on_new_frame >>")
+        
         # recording ?
         if self.__v_recording:
-            # convert iplimage to cvMat to np.array
-            l_frame = np.asarray(f_frame[:])
-
+            # log
+            # M_LOG.debug("recording...")
+            
             # save image
-            cv2.imwrite("data/records/{0:05d}.jpg".format(self.__i_frame_no), l_frame)
+            cv2.imwrite("data/records/{0:05d}.jpg".format(self.__i_frame_no), f_frame)
 
             # increment frame number
             self.__i_frame_no += 1

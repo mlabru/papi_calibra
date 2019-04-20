@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
----------------------------------------------------------------------------------------------------
 glb_data
 
 global data
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 revision 0.2  2015/nov  mlabru
 pep8 style conventions
 
 revision 0.1  2014/nov  mlabru
 initial release (Linux/Python)
----------------------------------------------------------------------------------------------------
 """
 __version__ = "$revision: 0.2$"
 __author__ = "Milton Abrunhosa"

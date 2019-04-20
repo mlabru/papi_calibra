@@ -1,14 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
----------------------------------------------------------------------------------------------------
 wid_sensors
 
 a serial port packet monitor that plots live data using PyQwt
 
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 revision 0.1  2017/abr  mlabru
 initial release (Linux/Python)
----------------------------------------------------------------------------------------------------
 """
 __version__ = "$revision: 0.1$"
 __author__ = "Milton Abrunhosa"
@@ -18,9 +19,6 @@ __date__ = "2017/04"
 
 # python library
 import logging
-
-# openCV
-import cv2.cv as cv
 
 # PyQt4
 from PyQt4 import QtCore

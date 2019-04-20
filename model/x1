@@ -1,0 +1,48 @@
+# -------------------------------------------------------------------------------------------------
+def receive_all(f_sock, fi_length):
+    """
+    receive a message in packets
+    
+    @param f_sock:
+    @param fi_
+    """
+    # logger
+    logging.info(">> receive all")
+
+    # data
+    ls_str_data = ""
+
+    # para todos os packets...
+    while 1:
+        # recebe a imagem
+        l_msg, l_addr = f_sock.recvfrom(fi_length)
+        logging.debug("l_msg len: {}".format(len(l_msg)))
+
+        # split message
+        llst_msg = l_msg.split('#')
+        logging.debug("llst_msg: {}".format(llst_msg))
+
+        # mensagem ?
+        if "102" == llst_msg[0]:
+            # próxima mensagem
+            ls_str_data += l_msg[4:]
+
+        # fim de mensagem ?
+        elif "103" == llst_msg[0]:
+            # próxima mensagem
+            ls_str_data += l_msg[4:]
+
+            # quit
+            break
+
+        # senão,...
+        else:
+            # quit
+            break
+
+    logging.debug("image len: {}".format(fi_length - 4))
+    logging.debug("array len: {}".format(len(l_msg[4:])))
+
+    # return
+    return ls_str_data    
+

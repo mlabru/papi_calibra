@@ -1,17 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
----------------------------------------------------------------------------------------------------
 img_opencv
 
-papi calibrate
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 revision 0.1  2017/abr  mlabru
 initial release (Linux/Python)
----------------------------------------------------------------------------------------------------
 """
 __version__ = "$revision: 0.1$"
 __author__ = "Milton Abrunhosa"
@@ -22,7 +18,7 @@ __date__ = "2017/04"
 # python library
 
 # openCV
-import cv
+import cv2
 
 # pyQt4
 from PyQt4 import QtGui
@@ -40,27 +36,15 @@ class CImageOpenCV(QtGui.QImage):
 
         @param f_opencv_bgr_img: BGR image
         """
-        # get depth and channels
-        l_depth, ln_channels = f_opencv_bgr_img.depth, f_opencv_bgr_img.nChannels
-
-        # not valid image ?
-        if (cv.IPL_DEPTH_8U != l_depth) or (3 != ln_channels):
-            # raise an error
-            raise ValueError("the input image must be 8-bit, 3-channel")
-
         # get image size
-        l_w, l_h = cv.GetSize(f_opencv_bgr_img)
-
-        # create image
-        l_opencv_rgb_img = cv.CreateImage((l_w, l_h), l_depth, ln_channels)
-        assert l_opencv_rgb_img
+        l_h, l_w, l_c = f_opencv_bgr_img.shape
 
         # converts the image from BGR to RGB format. it's assumed the image is in BGR format
-        cv.CvtColor(f_opencv_bgr_img, l_opencv_rgb_img, cv.CV_BGR2RGB)
+        # cv2.CvtColor(f_opencv_bgr_img, l_opencv_rgb_img, cv2.cv.BGR2RGB)
 
         # saves a reference to the l_opencv_rgb_img byte-content to prevent the garbage
         # collector from deleting it when __init__ returns
-        self.__img_data = l_opencv_rgb_img.tostring()
+        self.__img_data = f_opencv_bgr_img.tostring()
 
         # call the QImage base class constructor passing the byte-content, dimensions and format of the image
         super(CImageOpenCV, self).__init__(self.__img_data, l_w, l_h, QtGui.QImage.Format_RGB888)
